@@ -1,7 +1,7 @@
 #include "mex.h"
 #include <math.h>
 #include <stdlib.h>
-#include "dp_preds.h"
+#include "dp_nbhd.h"
 
 
 /* For C89 compilers */
@@ -83,9 +83,9 @@ void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]){
     for ( c2=1; c2<Ndp; c2++ ){
       E[r2*Ndp+c2] = 1E9;
       
-      for ( i=0; i<DP_PREDS_COUNT; i++ ){
-        r1 = r2-dp_preds[i][0];
-        c1 = c2-dp_preds[i][1];
+      for ( i=0; i<DP_NBHD_COUNT; i++ ){
+        r1 = r2-dp_nbhd[i][0];
+        c1 = c2-dp_nbhd[i][1];
         if ( r1<0 || c1<0 ) continue;
 
         m=((double)(r2-r1))/((double)(c2-c1));

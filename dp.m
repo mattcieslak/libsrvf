@@ -11,7 +11,7 @@
 % 
 % Return:
 %   gamma will have the same length as p1 and p2
-function gamma = reparametrize_dp( p1, p2, ndp )
+function gamma = dp( p1, p2, ndp )
   [M N] = size(p1);
 
   q1 = curve_to_q( p1 );
@@ -23,7 +23,7 @@ function gamma = reparametrize_dp( p1, p2, ndp )
   q1L = spline( xv, q1, xvl );
   q2L = spline( xv, q2, xvl );
 
-  gamma = dp( q1L, q2L, ndp );
+  gamma = dp_mex( q1L, q2L, ndp );
   %gamma = spline( linspace(0,1,ndp), gamma, linspace(0,1,N) );
   %gamma = 1/N + (N-1)/N * gamma;
 end
