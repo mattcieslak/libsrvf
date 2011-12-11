@@ -1,5 +1,5 @@
 % Useful only for 1-D data (functions).
-function [F T] = samps_to_plf( X, TX )
+function [F T S] = samps_to_plf( X, TX )
   [dim nsamps] = size(X);
 
   if ( nargin < 2 )
@@ -10,9 +10,12 @@ function [F T] = samps_to_plf( X, TX )
     % TODO: try to reduce the number of segments for curves?
     T = TX;
     F = X;
+    if ( nargout > 2 )
+      error "S is only useful for 1-D curves";
+    end
   else
-    s = updown_sequence( X );
-    F = [0 cumsum(s)];
-    T = [0 cumsum(abs(s))];
+    S = updown_sequence( X );
+    F = [0 cumsum(S)];
+    T = [0 cumsum(abs(S))];
   end
 end
