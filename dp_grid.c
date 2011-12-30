@@ -110,7 +110,6 @@ void dp_costs(
   tr = grid_rows - 1;
   tc = grid_cols - 1;
 
-  /*
   for ( tr=1; tr<grid_rows; ++tr )
   {
     for ( tc=1; tc<grid_cols; ++tc )
@@ -120,7 +119,6 @@ void dp_costs(
                                             P[grid_cols*tr+tc]%grid_cols );
     }
   }
-  */
 }
 
 double dp_edge_weight(

@@ -2,7 +2,7 @@
 #define DP_NBHD_H 1
 
 #ifndef DP_NBHD_DIM
-#define DP_NBHD_DIM 10 
+#define DP_NBHD_DIM 7 
 #endif
 
 #if DP_NBHD_DIM == 17

@@ -1,33 +1,77 @@
+% Computes the composition of two piecewise-linear functions.
+% The inner function must be 1-dimensional and non-decreasing.
+% The range of the inner function must be contained in the domain 
+% of the outer function.
+%
+% Inputs
 % F1, T1:  the outer function
-% gamma, Tgamma  the inner function (must be 1-D)
-function [F T] = plf_compose( F1, T1, gamma, Tgamma )
-  % T = change points of the composite function.
-  % Start with T = change points of the inner function ...
-  T = Tgamma;
+% F2, T2:  the inner function.  Must be a non-decreasing, 1-D function.
+% Returns
+% F, T:  the composite function
+function [F T] = plf_compose( F1, T1, F2, T2 )
+  assert(columns(F1)==columns(T1));  % PLF condition for F1
+  assert(rows(T1)==1);
+  assert(min(diff(T1))>0);
+  assert(columns(F2)==columns(T2));  % PLF condition for F2
+  assert(rows(T2)==1);
+  assert(min(diff(T2))>0);
+  assert(rows(F2)==1);       % F2 must be 1-D
+  assert(min(diff(F2))>=0);  % F2 must be non-decreasing
+  assert(T1(1)>=F2(1) && T1(end)<=F2(end));  % Functions composable?
 
-  % ... and add in the points where the inner function hits a 
-  % change point of the outer function.
-  for i=1:(length(Tgamma)-1)
-    if ( abs( gamma(i) - gamma(i+1) ) > 1e-5 ) 
-      v = find_in_range( T1, [gamma(i) gamma(i+1)] );
-      T = union( T, interp1( [gamma(i) gamma(i+1)], \
-                    [Tgamma(i) Tgamma(i+1)], v, 'extrap' ) );
-    end
-  end
+  % To get the change points of the inner function, we take T2, along 
+  % with the preimages of T1 under F2.
+  T = union( T2, plf_preimages( F2, T2, T1 ) );
 
   % Evaluate the composite function at all of these points
   for i=1:rows(F1)
-    F(i,:) = interp1(T1,F1(i,:),interp1( Tgamma,gamma,T,'extrap' ),'extrap');
+    F(i,:) = interp1(T1,F1(i,:),interp1( T2,F2,T,'extrap' ),'extrap');
   end
 end
 
-function w = find_in_range( v, R )
-  R = sort( R );
 
-  w = [];
-  for i=1:length(v)
-    if ( v(i) >= R(1) && v(i) <= R(2) )
-      w = [w v(i)];
-    end
-  end
-end
+%!test
+%! F1=linspace(0,1,5);
+%! T1=linspace(0,1,5);
+%! F2=linspace(0,1,5);
+%! T2=linspace(0,1,5);
+%! [F T]=plf_compose(F1,T1,F2,T2);
+%! assert(F,F1,eps);
+%! assert(T,T1,eps);
+%!
+%!test
+%! F1=[0 3/4 1];
+%! T1=[0 1/4 1];
+%! F2=[0 1/4 1];
+%! T2=[0 3/4 1];
+%! [F T]=plf_compose(F1,T1,F2,T2);
+%! assert(F,[0 3/4 1],1e-4);
+%! assert(T,[0 3/4 1],1e-4);
+%! [F T]=plf_compose(F2,T2,F1,T1);
+%! assert(F,[0 1/4 1],1e-4);
+%! assert(T,[0 1/4 1],1e-4);
+%!#figure();
+%!#plot(T1,F1,'b',T2,F2,'r',T,F,'k');
+%!
+%!test
+%! F1=[0 1 1 0 0; \
+%!     0 0 1 1 0];
+%! T1=linspace(0,1,5);
+%! F2=[0 1/3 1];
+%! T2=[0 2/3 1];
+%! [F T]=plf_compose(F1,T1,F2,T2);
+%! Texp=[0 1/2 2/3 3/4 7/8 1];
+%! Fexp=[0 1 1   1 0 0;
+%!       0 0 1/3 1 1 0];
+%! assert(T,Texp,1e-4);
+%! assert(F,Fexp,1e-4);
+%!#figure();
+%!#plot(F(1,:),F(2,:),'b-*');
+%!
+%!test
+%! F1=[0 3/8 5/8 1];
+%! T1=[0 3/8 5/8 1];
+%! F2=[0 0 1/4 1/2 3/4 3/4 1];
+%! T2=linspace(0,1,7);
+%! [F T]=plf_compose(F1,T1,F2,T2);
+
