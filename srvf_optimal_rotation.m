@@ -1,9 +1,8 @@
 % Given two SRVFs Q1 and Q2, returns the rotation R which best aligns Q2 to Q1.
-function R = srvf_optimal_rotation( Q1, T1, Q2, T2, closed )
+function R = srvf_optimal_rotation( Q1, T1, Q2, T2 )
   dim = rows( Q1 );
 
-  % Is the sort necessary?
-  Tr = sort( union( T1, T2 ) );
+  Tr = unique( [T1 T2] );
   Q1r = srvf_refine( Q1, T1, Tr );
   Q2r = srvf_refine( Q2, T2, Tr );
 

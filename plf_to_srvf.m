@@ -5,11 +5,10 @@
 % Inputs:
 %  F - function values
 %  T - corresponding parameter values
-%  closed - nonzero iff closed curve (default 0).
 %
 % Outputs:
 %  Q - SRVF values.  Q(i) = function value on interval [T(i), T(i+1)]
-function Q = plf_to_srvf( F, T, closed )
+function Q = plf_to_srvf( F, T )
   if ( nargin < 3 ) 
     closed = 0; 
   end

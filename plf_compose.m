@@ -24,9 +24,8 @@ function [F T] = plf_compose( F1, T1, F2, T2 )
   T = union( T2, plf_preimages( F2, T2, T1 ) );
 
   % Evaluate the composite function at all of these points
-  for i=1:rows(F1)
-    F(i,:) = interp1(T1,F1(i,:),interp1( T2,F2,T,'extrap' ),'extrap');
-  end
+  v = plf_evaluate(F2, T2, T);
+  F = plf_evaluate(F1, T1, v);
 end
 
 

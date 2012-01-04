@@ -1,3 +1,4 @@
+% Returns the PLF corrresponding the the given SRVF.
 function F = srvf_to_plf( Q, T )
   [dim nsamps] = size(Q);
 
