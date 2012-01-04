@@ -9,9 +9,7 @@ function [l S] = plf_arclength( F, T )
     S = [0 cumsum( sqrt(sum( dF .* dF, 1 )), 2 )];
     l = S(end);
   else
-    dF = diff(F);
-
-    S = [0 cumsum( abs( dF ) )];
+    S = [0 cumsum( abs( diff(F) ) )];
     l = S(end);
   end
 end

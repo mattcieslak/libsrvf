@@ -11,13 +11,13 @@
 function [F T] = plf_compose( F1, T1, F2, T2 )
   assert(columns(F1)==columns(T1));  % PLF condition for F1
   assert(rows(T1)==1);
-  assert(min(diff(T1))>0);
+  assert(min(diff(T1))>=0);
   assert(columns(F2)==columns(T2));  % PLF condition for F2
   assert(rows(T2)==1);
-  assert(min(diff(T2))>0);
+  assert(min(diff(T2))>=0);
   assert(rows(F2)==1);       % F2 must be 1-D
   assert(min(diff(F2))>=0);  % F2 must be non-decreasing
-  assert(T1(1)>=F2(1) && T1(end)<=F2(end));  % Functions composable?
+  assert(F2(1)>T1(1)-1e-6 && F2(end)<T1(end)+1e-6);  % Functions composable?
 
   % To get the change points of the inner function, we take T2, along 
   % with the preimages of T1 under F2.
