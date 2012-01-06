@@ -1,33 +1,50 @@
-function plot_registration( X1, T1, X2, T2, color1, color2 )
+% Plots the matching between two PLFs.
+%
+% Input
+%  F1,T1 : the first PLF
+%  F2,T2 : the second PLF
+%  fmt1 : a format string accepted by plot()
+%  fmt2 : a format string accepted by plot()
+% --------------------------------------------------------------------------
+function plot_registration( F1, T1, F2, T2, fmt1, fmt2 )
   if ( nargin < 6 )
-    color2 = 'r';
+    fmt2 = 'r';
   end
   if ( nargin < 5 )
-    color1 = 'b';
+    fmt1 = 'b';
   end
-  Tr = union( T1, T2 );
+  Tr = unique( [T1 T2] );
 
-  dim = rows( X1 );
+  dim = rows( F1 );
   nsamps = length( Tr );
 
   for i=1:dim
-    X1r(i,:) = interp1( T1, X1(i,:), Tr );
-    X2r(i,:) = interp1( T2, X2(i,:), Tr );
+    F1r(i,:) = interp1( T1, F1(i,:), Tr );
+    F2r(i,:) = interp1( T2, F2(i,:), Tr );
   end
 
   if ( dim == 2 )
     figure();
     hold on;
 
-    plot( X1(1,:), X1(2,:), color1 );
-    plot( X2(1,:), X2(2,:), color2 );
+    plot( F1(1,:), F1(2,:), fmt1 );
+    plot( F2(1,:), F2(2,:), fmt2 );
 
     for i=1:3:nsamps
-      plot( [X1r(1,i) X2r(1,i)], [X1r(2,i) X2r(2,i)], 'k' );
+      plot( [F1r(1,i) F2r(1,i)], [F1r(2,i) F2r(2,i)], 'k' );
     end
   elseif ( dim == 1 )
-    plot( Tr, X1r, color1, Tr, X2r, color2 );
+    plot( Tr, F1r, fmt1, Tr, F2r, fmt2 );
   else
     error "Unsupported dimension";
   end
 end
+
+
+%!demo
+%! load demos/horse-1.mat
+%! load demos/horse-2.mat
+%! T1 = linspace(0,1,length(X1));
+%! T2 = linspace(0,1,length(X2));
+%! plot_registration(X1,T1,X2,T2);
+

@@ -1,13 +1,30 @@
-% Computes preimages of sample points xv under the non-decreasing 
-% piecewise-linear function T,F.
+% Computes preimages of the values in xv under the non-decreasing 
+% piecewise-linear function F,T.  The function must be a 1-D function, 
+% and xv must be non-decreasing.
+%
+% If F is not a one-to-one function (i.e. F(i)==F(i+1) for some i), 
+% then there may be more than one preimage for a given value xv(j).
+% In this case, there is at the moment no convention determining 
+% which preimage is returned for such a value.  The only guarantee 
+% is that if you do this
+%
+% xvi=plf_preimages(F,T,xv);
+% Fxvi=plf_evaluate(F,T,xvi);
+%
+% then Fxvi will be equal (or at least close) to xv.
+% TODO: is there a sensible convention for choosing preimages?
 %
 % Inputs
-% T,F:  the function.  F must be non-decreasing.
+% F,T:  the function.  F and T must be non-decreasing.
 % xv:   the sample points.  Must be non-decreasing.
 %
 % Outputs
 % xvi:  preimages of xv
 function xvi = plf_preimages( F, T, xv )
+  assert( rows(F) == 1 );
+  assert( min(diff(F)) >= 0 );
+  assert( min(diff(T)) >= 0 );
+
   xvi = zeros(1,length(xv));
   Fidx = 1;
   for xvidx = 1:length(xv)
@@ -66,5 +83,5 @@ end
 %! tv=linspace(T(1),T(end),2000);
 %! xv=interp1(T,F,tv);
 %! xvi=plf_preimages(F,T,xv);
-%! Fxvi=interp1(T,F,xvi);
+%! Fxvi=plf_evaluate(F,T,xvi);
 %! assert(Fxvi,xv,1e-4)

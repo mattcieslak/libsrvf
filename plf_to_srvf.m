@@ -12,7 +12,7 @@ function Q = plf_to_srvf( F, T )
   if ( nargin < 3 ) 
     closed = 0; 
   end
-  assert( ismonotone(T,-1e-6), 1 );  % tol < 0 ==> need strictly increasing
+  assert( min(diff(T)) > 0 );
 
   [dim, ncp] = size(F);
 
@@ -37,3 +37,22 @@ function Q = plf_to_srvf( F, T )
     Q = sign(m) .* sqrt(abs(m));
   end
 end
+
+%!test
+%! F=[0 1 1 0; 
+%!    0 0 1 1];
+%! T=[0 1/3 2/3 1];
+%! Qexp=[sqrt(3)  0.00000 -sqrt(3);
+%!       0.00000  sqrt(3)  0.00000];
+%! Q=plf_to_srvf(F,T);
+%! assert(Q,Qexp,1e-3);
+%!
+%!test
+%! F=[0 1 0 -1;
+%!    0 1 2  1];
+%! T=[0 1 2 3];
+%! x=2**(-1/4);
+%! Qexp=[x -x -x;
+%!       x  x -x];
+%! Q=plf_to_srvf(F,T);
+%! assert(Q,Qexp,1e-3);
