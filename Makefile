@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-g -pg -O2 -Wall
+CFLAGS=-fPIC -g -pg -O0 -Wall -DDP_NBHD_DIM=10
 OBJS=dp_grid.o
 
 all: $(OBJS)

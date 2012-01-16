@@ -18,12 +18,12 @@ function plot_registration( F1, T1, F2, T2, fmt1, fmt2 )
   dim = rows( F1 );
   nsamps = length( Tr );
 
-  for i=1:dim
-    F1r(i,:) = interp1( T1, F1(i,:), Tr );
-    F2r(i,:) = interp1( T2, F2(i,:), Tr );
-  end
+  F1r = plf_evaluate(F1,T1,Tr);
+  F2r = plf_evaluate(F2,T2,Tr);
 
-  if ( dim == 2 )
+  if ( dim == 1 )
+    plot( Tr, F1r, fmt1, Tr, F2r, fmt2 );
+  elseif ( dim == 2 )
     figure();
     hold on;
 
@@ -33,8 +33,18 @@ function plot_registration( F1, T1, F2, T2, fmt1, fmt2 )
     for i=1:3:nsamps
       plot( [F1r(1,i) F2r(1,i)], [F1r(2,i) F2r(2,i)], 'k' );
     end
-  elseif ( dim == 1 )
-    plot( Tr, F1r, fmt1, Tr, F2r, fmt2 );
+  elseif ( dim == 3 )
+    figure();
+    hold on;
+
+    plot3( F1(1,:), F1(2,:), F1(3,:), fmt1 );
+    plot3( F2(1,:), F2(2,:), F2(3,:), fmt2 );
+
+    for i=1:3:nsamps
+      plot3( [F1r(1,i) F2r(1,i)], \
+             [F1r(2,i) F2r(2,i)], \
+             [F1r(3,i) F2r(3,i)], 'k' );
+    end
   else
     error "Unsupported dimension";
   end

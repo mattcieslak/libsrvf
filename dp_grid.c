@@ -4,40 +4,38 @@
 #include "dp_grid.h"
 
 
-void dp_all_edge_weights(
-  double *Q1, double *T1, int nsamps1, 
+void dp_all_edge_weights( 
+  double *Q1, double *T1, int nsamps1,
   double *Q2, double *T2, int nsamps2,
   int dim, 
-  double *grid, int grid_rows, int grid_cols )
+  double *tv1, int ntv1, 
+  double *tv2, int ntv2, 
+  double *W )
 {
   int sr, sc;  /* source row and column */
   int tr, tc;  /* target row and column */
   int l1, l2, l3;  /* for multidimensional array mapping */
-  double a, c; /* source coordinates */
-  double b, d; /* target coordinates */
   int i;
   
-  for ( i=0; i<grid_cols*grid_rows*grid_cols*grid_rows; grid[i++]=1e6 );
+  for ( i=0; i<ntv1*ntv2*ntv1*ntv2; W[i++]=1e6 );
 
-  /* grid is a grid_rows x grid_cols x grid_rows x grid_cols array.  
-   * Weight of edge from (T1[i],T2[j]) to (T1[k],T2[l]) (Cartesian coordinates) 
-   * is in grid(j,i,l,k).
+  /* W is a ntv2 x ntv1 x ntv2 x ntv1 array.  
+   * Weight of edge from (tv1[i],tv2[j]) to (tv1[k],tv2[l]) 
+   * (Cartesian coordinates) is in grid(j,i,l,k).
    * Mapping: 
-   *  (j,i,l,k) :--> j*grid_cols*grid_rows*grid_cols + 
-   *                 i*grid_rows*grid_cols +
-   *                 l*grid_cols + 
+   *  (j,i,l,k) :--> j*ntv1*ntv2*ntv1 + 
+   *                 i*ntv2*ntv1 +
+   *                 l*ntv1 + 
    *                 k
    */
-  l1 = grid_cols * grid_rows * grid_cols;
-  l2 = grid_rows * grid_cols;
-  l3 = grid_cols;
+  l1 = ntv1 * ntv2 * ntv1;
+  l2 = ntv2 * ntv1;
+  l3 = ntv1;
 
-  for ( tr=1; tr<grid_rows; ++tr )
+  for ( tr=1; tr<ntv2; ++tr )
   {
-    d = ((double)tr) / ((double)(grid_rows-1));
-    for ( tc=1; tc<grid_cols; ++tc )
+    for ( tc=1; tc<ntv1; ++tc )
     {
-      b = ((double)tc) / ((double)(grid_cols-1));
       for ( i=0; i<DP_NBHD_COUNT; ++i )
       {
         sr = tr - dp_nbhd[i][0];
@@ -45,12 +43,10 @@ void dp_all_edge_weights(
 
         if ( sr < 0 || sc < 0 ) continue;
 
-        a = ((double)sc) / ((double)(grid_cols-1));
-        c = ((double)sr) / ((double)(grid_rows-1));
-
         /* grid(sr,sc,tr,tc) */
-        grid[sr*l1+sc*l2+tr*l3+tc] = 
-         dp_edge_weight( Q1, T1, nsamps1, Q2, T2, nsamps2, dim, a, b, c, d );
+        W[sr*l1+sc*l2+tr*l3+tc] = 
+         dp_edge_weight( Q1, T1, nsamps1, Q2, T2, nsamps2, dim, 
+                         tv1[sc], tv1[tc], tv2[sr], tv2[tr] );
         
         /*
         printf( "(%0.2f,%0.2f) --> (%0.2f,%0.2f) = %0.2f\n", 
@@ -62,29 +58,28 @@ void dp_all_edge_weights(
 }
 
 
-void dp_costs(
+double dp_costs(
   double *Q1, double *T1, int nsamps1, 
   double *Q2, double *T2, int nsamps2,
-  int dim, double *E, int *P, int grid_rows, int grid_cols )
+  int dim, 
+  double *tv1, int ntv1, 
+  double *tv2, int ntv2, 
+  double *E, int *P )
 {
   int sr, sc;  /* source row and column */
   int tr, tc;  /* target row and column */
-  double a, c; /* source coordinates */
-  double b, d; /* target coordinates */
   double w, cand_cost;
   int i;
   
   E[0] = 0.0;
-  for ( i=1; i<grid_cols; E[i++]=1e9 );
-  for ( i=1; i<grid_rows; E[grid_cols*i++]=1e9 );
+  for ( i=1; i<ntv1; E[i++]=1e9 );
+  for ( i=1; i<ntv2; E[ntv1*i++]=1e9 );
 
-  for ( tr=1; tr<grid_rows; ++tr )
+  for ( tr=1; tr<ntv2; ++tr )
   {
-    d = ((double)tr) / ((double)(grid_rows-1));
-    for ( tc=1; tc<grid_cols; ++tc )
+    for ( tc=1; tc<ntv1; ++tc )
     {
-      b = ((double)tc) / ((double)(grid_cols-1));
-      E[grid_cols*tr + tc] = 1e9;
+      E[ntv1*tr + tc] = 1e9;
 
       for ( i=0; i<DP_NBHD_COUNT; ++i )
       {
@@ -93,38 +88,36 @@ void dp_costs(
 
         if ( sr < 0 || sc < 0 ) continue;
 
-        a = ((double)sc) / ((double)(grid_cols-1));
-        c = ((double)sr) / ((double)(grid_rows-1));
+        w = dp_edge_weight( Q1, T1, nsamps1, Q2, T2, nsamps2, dim, 
+                            tv1[sc], tv1[tc], tv2[sr], tv2[tr] );
 
-        w = dp_edge_weight( Q1, T1, nsamps1, Q2, T2, nsamps2, dim, a, b, c, d );
-        cand_cost = E[grid_cols*sr+sc] + w;
-        if ( cand_cost < E[grid_cols*tr+tc] )
+        cand_cost = E[ntv1*sr+sc] + w;
+        if ( cand_cost < E[ntv1*tr+tc] )
         {
-          E[grid_cols*tr+tc] = cand_cost;
-          P[grid_cols*tr+tc] = grid_cols*sr + sc;
+          E[ntv1*tr+tc] = cand_cost;
+          P[ntv1*tr+tc] = ntv1*sr + sc;
         }
       }
     }
   }
 
-  tr = grid_rows - 1;
-  tc = grid_cols - 1;
-
-  for ( tr=1; tr<grid_rows; ++tr )
+  for ( tr=1; tr<ntv2; ++tr )
   {
-    for ( tc=1; tc<grid_cols; ++tc )
+    for ( tc=1; tc<ntv1; ++tc )
     {
-      printf( "E[%d,%d]=%0.3f, ", tr, tc, E[grid_cols*tr+tc] );
-      printf( "P[%d,%d]=(%d,%d)\n", tr, tc, P[grid_cols*tr+tc]/grid_cols,
-                                            P[grid_cols*tr+tc]%grid_cols );
+      printf( "E[%d,%d]=%0.3f, ", tr, tc, E[ntv1*tr+tc] );
+      printf( "P[%d,%d]=(%d,%d)\n", tr, tc, P[ntv1*tr+tc]/ntv1,
+                                            P[ntv1*tr+tc]%ntv1 );
     }
   }
+  return E[ntv1*ntv2-1];
 }
+
 
 double dp_edge_weight(
   double *Q1, double *T1, int nsamps1, 
   double *Q2, double *T2, int nsamps2,
-  int dim,
+  int dim, 
   double a, double b, 
   double c, double d )
 {
@@ -138,23 +131,30 @@ double dp_edge_weight(
   double dq, dqi;
   int i;
 
-  Q1idx = param_to_idx( T1, nsamps1, a );
-  Q2idx = param_to_idx( T2, nsamps2, c );
+  Q1idx = dp_lookup( T1, nsamps1, a );
+  Q2idx = dp_lookup( T2, nsamps2, c );
 
   t1 = a;
   t2 = c;
 
-  slope = (d-c) / (b-a);
+  slope = (d-c)/(b-a);
   rslope = sqrt( slope );
 
   while( t1 < b && t2 < d )
   {
+    if ( Q1idx > nsamps1-2 || Q2idx > nsamps2-2 ) break;
+
     /* Find endpoint of current interval */
     t1nextcand1 = T1[Q1idx+1];
-    t1nextcand2 = a + (T2[Q2idx+1]-c) / slope; /* preimage of T2[Q2idx+1] */
+    t1nextcand2 = a + (T2[Q2idx+1]-c) / slope;
 
-    if ( t1nextcand1 < t1nextcand2 )
+    if ( fabs(t1nextcand1-t1nextcand2) < 1e-6 )
     {
+      t1next = T1[Q1idx+1];
+      t2next = T2[Q2idx+1];
+      Q1idxnext = Q1idx+1;
+      Q2idxnext = Q2idx+1;
+    } else if ( t1nextcand1 < t1nextcand2 ) {
       t1next = t1nextcand1;
       t2next = c + slope * (t1next - a);
       Q1idxnext = Q1idx+1;
@@ -188,55 +188,43 @@ double dp_edge_weight(
 }
 
 
-/**
- * Given predecessor matrix P (as created by dp_costs()), build the 
- * corrseponding piecewise-linear reparametrization function gamma.
- *
- * \param P P[i*grid_cols+j] = predecessor of gridpoint at row i, column j.  
- *   If predecessor is at row pr and column pc, then 
- *   P[i*grid_cols+j] = pr*grid_cols + pc.
- * \param grid_rows
- * \param grid_cols
- * \param G pointer to array of length at least \c grid_cols, to receive 
- *   the function values.
- * \param T pointer to array of length at least \c grid_cols, to receive 
- *   the corresponding parameter values.
- */
-int dp_build_gamma( int *P, int grid_rows, int grid_cols, double *G, double *T )
+int dp_build_gamma( 
+  int *P, 
+  double *tv1, int ntv1, 
+  double *tv2, int ntv2,
+  double *G, double *T )
 {
   int sr, sc;
   int tr, tc;
   int p, i;
-  double dx = 1.0 / (grid_cols - 1);
-  double dy = 1.0 / (grid_rows - 1);
   int npts;  /* result = length of Tg */
 
   /* Dry run first, to determine length of Tg */
   npts = 1;
-  tr = grid_rows-1;
-  tc = grid_cols-1;
+  tr = ntv2-1;
+  tc = ntv1-1;
   while( tr > 0 && tc > 0 )
   {
-    p = P[tr*grid_cols+tc];
-    tr = p / grid_cols;
-    tc = p % grid_cols;
+    p = P[tr*ntv1+tc];
+    tr = p / ntv1;
+    tc = p % ntv1;
     ++npts;
   }
 
-  G[npts-1] = 1.0;
-  T[npts-1] = 1.0;
+  G[npts-1] = tv2[ntv2-1];
+  T[npts-1] = tv1[ntv1-1];
 
-  tr = grid_rows-1;
-  tc = grid_cols-1;
+  tr = ntv2-1;
+  tc = ntv1-1;
   i = npts-2;
   while( tr > 0 && tc > 0 )
   {
-    p = P[tr*grid_cols+tc];
-    sr = p / grid_cols;
-    sc = p % grid_cols;
+    p = P[tr*ntv1+tc];
+    sr = p / ntv1;
+    sc = p % ntv1;
     
-    G[i] = dy * sr;
-    T[i] = dx * sc;
+    G[i] = tv2[sr];
+    T[i] = tv1[sc];
 
     tr = sr;
     tc = sc;
@@ -247,11 +235,11 @@ int dp_build_gamma( int *P, int grid_rows, int grid_cols, double *G, double *T )
 }
 
 
-int param_to_idx( double *T, int n, double t )
+int dp_lookup( double *T, int n, double t )
 {
   int l, m, r;
 
-  if ( t < 0.9999 )
+  if ( t < T[n-1] )
   {
     l=0;
     r=n;
