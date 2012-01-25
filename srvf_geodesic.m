@@ -22,11 +22,10 @@ function [P T] = srvf_geodesic( Q1, T1, Q2, T2, Nsteps )
   assert( abs(T1(1)-T2(1)) < 1e-4 );
   assert( abs(T1(end)-T2(end)) < 1e-4 );
 
-  [dim nsegs] = size(Q1);
-
   T = unique( [T1 T2] );
   Q1r = srvf_refine( Q1, T1, T );
   Q2r = srvf_refine( Q2, T2, T );
+  [dim nsegs] = size(Q1r);
 
   P = zeros( dim, nsegs, Nsteps );
   Ptv = linspace( 0, 1, Nsteps );
@@ -42,29 +41,30 @@ end
 
 %!demo
 %! load demos/horse-1.mat
-%! load demos/horse-2.mat
-%! T1 = linspace(0,1,length(X1));
-%! T2 = linspace(0,1,length(X2));
-%! Q1=plf_to_srvf(X1,T1);
-%! Q2=plf_to_srvf(X2,T2);
-%! [P T] = srvf_geodesic(Q1,T1,Q2,T2,5);
-%!
-%! figure();
-%! hold on;
+%! load demos/horse-1a.mat
+%! [F1 T1]=samps_to_plf(X1);
+%! [F2 T2]=samps_to_plf(X2);
+%! Q1=plf_to_srvf(F1,T1);
+%! Q2=plf_to_srvf(F2,T2);
+%! [G GT]=srvf_optimal_matching(Q1,T1,Q2,T2);
+%! [F2r T2r]=plf_compose(F2,T2,G,GT);
+%! Q2r=plf_to_srvf(F2r,T2r);
+%! [P T] = srvf_geodesic(Q1,T1,Q2r,T2r,5);
 %! plot_geodesic(P,T);
-%! xl=min([X1(1,:) X2(1,:)]);
-%! xu=max([X1(1,:) X2(1,:)]);
-%! yl=min([X1(2,:) X2(2,:)]);
-%! yu=max([X1(2,:) X2(2,:)]);
-%! axis([xl xu yl yu],"square");
 %! title("The curves corresponding to the geodesic");
 
-%! figure();
-%! hold on;
+%!#demo
+%! load demos/rna1.mat
+%! load demos/rna2.mat
+%! [F1 T1]=samps_to_plf(X1);
+%! [F2 T2]=samps_to_plf(X2);
+%! Q1=plf_to_srvf(F1,T1);
+%! Q2=plf_to_srvf(F2,T2);
+%! [G GT]=srvf_optimal_matching(Q1,T1,Q2,T2);
+%! [F2r T2r]=plf_compose(F2,T2,G,GT);
+%! Q2r=plf_to_srvf(F2r,T2r);
+%! [P T] = srvf_geodesic(Q1,T1,Q2r,T2r,5);
+%! plot_geodesic(P,T);
+%! title("The curves corresponding to the geodesic");
 %! plot_geodesic(P,T,'q');
-%! xl=min([Q1(1,:) Q2(1,:)]);
-%! xu=max([Q1(1,:) Q2(1,:)]);
-%! yl=min([Q1(2,:) Q2(2,:)]);
-%! yu=max([Q1(2,:) Q2(2,:)]);
-%! axis([xl xu yl yu],"square");
 %! title("The SRVFs on the geodesic");

@@ -34,6 +34,13 @@ function plot_geodesic( G, T, plot_type, colors )
 
   [dim nsegs nsteps] = size(G);
 
+  figure();
+  hold on
+
+  xl=0; xu=0;
+  yl=0; yu=0;
+  zl=0; zu=0;
+
   for i=1:nsteps
     cidx = mod( i-1, length(colors) ) + 1;  % cycle through the colors
     if ( i==1 || i==nsteps )
@@ -43,10 +50,46 @@ function plot_geodesic( G, T, plot_type, colors )
     end
 
     if ( plot_type == 'q' )
-      plot_srvf( G(:,:,i), T, keystr );
+      Gi = G(:,:,i);
+      Gi(1,:) = Gi(1,:) + xu;
+      plot_srvf( Gi, T, keystr );
+
+      if ( dim > 1 )
+        xl=min(xl, min(Gi(1,:)));
+        xu=max(xu, max(Gi(1,:)));
+        yl=min(yl, min(Gi(2,:)));
+        yu=max(yu, max(Gi(2,:)));
+      end
+      if ( dim > 2 )
+        zl=min(zl, min(Gi(3,:)));
+        zu=max(zu, max(Gi(3,:)));
+      end
     else
       GFi = srvf_to_plf( G(:,:,i), T );
+      GFi(1,:) = GFi(1,:) + xu;
       plot_plf( GFi, T, keystr );
+
+      if ( dim > 1 )
+        xl=min(xl, min(GFi(1,:)));
+        xu=max(xu, max(GFi(1,:)));
+        yl=min(yl, min(GFi(2,:)));
+        yu=max(yu, max(GFi(2,:)));
+      end
+      if ( dim > 2 )
+        zl=min(zl, min(GFi(3,:)));
+        zu=max(zu, max(GFi(3,:)));
+      end
     end
   end
+
+  if ( dim == 1 )
+    axis equal
+  elseif ( dim == 2 )
+    axis([xl xu yl yu], 'equal');
+  elseif ( dim == 3 )
+  [xl xu yl yu zl zu]
+    axis([xl xu yl yu zl zu], 'equal');
+  end
+
+  hold off
 end
