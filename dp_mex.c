@@ -3,17 +3,6 @@
 #include "dp_grid.h"
 
 
-/* For C89 compilers */
-static int _round( double v ){
-  double f, r;
-
-  f = floor(v);
-  r = v-f;
-  
-  if ( r <= 0.5 ) return (int)f;
-  else            return (int)ceil(v);
-}
-
 /* Signature:
  * function [G T] = dp_mex( Q1, T1, Q2, T2, tv1, tv2 )
  * Arguments are checked in dp.m, not here.  */
@@ -37,10 +26,10 @@ void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]){
   double m, rootm;
   int sr, sc; /* source row and column index */
   int tr, tc; /* target row and column index */
-  int i, j, k;
   int Galloc_size;
   double *pres;
 
+  /* [G T dist] = dp_mex( Q1, T1, Q2, T2, tv1, tv2 ); */
   Q1 = mxGetPr( prhs[0] );
   T1 = mxGetPr( prhs[1] );
   Q2 = mxGetPr( prhs[2] );

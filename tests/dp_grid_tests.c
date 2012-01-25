@@ -103,6 +103,7 @@ static void test_dp_lookup_random2()
   {
     t = (rand() % 100) / 99.0;
     idx = dp_lookup( T, nsamps, t );
+    CU_ASSERT(idx<nsamps-1);
     CU_ASSERT( (t>0.9999 && idx==nsamps-2) || (t >= T[idx] && t < T[idx+1]) );
 
     /*
@@ -169,6 +170,116 @@ static void test_dp_edge_weight_basic1()
   }
 }
 
+static void test_dp_edge_weight_basic2()
+{
+  /* Q1 and Q2 are column-major arrays! */
+  double Q1[2*3] = 
+  {
+    1,1,
+    1,1,
+    1,1
+  };
+  double T1[]={0,1.0/3.0,2.0/3.0,1};
+  double Q2[2*4] = 
+  {
+    1,-1,
+    -1,1,
+    1,-1,
+    -1,1
+  };
+  double T2[]={0,.25,.5,.75,1};
+  double tv1[]={0,1.0/3.0,2.0/3.0,1};
+  double tv2[]={0,0.5,1};
+  double W[144]; /* edge weight matrix */
+  double E[12];  /* DP cost matrix */
+  int P[12];     /* DP predecessor matrix */
+  double G[4];   /* gamma function values */
+  double T[4];   /* gamma parameter values */
+  double retval;
+
+  double Eexp[] = { 
+    0.0, 1e9, 1e9, 1e9, 
+    1e9, 5.0/3.0, 7.0/3.0, 3, 
+    1e9, 8.0/3.0, 10.0/3.0, 4.0
+  };
+
+  int nsamps1 = sizeof(T1) / sizeof(double);
+  int nsamps2 = sizeof(T2) / sizeof(double);
+  int ntv1 = sizeof(tv1) / sizeof(double);
+  int ntv2 = sizeof(tv2) / sizeof(double);
+  int dim = 2;
+  int Gnsamps;
+  int i;
+
+  retval = dp_costs( Q1, T1, nsamps1, Q2, T2, nsamps2,
+                     dim, tv1, ntv1, tv2, ntv2, E, P );
+  CU_ASSERT_DOUBLE_EQUAL( retval, E[ntv1*ntv2-1], 1e-3 );
+
+  for ( i=0; i<ntv1*ntv2; ++i )
+  {
+    CU_ASSERT_DOUBLE_EQUAL( E[i], Eexp[i], 1e-3 );
+  }
+
+  dp_all_edge_weights (
+    Q1, T1, nsamps1, Q2, T2, nsamps2, 
+    dim, tv1, ntv1, tv2, ntv2, W );
+
+  Gnsamps = dp_build_gamma(P,tv1,ntv1,tv2,ntv2,G,T);
+  printf( "Gamma: " );
+  for ( i=0; i<Gnsamps; ++i )
+  {
+    printf( "(%0.3f,%0.3f)", T[i], G[i] );
+  }
+  printf( "\n" );
+}
+
+static void test_dp_edge_weight_basic3()
+{
+  /* Q1 and Q2 are column-major arrays! */
+  double Q1[2*7] = 
+  {
+    -0.12093, -3.29569,
+    -3.99025,  1.89471,
+     0.41784, -5.22274,
+    -3.41510, -3.55044,
+    -4.53925, -2.88102,
+    -3.91785, -3.61769,
+    -2.95956, -4.41621
+  };
+  double T1[8] =
+  {
+    0.00000, 0.14286, 0.28571, 0.42857, 
+    0.57143, 0.71429, 0.85714, 1.00000
+  };
+  double Q2[2*9] = 
+  {
+    -3.94476, -4.47761,
+    -5.49738, -1.25924,
+    -6.12657,  0.84389,
+    -6.08871, -0.48200,
+    -5.89130, -1.34482,
+    -6.17836,  0.40485,
+    -6.01889,  1.04033,
+    -6.09084,  0.86223,
+    -5.45081, -2.80984
+  };
+  double T2[10] = 
+  {
+    0.00000, 0.11111, 0.22222, 0.33333, 0.44444, 
+    0.55556, 0.66667, 0.77778, 0.88889, 1.00000
+  };
+  int nsamps1 = sizeof(T1) / sizeof(double);
+  int nsamps2 = sizeof(T2) / sizeof(double);
+  int dim = 2;
+  double E[nsamps1*nsamps2];
+  int P[nsamps1*nsamps2];
+  double retval;
+
+  retval = dp_costs( Q1, T1, nsamps1, Q2, T2, nsamps2,
+                     dim, T1, nsamps1, T2, nsamps2, E, P );
+  CU_ASSERT_DOUBLE_EQUAL( retval, 19.629, 1e-3 );
+}
+
 static void test_dp_edge_weight_timing1()
 {
   double T1[10];
@@ -217,6 +328,18 @@ CU_ErrorCode grid_tests_suite()
 
   if ( CU_add_test( suite, "dp_edge_weight() basic test 1", 
                     (CU_TestFunc)test_dp_edge_weight_basic1 ) == NULL )
+  {
+    return CU_get_error();
+  }
+
+  if ( CU_add_test( suite, "dp_edge_weight() basic test 2", 
+                    (CU_TestFunc)test_dp_edge_weight_basic2 ) == NULL )
+  {
+    return CU_get_error();
+  }
+
+  if ( CU_add_test( suite, "dp_edge_weight() basic test 3", 
+                    (CU_TestFunc)test_dp_edge_weight_basic3 ) == NULL )
   {
     return CU_get_error();
   }

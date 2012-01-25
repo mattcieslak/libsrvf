@@ -19,9 +19,9 @@ function [F T] = plf_compose( F1, T1, F2, T2 )
   assert(min(diff(F2))>=0);  % F2 must be non-decreasing
   assert(F2(1)>T1(1)-1e-6 && F2(end)<T1(end)+1e-6);  % Functions composable?
 
-  % To get the change points of the inner function, we take T2, along 
+  % To get the change points of the composite function, we take T2, along 
   % with the preimages of T1 under F2.
-  T = union( T2, plf_preimages( F2, T2, T1 ) );
+  T = unique( [T2 plf_preimages( F2, T2, T1 )] );
 
   % Evaluate the composite function at all of these points
   v = plf_evaluate(F2, T2, T);

@@ -3,7 +3,9 @@ function [F T S] = samps_to_plf( X, TX )
   [dim nsamps] = size(X);
 
   if ( nargin < 2 )
-    TX = linspace(0,1,nsamps);
+    dX = diff(X,1,2);
+    TX = [0 cumsum(sum(dX.*dX,1))];
+    TX = TX / TX(end);
   end
 
   if ( dim > 1 )

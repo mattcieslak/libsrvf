@@ -101,6 +101,7 @@ double dp_costs(
     }
   }
 
+  /*
   for ( tr=1; tr<ntv2; ++tr )
   {
     for ( tc=1; tc<ntv1; ++tc )
@@ -110,6 +111,8 @@ double dp_costs(
                                             P[ntv1*tr+tc]%ntv1 );
     }
   }
+  */
+
   return E[ntv1*ntv2-1];
 }
 
@@ -173,7 +176,8 @@ double dp_edge_weight(
     dq = 0.0;
     for ( i=0; i<dim; ++i )
     {
-      dqi = Q1[Q1idx] - rslope * Q2[Q2idx];
+      /* Q1 and Q2 are column-major arrays! */
+      dqi = Q1[Q1idx*dim+i] - rslope * Q2[Q2idx*dim+i];
       dq += dqi*dqi;
     }
     res += (t1next - t1) * dq;

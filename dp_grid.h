@@ -84,7 +84,7 @@ double dp_costs(
  * \param c source Q2 parameter
  * \param d target Q2 parameter
  */
-double dp_edge_weight(
+inline double dp_edge_weight(
   double *Q1, double *T1, int nsamps1, 
   double *Q2, double *T2, int nsamps2,
   int dim,

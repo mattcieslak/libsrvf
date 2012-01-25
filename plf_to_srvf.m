@@ -9,9 +9,6 @@
 % Outputs:
 %  Q - SRVF values.  Q(i) = function value on interval [T(i), T(i+1)]
 function Q = plf_to_srvf( F, T )
-  if ( nargin < 3 ) 
-    closed = 0; 
-  end
   assert( min(diff(T)) > 0 );
 
   [dim, ncp] = size(F);
