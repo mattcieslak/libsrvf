@@ -282,21 +282,39 @@ static void test_dp_edge_weight_basic3()
 
 static void test_dp_edge_weight_timing1()
 {
-  double T1[10];
-  double Q1[] = {0.23, -0.2, 0.57, -0.12, 0.332, -0.14, 0.1, -0.3, 0.2, -0.1};
-  double T2[8];
-  double Q2[] = { -0.1, 0.23, -0.5, 0.6, -0.13, 0.2, -0.012, 0.27 };
-  double E[80*80];
-  int P[80*80];
+  double *Q1=0, *T1=0;
+  double *Q2=0, *T2=0;
+  double *E=0;
+  int *P=0;
+  int nsamps1 = 200;
+  int nsamps2 = 250;
+  
+  Q1 = (double*)malloc( (nsamps1-1)*sizeof(double) );
+  Q2 = (double*)malloc( (nsamps2-1)*sizeof(double) );
+  T1 = (double*)malloc( nsamps1*sizeof(double) );
+  T2 = (double*)malloc( nsamps2*sizeof(double) );
+  E = (double*)malloc( nsamps1*nsamps2*sizeof(double) );
+  P = (int*)malloc( nsamps1*nsamps2*sizeof(int) );
 
-  int nsamps1 = sizeof(T1) / sizeof(double);
-  int nsamps2 = sizeof(T2) / sizeof(double);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(Q1);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(Q2);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(T1);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(T2);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(E);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(P);
 
   random_partition( T1, nsamps1 );
   random_partition( T2, nsamps2 );
 
   dp_costs( Q1, T1, nsamps1, Q2, T2, nsamps2, 1, 
             T1, nsamps1, T2, nsamps2, E, P );
+
+  if ( Q1 ) free(Q1);
+  if ( Q2 ) free(Q2);
+  if ( T1 ) free(T1);
+  if ( T2 ) free(T2);
+  if ( E ) free(E);
+  if ( P ) free(P);
 }
 
 

@@ -106,15 +106,15 @@ end
 %! assert(d,4,1e-3);
 
 %!demo
-#%! load demos/horse-1.mat
-#%! load demos/horse-2.mat
+%! load demos/horse-1.mat
+%! load demos/horse-2.mat
 %!
 #%! load demos/1B0W.mat
 #%! load demos/1BWW.mat
 %!
-%! load demos/incorporateseqlab.mat;
-%! X1=s{13};
-%! X2=s{14};
+#%! load demos/incorporateseqlab.mat;
+#%! X1=s{13};
+#%! X2=s{14};
 %!
 #%! uv = linspace(0,1,100);
 #%! X1 = [uv; sin(pi*uv)];
@@ -126,8 +126,8 @@ end
 #%! T2 = linspace(0,1,length(X2));
 %! X1=X1-repmat(X1(:,1),1,length(X1));
 %! X2=X2-repmat(X2(:,1),1,length(X2));
-%! [F1 T1]=samps_to_plf(X1);
-%! [F2 T2]=samps_to_plf(X2);
+%! [F1 T1]=poly_to_plf(X1);
+%! [F2 T2]=poly_to_plf(X2);
 %! printf('Arclengths: %0.3f, %0.3f\n', \
 %!         plf_arclength(F1,T1), \
 %!         plf_arclength(F2,T2));
@@ -157,6 +157,9 @@ end
 %! F2r=R*F2;
 %! Q2r=R*Q2;
 %! X2r=R*X2;
+%!
+%! tv1=linspace(0,1,62);
+%! tv2=linspace(0,1,62);
 %! 
 %! [G TG seed expdist]=srvf_optimal_matching(Q1,T1,Q2r,T2);
 %! [F2rr T2rr]=plf_compose(F2r,T2,G,TG);
@@ -167,9 +170,9 @@ end
 %! xu=max([F1(1,:) F2r(1,:)]);
 %! yl=min([F1(2,:) F2r(2,:)]);
 %! yu=max([F1(2,:) F2r(2,:)]);
-%! zl=min([F1(3,:) F2r(3,:)]);
-%! zu=max([F1(3,:) F2r(3,:)]);
-%! axis([xl xu yl yu zl zu],"square");
+#%! zl=min([F1(3,:) F2r(3,:)]);
+#%! zu=max([F1(3,:) F2r(3,:)]);
+%! axis([xl xu yl yu],"equal");
 %! title("Original matching");
 %!
 %! plot_registration(F1,T1,F2rr,T2rr);
@@ -177,9 +180,9 @@ end
 %! xu=max([F1(1,:) F2rr(1,:)]);
 %! yl=min([F1(2,:) F2rr(2,:)]);
 %! yu=max([F1(2,:) F2rr(2,:)]);
-%! zl=min([F1(3,:) F2rr(3,:)]);
-%! zu=max([F1(3,:) F2rr(3,:)]);
-%! axis([xl xu yl yu zl zu],"square");
+#%! zl=min([F1(3,:) F2rr(3,:)]);
+#%! zu=max([F1(3,:) F2rr(3,:)]);
+%! axis([xl xu yl yu],"equal");
 %! title("Matching after DP");
 %!
 %! figure();
@@ -221,7 +224,7 @@ end
 %! xu=max([F1(1,:) F2rr(1,:)]);
 %! yl=min([F1(2,:) F2rr(2,:)]);
 %! yu=max([F1(2,:) F2rr(2,:)]);
-%! zl=min([F1(3,:) F2rr(3,:)]);
-%! zu=max([F1(3,:) F2rr(3,:)]);
-%! axis([xl xu yl yu zl zu],"square");
+#%! zl=min([F1(3,:) F2rr(3,:)]);
+#%! zu=max([F1(3,:) F2rr(3,:)]);
+%! axis([xl xu yl yu],"equal");
 %! title("Matching after DP (old program)");

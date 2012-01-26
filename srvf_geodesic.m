@@ -42,8 +42,8 @@ end
 %!demo
 %! load demos/horse-1.mat
 %! load demos/horse-1a.mat
-%! [F1 T1]=samps_to_plf(X1);
-%! [F2 T2]=samps_to_plf(X2);
+%! [F1 T1]=poly_to_plf(X1);
+%! [F2 T2]=poly_to_plf(X2);
 %! Q1=plf_to_srvf(F1,T1);
 %! Q2=plf_to_srvf(F2,T2);
 %! [G GT]=srvf_optimal_matching(Q1,T1,Q2,T2);
@@ -56,8 +56,8 @@ end
 %!#demo
 %! load demos/rna1.mat
 %! load demos/rna2.mat
-%! [F1 T1]=samps_to_plf(X1);
-%! [F2 T2]=samps_to_plf(X2);
+%! [F1 T1]=poly_to_plf(X1);
+%! [F2 T2]=poly_to_plf(X2);
 %! Q1=plf_to_srvf(F1,T1);
 %! Q2=plf_to_srvf(F2,T2);
 %! [G GT]=srvf_optimal_matching(Q1,T1,Q2,T2);
