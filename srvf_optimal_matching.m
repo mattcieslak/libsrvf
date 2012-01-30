@@ -133,13 +133,7 @@ end
 %!         plf_arclength(F2,T2));
 %!
 %! plot_registration( F1, T1, F2, T2, 'b-*', 'r-*' );
-%! title('Curves before resampling');
-%!
-#%! X1 = Resample_Uniform_Increase_4(X1,length(X1));
-#%! X2 = Resample_Uniform_Increase_4(X2,length(X2));
-#%!
-#%! plot_registration( X1, T1, X2, T2, 'b-*', 'r-*' );
-#%! title('Curves after resampling');
+%! title('Original curves');
 %!
 %! Q1=plf_to_srvf(F1,T1);
 %! Q2=plf_to_srvf(F2,T2);
@@ -153,6 +147,7 @@ end
 %! printf('L2 Norms: %0.3f, %0.3f\n',\
 %!         srvf_squared_l2norm(Q1,T1), \
 %!         srvf_squared_l2norm(Q2,T2));
+%!
 %! R=srvf_optimal_rotation(Q1,T1,Q2,T2);
 %! F2r=R*F2;
 %! Q2r=R*Q2;
@@ -161,7 +156,10 @@ end
 %! tv1=linspace(0,1,62);
 %! tv2=linspace(0,1,62);
 %! 
+%! tic();
 %! [G TG seed expdist]=srvf_optimal_matching(Q1,T1,Q2r,T2);
+%! time_new_dp = toc();
+%!
 %! [F2rr T2rr]=plf_compose(F2r,T2,G,TG);
 %! Q2rr=plf_to_srvf(F2rr,T2rr);
 %!
@@ -180,8 +178,8 @@ end
 %! xu=max([F1(1,:) F2rr(1,:)]);
 %! yl=min([F1(2,:) F2rr(2,:)]);
 %! yu=max([F1(2,:) F2rr(2,:)]);
-#%! zl=min([F1(3,:) F2rr(3,:)]);
-#%! zu=max([F1(3,:) F2rr(3,:)]);
+#%!zl=min([F1(3,:) F2rr(3,:)]);
+#%!zu=max([F1(3,:) F2rr(3,:)]);
 %! axis([xl xu yl yu],"equal");
 %! title("Matching after DP");
 %!
@@ -210,7 +208,9 @@ end
 %! q1=curve_to_q(p1);
 %! q2=curve_to_q(p2);
 %! uv=linspace(0,1,length(q1));
+%! tic();
 %! g = DynamicProgrammingQ( q1, q2, 0, 0 );
+%! time_old_dp=toc();
 %! g = invertGamma( g );
 %! g = (g-g(1)) / (g(end)-g(1)); 
 %! for i=1:size(p2,1)
@@ -228,3 +228,5 @@ end
 #%! zu=max([F1(3,:) F2rr(3,:)]);
 %! axis([xl xu yl yu],"equal");
 %! title("Matching after DP (old program)");
+%!
+%! printf("Running Times\n\tNew DP: %f\n\tOld DP: %f\n", time_new_dp, time_old_dp );

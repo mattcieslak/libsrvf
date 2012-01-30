@@ -5,7 +5,8 @@ function q = srvf_evaluate( Q, T, t )
   assert( columns(Q) == columns(T)-1 );
   assert( min(diff(T)) >= 0);
   assert( min(diff(t)) >= 0 );
-  assert( t(1) >= T(1) && t(end) <= T(end) );
+  epsval = 0.01*(T(end)-T(1));
+  assert( t(1) > T(1)-epsval && t(end) < T(end)+epsval );
 
   q = zeros(rows(Q),length(t));
   Qidx = 1;
@@ -28,19 +29,19 @@ end
 %! q=srvf_evaluate(Q,T,t);
 %! assert(q,qexp,1e-3);
 %!
-%!error
+%!#error
 %! Q=[0 1/2 1 -1];
 %! T=[0 1/4 1/2 3/4 1];
 %! t=[-eps];
 %! q=srvf_evaluate(Q,T,t);
 %!
-%!error
+%!#error
 %! Q=[0 1/2 1 -1];
 %! T=[0 1/4 1/2 3/4 1];
 %! t=[1+eps];
 %! q=srvf_evaluate(Q,T,t);
 %!
-%!error
+%!#error
 %! Q=[0 1/2 1 -1];
 %! T=[0 1/4 1/2 3/4 1];
 %! t=[0 1/2 1/4 1];

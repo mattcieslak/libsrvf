@@ -123,11 +123,19 @@ static void test_dp_edge_weight_basic1()
   double Q2[] = { -1.0, 1.0, -1.0 };
   double tv1[] = { 0.0, 0.25, 0.5, 0.75, 1.0 };
   double tv2[] = { 0.0, 0.25, 0.5, 0.75, 1.0 };
-  double W[625]; /* edge weight matrix */
-  double E[25];  /* DP cost matrix */
-  int P[25];     /* DP predecessor matrix */
-  double G[5];   /* gamma function values */
-  double T[5];   /* gamma parameter values */
+  int nsamps1 = sizeof(T1) / sizeof(double);
+  int nsamps2 = sizeof(T2) / sizeof(double);
+  int ntv1 = sizeof(tv1) / sizeof(double);
+  int ntv2 = sizeof(tv2) / sizeof(double);
+  int dim = 1;
+
+  double W[ntv2*ntv1*ntv2*ntv1]; /* edge weight matrix */
+  double E[ntv2*ntv1];  /* DP cost matrix */
+  int P[ntv2*ntv1];     /* DP predecessor matrix */
+  int idxv1b[ntv1];
+  int idxv2b[ntv2];
+  double G[ntv1];   /* gamma function values */
+  double T[ntv1];   /* gamma parameter values */
   int npts;
 
   double a[] = { 0.25, 0.75, 0.0, 0.0, 0.25, 1.0/6.0 };
@@ -135,23 +143,23 @@ static void test_dp_edge_weight_basic1()
   double c[] = { 0.25, 0.25, 0.0, 0.0, 0.0, 1.0/6.0 };
   double d[] = { 0.5, 1.0, 0.25, 0.25, 0.25, 5.0/6.0 };
   double expected[] = { 0.51430, 0.90377, 0.90377, 0.66667, 0.0, 1.4714 };
-
-  int nsamps1 = sizeof(T1) / sizeof(double);
-  int nsamps2 = sizeof(T2) / sizeof(double);
-  int ntv1 = sizeof(tv1) / sizeof(double);
-  int ntv2 = sizeof(tv2) / sizeof(double);
-  int dim = 1;
+  int ncases = sizeof(expected) / sizeof(double);
+  int idxv1a, idxv2a;
 
   double actual;
-  int ncases = sizeof(expected) / sizeof(double);
   int i;
 
   for ( i=0; i<ncases; ++i )
   {
+    /* Can't use dp_all_indexes() for this because a and c are 
+     * not sorted in ascending order */
+    idxv1a = dp_lookup(T1,nsamps1,a[i]);
+    idxv2a = dp_lookup(T2,nsamps2,c[i]);
+
     actual = dp_edge_weight ( 
       Q1, T1, nsamps1, 
       Q2, T2, nsamps2, 
-      dim, a[i], b[i], c[i], d[i] );
+      dim, a[i], b[i], c[i], d[i], idxv1a, idxv2a );
     CU_ASSERT_DOUBLE_EQUAL( actual, expected[i], 0.0001 );
     if ( fabs(actual - expected[i]) > 0.0001 )
     {
@@ -159,8 +167,11 @@ static void test_dp_edge_weight_basic1()
     }
   }
 
-  dp_all_edge_weights( Q1, T1, 6, Q2, T2, 4, 1, tv1, ntv1, tv2, ntv2, W );
-  dp_costs( Q1, T1, 6, Q2, T2, 4, 1, tv1, ntv1, tv2, ntv2, E, P );
+  dp_all_indexes(T1,nsamps1,tv1,ntv1,idxv1b);
+  dp_all_indexes(T2,nsamps2,tv2,ntv2,idxv2b);
+
+  dp_all_edge_weights(Q1,T1,6,Q2,T2,4,1,tv1,idxv1b,ntv1,tv2,idxv2b,ntv2,W);
+  dp_costs(Q1,T1,6,Q2,T2,4,1,tv1,idxv1b,ntv1,tv2,idxv2b,ntv2,E,P);
   npts = dp_build_gamma( P, tv1, ntv1, tv2, ntv2, G, T );
 
   printf( "gamma:\n" );
@@ -190,6 +201,8 @@ static void test_dp_edge_weight_basic2()
   double T2[]={0,.25,.5,.75,1};
   double tv1[]={0,1.0/3.0,2.0/3.0,1};
   double tv2[]={0,0.5,1};
+  int idxv1[4];
+  int idxv2[3];
   double W[144]; /* edge weight matrix */
   double E[12];  /* DP cost matrix */
   int P[12];     /* DP predecessor matrix */
@@ -211,8 +224,11 @@ static void test_dp_edge_weight_basic2()
   int Gnsamps;
   int i;
 
+  dp_all_indexes(T1,nsamps1,tv1,ntv1,idxv1);
+  dp_all_indexes(T2,nsamps2,tv2,ntv2,idxv2);
+
   retval = dp_costs( Q1, T1, nsamps1, Q2, T2, nsamps2,
-                     dim, tv1, ntv1, tv2, ntv2, E, P );
+    dim, tv1, idxv1, ntv1, tv2, idxv2, ntv2, E, P );
   CU_ASSERT_DOUBLE_EQUAL( retval, E[ntv1*ntv2-1], 1e-3 );
 
   for ( i=0; i<ntv1*ntv2; ++i )
@@ -222,7 +238,7 @@ static void test_dp_edge_weight_basic2()
 
   dp_all_edge_weights (
     Q1, T1, nsamps1, Q2, T2, nsamps2, 
-    dim, tv1, ntv1, tv2, ntv2, W );
+    dim, tv1, idxv1, ntv1, tv2, idxv2, ntv2, W );
 
   Gnsamps = dp_build_gamma(P,tv1,ntv1,tv2,ntv2,G,T);
   printf( "Gamma: " );
@@ -270,13 +286,18 @@ static void test_dp_edge_weight_basic3()
   };
   int nsamps1 = sizeof(T1) / sizeof(double);
   int nsamps2 = sizeof(T2) / sizeof(double);
+  int idxv1[nsamps1];
+  int idxv2[nsamps2];
   int dim = 2;
   double E[nsamps1*nsamps2];
   int P[nsamps1*nsamps2];
   double retval;
 
+  dp_all_indexes(T1,nsamps1,T1,nsamps1,idxv1);
+  dp_all_indexes(T2,nsamps2,T2,nsamps2,idxv2);
+
   retval = dp_costs( Q1, T1, nsamps1, Q2, T2, nsamps2,
-                     dim, T1, nsamps1, T2, nsamps2, E, P );
+    dim, T1, idxv1, nsamps1, T2, idxv2, nsamps2, E, P );
   CU_ASSERT_DOUBLE_EQUAL( retval, 19.629, 1e-3 );
 }
 
@@ -284,6 +305,8 @@ static void test_dp_edge_weight_timing1()
 {
   double *Q1=0, *T1=0;
   double *Q2=0, *T2=0;
+  int *idxv1=0;
+  int *idxv2=0;
   double *E=0;
   int *P=0;
   int nsamps1 = 200;
@@ -293,6 +316,8 @@ static void test_dp_edge_weight_timing1()
   Q2 = (double*)malloc( (nsamps2-1)*sizeof(double) );
   T1 = (double*)malloc( nsamps1*sizeof(double) );
   T2 = (double*)malloc( nsamps2*sizeof(double) );
+  idxv1 = (int*)malloc( nsamps1*sizeof(int) );
+  idxv2 = (int*)malloc( nsamps2*sizeof(int) );
   E = (double*)malloc( nsamps1*nsamps2*sizeof(double) );
   P = (int*)malloc( nsamps1*nsamps2*sizeof(int) );
 
@@ -306,15 +331,38 @@ static void test_dp_edge_weight_timing1()
   random_partition( T1, nsamps1 );
   random_partition( T2, nsamps2 );
 
+  dp_all_indexes(T1,nsamps1,T1,nsamps1,idxv1);
+  dp_all_indexes(T2,nsamps2,T2,nsamps2,idxv2);
+
   dp_costs( Q1, T1, nsamps1, Q2, T2, nsamps2, 1, 
-            T1, nsamps1, T2, nsamps2, E, P );
+    T1, idxv1, nsamps1, T2, idxv2, nsamps2, E, P );
 
   if ( Q1 ) free(Q1);
   if ( Q2 ) free(Q2);
   if ( T1 ) free(T1);
   if ( T2 ) free(T2);
+  if ( idxv1) free(idxv1);
+  if ( idxv2) free(idxv2);
   if ( E ) free(E);
   if ( P ) free(P);
+}
+
+
+static void test_dp_all_indexes_basic1()
+{
+  double p[]={0.0,0.2,0.33333,0.75,1.0};
+  double tv[]={0.0,0.1,0.1999,0.2,0.33332,0.33333,0.74,0.999,1.0};
+  int exp[]={0,0,0,1,1,2,2,3,3};
+  int np=sizeof(p)/sizeof(double);
+  int ntv=sizeof(tv)/sizeof(double);
+  int idxv[ntv];
+  int i;
+
+  dp_all_indexes(p,np,tv,ntv,idxv);
+  for ( i=0; i<ntv; ++i )
+  {
+    CU_ASSERT_EQUAL(idxv[i],exp[i]);
+  }
 }
 
 
@@ -364,6 +412,12 @@ CU_ErrorCode grid_tests_suite()
 
   if ( CU_add_test( suite, "dp_edge_weight() timing test 1", 
                     (CU_TestFunc)test_dp_edge_weight_timing1 ) == NULL )
+  {
+    return CU_get_error();
+  }
+
+  if ( CU_add_test( suite, "dp_all_indexes() basic test 1", 
+                    (CU_TestFunc)test_dp_all_indexes_basic1 ) == NULL )
   {
     return CU_get_error();
   }

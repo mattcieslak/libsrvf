@@ -8,8 +8,8 @@ void dp_all_edge_weights(
   double *Q1, double *T1, int nsamps1,
   double *Q2, double *T2, int nsamps2,
   int dim, 
-  double *tv1, int ntv1, 
-  double *tv2, int ntv2, 
+  double *tv1, int *idxv1, int ntv1, 
+  double *tv2, int *idxv2, int ntv2, 
   double *W )
 {
   int sr, sc;  /* source row and column */
@@ -46,7 +46,7 @@ void dp_all_edge_weights(
         /* grid(sr,sc,tr,tc) */
         W[sr*l1+sc*l2+tr*l3+tc] = 
          dp_edge_weight( Q1, T1, nsamps1, Q2, T2, nsamps2, dim, 
-                         tv1[sc], tv1[tc], tv2[sr], tv2[tr] );
+           tv1[sc], tv1[tc], tv2[sr], tv2[tr], idxv1[sc], idxv2[sr] );
         
         /*
         printf( "(%0.2f,%0.2f) --> (%0.2f,%0.2f) = %0.2f\n", 
@@ -62,8 +62,8 @@ double dp_costs(
   double *Q1, double *T1, int nsamps1, 
   double *Q2, double *T2, int nsamps2,
   int dim, 
-  double *tv1, int ntv1, 
-  double *tv2, int ntv2, 
+  double *tv1, int *idxv1, int ntv1, 
+  double *tv2, int *idxv2, int ntv2, 
   double *E, int *P )
 {
   int sr, sc;  /* source row and column */
@@ -89,7 +89,7 @@ double dp_costs(
         if ( sr < 0 || sc < 0 ) continue;
 
         w = dp_edge_weight( Q1, T1, nsamps1, Q2, T2, nsamps2, dim, 
-                            tv1[sc], tv1[tc], tv2[sr], tv2[tr] );
+          tv1[sc], tv1[tc], tv2[sr], tv2[tr], idxv1[sc], idxv2[sr] );
 
         cand_cost = E[ntv1*sr+sc] + w;
         if ( cand_cost < E[ntv1*tr+tc] )
@@ -122,7 +122,8 @@ double dp_edge_weight(
   double *Q2, double *T2, int nsamps2,
   int dim, 
   double a, double b, 
-  double c, double d )
+  double c, double d,
+  int aidx, int cidx )
 {
   double res = 0.0;
   int Q1idx, Q2idx;
@@ -134,8 +135,8 @@ double dp_edge_weight(
   double dq, dqi;
   int i;
 
-  Q1idx = dp_lookup( T1, nsamps1, a );
-  Q2idx = dp_lookup( T2, nsamps2, c );
+  Q1idx = aidx; /*dp_lookup( T1, nsamps1, a );*/
+  Q2idx = cidx; /*dp_lookup( T2, nsamps2, c );*/
 
   t1 = a;
   t2 = c;
@@ -265,6 +266,19 @@ int dp_lookup( double *T, int n, double t )
     return m;
   } else {
     return n-2;
+  }
+}
+
+void dp_all_indexes( double *p, int np, double *tv, int ntv, int *idxv )
+{
+  int pi;
+  int i;
+
+  pi=0;
+  for ( i=0; i<ntv; ++i )
+  {
+    while ( pi < np-2 && tv[i] >= p[pi+1] ) ++pi;
+    idxv[i] = pi;
   }
 }
 

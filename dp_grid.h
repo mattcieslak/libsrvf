@@ -25,8 +25,10 @@
  * \param nsamps2 the length of T2
  * \param dim dimension of the ambient space
  * \param tv1 the Q1 (column) parameter values for the DP grid
+ * \param idxv1 Q1 indexes for tv1, as computed by \c dp_all_indexes()
  * \param ntv1 the length of tv1
  * \param tv2 the Q2 (row) parameter values for the DP grid
+ * \param idxv2 Q2 indexes for tv2, as computed by \c dp_all_indexes()
  * \param ntv2 the length of tv2
  * \param E [output] pointer to the edge weight matrix.  Must already be 
  *          allocated, with size (ntv1*ntv2)^2.
@@ -35,8 +37,8 @@ void dp_all_edge_weights(
   double *Q1, double *T1, int nsamps1,
   double *Q2, double *T2, int nsamps2,
   int dim, 
-  double *tv1, int ntv1, 
-  double *tv2, int ntv2, 
+  double *tv1, int *idxv1, int ntv1, 
+  double *tv2, int *idxv2, int ntv2, 
   double *W );
 
 /**
@@ -50,8 +52,10 @@ void dp_all_edge_weights(
  * \param nsamps2 the length of T2
  * \param dim dimension of the ambient space
  * \param tv1 the Q1 (column) parameter values for the DP grid
+ * \param idxv1 Q1 indexes for tv1, as computed by \c dp_all_indexes()
  * \param ntv1 the length of tv1
  * \param tv2 the Q2 (row) parameter values for the DP grid
+ * \param idxv2 Q2 indexes for tv2, as computed by \c dp_all_indexes()
  * \param ntv2 the length of tv2
  * \param E [output] on return, E[ntv2*i+j] holds the cost of the best 
  *        path from (0,0) to (tv1[i],tv2[j]) in the grid.
@@ -65,8 +69,8 @@ double dp_costs(
   double *Q1, double *T1, int nsamps1, 
   double *Q2, double *T2, int nsamps2,
   int dim, 
-  double *tv1, int ntv1, 
-  double *tv2, int ntv2, 
+  double *tv1, int *idxv1, int ntv1, 
+  double *tv2, int *idxv2, int ntv2, 
   double *E, int *P );
 
 /**
@@ -83,13 +87,16 @@ double dp_costs(
  * \param b target Q1 parameter
  * \param c source Q2 parameter
  * \param d target Q2 parameter
+ * \param aidx index such that Q1[aidx] <= a < Q1[aidx+1]
+ * \param cidx index such that Q2[cidx] <= c < Q2[cidx+1]
  */
 inline double dp_edge_weight(
   double *Q1, double *T1, int nsamps1, 
   double *Q2, double *T2, int nsamps2,
   int dim,
   double a, double b, 
-  double c, double d );
+  double c, double d, 
+  int aidx, int cidx );
   
 
 /**
@@ -126,5 +133,21 @@ int dp_build_gamma(
  *         (or n-2 if t==T[n-1]).
  */
 int dp_lookup( double *T, int n, double t );
+
+/**
+ * 1-D table lookup for a sorted array of query points.
+ *
+ * Given a partition p and an increasing sequence of numbers tv between 
+ * p[0] and p[np-1], computes the sequence of indexes idxv such that for 
+ * i=0,...,ntv-1, p[idxv[i]] <= tv[i] < p[idxv[i]+1].  If tv[i]==p[np-1], 
+ * then idxv[i] will be set to np-2.
+ *
+ * \param p an increasing sequence (the table)
+ * \param np the length of \a p
+ * \param tv an increasing sequence (the query points)
+ * \param ntv the length of \a tv
+ * \param idxv [output] pre-allocated array of \a ntv ints to hold result
+ */
+void dp_all_indexes( double *p, int np, double *tv, int ntv, int *idxv );
 
 #endif /* DP_GRID_H */

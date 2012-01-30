@@ -15,6 +15,8 @@ void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]){
   int nsamps2;
   double *tv1 = 0;
   double *tv2 = 0;
+  int *idxv1 = 0;
+  int *idxv2 = 0;
   int ntv1;
   int ntv2;
   double *G = 0;
@@ -45,6 +47,16 @@ void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]){
   Galloc_size = ntv1>ntv2 ? ntv1 : ntv2;
 
 
+  if ( !(idxv1=(int*)mxMalloc(ntv1*sizeof(int))) )
+  {
+    mexErrMsgIdAndTxt( "dp:AllocFailed", "failed to allocate idxv1" );
+    goto cleanup;
+  }
+  if ( !(idxv2=(int*)mxMalloc(ntv2*sizeof(int))) )
+  {
+    mexErrMsgIdAndTxt( "dp:AllocFailed", "failed to allocate idxv2" );
+    goto cleanup;
+  }
   if ( !(E=(double*)mxMalloc(ntv1*ntv2*sizeof(double))) )
   { 
     mexErrMsgIdAndTxt( "dp:AllocFailed", "failed to allocate E" );
@@ -75,9 +87,13 @@ void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]){
   T = mxGetPr( plhs[1] );
   pres = mxGetPr( plhs[2] );
 
+  /* dp_costs() needs indexes for gridpoints precomputed */
+  dp_all_indexes( T1, nsamps1, tv1, ntv1, idxv1 );
+  dp_all_indexes( T2, nsamps2, tv2, ntv2, idxv2 );
+
   /* Compute cost of best path from (0,0) to every other grid point */
   *pres = dp_costs( Q1, T1, nsamps1, Q2, T2, nsamps2, 
-                    dim, tv1, ntv1, tv2, ntv2, E, P );
+    dim, tv1, idxv1, ntv1, tv2, idxv2, ntv2, E, P );
 
   /* Reconstruct best path from (0,0) to (1,1) */
   Gsize = dp_build_gamma( P, tv1, ntv1, tv2, ntv2, G, T );
@@ -85,6 +101,8 @@ void mexFunction(int nlhs, mxArray *plhs[ ],int nrhs, const mxArray *prhs[ ]){
   mxSetN( plhs[1], Gsize );
 
 cleanup:
+  if ( idxv1 ) mxFree( idxv1 );
+  if ( idxv2 ) mxFree( idxv2 );
   if ( E ) mxFree( E );
   if ( P ) mxFree( P );
 }
