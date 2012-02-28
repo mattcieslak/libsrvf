@@ -2,7 +2,8 @@
 % left-continuous at jump discontinuities, if any.
 function f = plf_evaluate( F, T, t )
   if isscalar(t)
-    t = linspace(0,1,t);
+    % This 'feature' has unintended consequences and should be removed.
+    %t = linspace(0,1,t);
   end
 
   f = zeros(rows(F),length(t));
