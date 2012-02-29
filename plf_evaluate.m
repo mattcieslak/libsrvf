@@ -6,8 +6,8 @@ function f = plf_evaluate( F, T, t )
     %t = linspace(0,1,t);
   end
 
-  f = zeros(rows(F),length(t));
-  for i=1:rows(F)
+  f = zeros(size(F,1),length(t));
+  for i=1:size(F,1)
     f(i,:) = interp1(T,F(i,:),t,'extrap');
   end
 
@@ -15,7 +15,7 @@ function f = plf_evaluate( F, T, t )
   jumps = find( diff(T) == 0 );
   for j=1:length(jumps)
     jump_tidx = find( t == T(jumps(j)) );
-    for i=1:rows(F)
+    for i=1:size(F,1)
       f(i,jump_tidx) = F(i,jumps(j));
     end
   end

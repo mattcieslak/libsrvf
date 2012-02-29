@@ -9,11 +9,11 @@
 %  ip : the L^2 inner product of the two SRVFs
 % ---------------------------------------------------------
 function ip = srvf_l2product( Q1, T1, Q2, T2 )
-  assert( rows(Q1) == rows(Q2) );
-  assert( rows(T1) == 1 );
-  assert( rows(T2) == 1 );
-  assert( columns(Q1) == columns(T1)-1 );
-  assert( columns(Q2) == columns(T2)-1 );
+  assert( size(Q1,1) == size(Q2,1) );
+  assert( size(T1,1) == 1 );
+  assert( size(T2,1) == 1 );
+  assert( size(Q1,2) == size(T1,2)-1 );
+  assert( size(Q2,2) == size(T2,2)-1 );
 
   Tr = unique( [T1 T2] );
 

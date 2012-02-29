@@ -18,6 +18,6 @@ function plot_plf( F, T, color )
   elseif ( dim == 3 )
     plot3(F(1,:),F(2,:),F(3,:),color);
   else
-    error( "PLFs must be dimension 3 or lower." );
+    error( 'PLFs must be dimension 3 or lower.' );
   end
 end

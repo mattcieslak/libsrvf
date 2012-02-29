@@ -15,8 +15,8 @@ function plot_registration( F1, T1, F2, T2, fmt1, fmt2 )
   end
   Tr = unique( [T1 T2] );
 
-  dim = rows( F1 );
-  nsamps = length( Tr );
+  dim = size(F1,1);
+  nsamps = length(Tr);
 
   F1r = plf_evaluate(F1,T1,Tr);
   F2r = plf_evaluate(F2,T2,Tr);
@@ -46,7 +46,7 @@ function plot_registration( F1, T1, F2, T2, fmt1, fmt2 )
              [F1r(3,i) F2r(3,i)], 'k' );
     end
   else
-    error "Unsupported dimension";
+    error 'Unsupported dimension';
   end
 end
 

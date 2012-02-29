@@ -4,7 +4,7 @@
 % function is not one-to-one, and the result will be a right-inverse of 
 % the input function.
 function [Fi Ti] = plf_inverse( F, T )
-  assert( rows(F) == 1 ); % 1-D functions only
+  assert( size(F,1) == 1 ); % 1-D functions only
   assert( ismonotone(F,0) ); % non-increasing or non-decreasing
   assert( min(diff(T)) >= 0 ); % non-decreasing (function may have jumps)
 

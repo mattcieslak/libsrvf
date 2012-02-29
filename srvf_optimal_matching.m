@@ -36,11 +36,11 @@
 function [G T seed dist] = srvf_optimal_matching( Q1, T1, Q2, T2, tv1, tv2, nseeds )
   % Validation
   assert(nargin>=4);
-  assert(rows(Q1)==rows(Q2));
+  assert(size(Q1,1)==size(Q2,1));
   assert(length(T1)==length(Q1)+1);
   assert(length(T2)==length(Q2)+1);
-  assert(rows(T1)==1);
-  assert(rows(T2)==1);
+  assert(size(T1,1)==1);
+  assert(size(T2,1)==1);
 
   % Argument tv1
   if ( nargin < 5 ) 
@@ -170,8 +170,8 @@ end
 %! yu=max([F1(2,:) F2r(2,:)]);
 #%! zl=min([F1(3,:) F2r(3,:)]);
 #%! zu=max([F1(3,:) F2r(3,:)]);
-%! axis([xl xu yl yu],"equal");
-%! title("Original matching");
+%! axis([xl xu yl yu],'equal');
+%! title('Original matching');
 %!
 %! plot_registration(F1,T1,F2rr,T2rr);
 %! xl=min([F1(1,:) F2rr(1,:)]);
@@ -180,8 +180,8 @@ end
 %! yu=max([F1(2,:) F2rr(2,:)]);
 #%!zl=min([F1(3,:) F2rr(3,:)]);
 #%!zu=max([F1(3,:) F2rr(3,:)]);
-%! axis([xl xu yl yu],"equal");
-%! title("Matching after DP");
+%! axis([xl xu yl yu],'equal');
+%! title('Matching after DP');
 %!
 %! figure();
 %! plot(TG,G);
@@ -190,17 +190,17 @@ end
 #%! figure();
 #%! plot3(F2r(1,:),F2r(2,:),F2r(3,:),'b-*',
 #%!       F2rr(1,:),F2rr(2,:),F2rr(3,:),'r-*');
-#%! title("F2r and F2rr");
+#%! title('F2r and F2rr');
 #%! disp(F2r-F2rr);
 #%! disp(T2-T2rr);
 %!
 %! dist1 = srvf_squared_l2distance(Q1,T1,Q2,T2);
 %! dist2 = srvf_squared_l2distance(Q1,T1,Q2r,T2);
 %! dist3 = srvf_squared_l2distance(Q1,T1,Q2rr,T2rr);
-%! printf("Distances:\n");
-%! printf("\tOriginal: %0.3f\n",dist1);
-%! printf("\tRotated: %0.3f\n",dist2);
-%! printf("\tRotated and Matched: actual %0.3f, expected %0.3f\n",\
+%! printf('Distances:\n');
+%! printf('\tOriginal: %0.3f\n',dist1);
+%! printf('\tRotated: %0.3f\n',dist2);
+%! printf('\tRotated and Matched: actual %0.3f, expected %0.3f\n',\
 %!           dist3, expdist);
 %!
 %! p1=srvf_to_plf(Q1,T1);
@@ -226,7 +226,7 @@ end
 %! yu=max([F1(2,:) F2rr(2,:)]);
 #%! zl=min([F1(3,:) F2rr(3,:)]);
 #%! zu=max([F1(3,:) F2rr(3,:)]);
-%! axis([xl xu yl yu],"equal");
-%! title("Matching after DP (old program)");
+%! axis([xl xu yl yu],'equal');
+%! title('Matching after DP (old program)');
 %!
-%! printf("Running Times\n\tNew DP: %f\n\tOld DP: %f\n", time_new_dp, time_old_dp );
+%! printf('Running Times\n\tNew DP: %f\n\tOld DP: %f\n', time_new_dp, time_old_dp );

@@ -1,14 +1,14 @@
 % Evaluates an SRVF at the given parameter values.
 % t must be non-decreasing.
 function q = srvf_evaluate( Q, T, t )
-  assert( rows(T) == 1 );
-  assert( columns(Q) == columns(T)-1 );
+  assert( size(T,1) == 1 );
+  assert( size(Q,2) == size(T,2)-1 );
   assert( min(diff(T)) >= 0);
   assert( min(diff(t)) >= 0 );
   epsval = 0.01*(T(end)-T(1));
   assert( t(1) > T(1)-epsval && t(end) < T(end)+epsval );
 
-  q = zeros(rows(Q),length(t));
+  q = zeros(size(Q,1),length(t));
   Qidx = 1;
 
   for qidx = 1:length(t)

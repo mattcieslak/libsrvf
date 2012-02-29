@@ -14,9 +14,9 @@
 %      SRVFs will have the same change point parameters.
 %  T : a 1-row matrix containing the change point parameters for the SRVFs in P.
 function [P T] = srvf_geodesic( Q1, T1, Q2, T2, Nsteps )
-  assert( rows(Q1) == rows(Q2) );
-  assert( rows(T1) == 1 && columns(T1) == columns(Q1)+1 );
-  assert( rows(T2) == 1 && columns(T2) == columns(Q2)+1 );
+  assert( size(Q1,1) == size(Q2,1) );
+  assert( size(T1,1) == 1 && size(T1,2) == size(Q1,2)+1 );
+  assert( size(T2,1) == 1 && size(T2,2) == size(Q2,2)+1 );
   assert( min(diff(T1)) > 0 );
   assert( min(diff(T2)) > 0 );
   assert( abs(T1(1)-T2(1)) < 1e-4 );
@@ -51,7 +51,7 @@ end
 %! Q2r=plf_to_srvf(F2r,T2r);
 %! [P T] = srvf_geodesic(Q1,T1,Q2r,T2r,5);
 %! plot_geodesic(P,T);
-%! title("The curves corresponding to the geodesic");
+%! title('The curves corresponding to the geodesic');
 
 %!#demo
 %! load demos/rna1.mat
@@ -65,6 +65,6 @@ end
 %! Q2r=plf_to_srvf(F2r,T2r);
 %! [P T] = srvf_geodesic(Q1,T1,Q2r,T2r,5);
 %! plot_geodesic(P,T);
-%! title("The curves corresponding to the geodesic");
+%! title('The curves corresponding to the geodesic');
 %! plot_geodesic(P,T,'q');
-%! title("The SRVFs on the geodesic");
+%! title('The SRVFs on the geodesic');

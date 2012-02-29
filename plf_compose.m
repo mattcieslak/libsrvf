@@ -8,14 +8,14 @@
 % F2, T2:  the inner function.  Must be a non-decreasing, 1-D function.
 % Returns
 % F, T:  the composite function
-function [F T] = plf_compose( F1, T1, F2, T2 )
-  assert(columns(F1)==columns(T1));  % PLF condition for F1
-  assert(rows(T1)==1);
+function [F,T] = plf_compose(F1,T1,F2,T2)
+  assert(size(F1,2)==size(T1,2));  % PLF condition for F1
+  assert(size(T1,1)==1);
   assert(min(diff(T1))>=0);
-  assert(columns(F2)==columns(T2));  % PLF condition for F2
-  assert(rows(T2)==1);
+  assert(size(F2,2)==size(T2,2));  % PLF condition for F2
+  assert(size(T2,1)==1);
   assert(min(diff(T2))>=0);
-  assert(rows(F2)==1);       % F2 must be 1-D
+  assert(size(F2,1)==1);       % F2 must be 1-D
   assert(min(diff(F2))>=0);  % F2 must be non-decreasing
   assert(F2(1)>T1(1)-1e-6 && F2(end)<T1(end)+1e-6);  % Functions composable?
 

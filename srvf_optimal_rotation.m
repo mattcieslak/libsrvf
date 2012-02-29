@@ -1,6 +1,6 @@
 % Given two SRVFs Q1 and Q2, returns the rotation R which best aligns Q2 to Q1.
 function R = srvf_optimal_rotation( Q1, T1, Q2, T2 )
-  dim = rows( Q1 );
+  dim = size(Q1,1);
 
   Tr = unique( [T1 T2] );
   Q1r = srvf_refine( Q1, T1, Tr );
@@ -38,8 +38,8 @@ end
 %! xu=max([X1(1,:) X2(1,:)]);
 %! yl=min([X1(2,:) X2(2,:)]);
 %! yu=max([X1(2,:) X2(2,:)]);
-%! axis([xl xu yl yu],"square");
-%! title("Curves before rotational alignment");
+%! axis([xl xu yl yu],'square');
+%! title('Curves before rotational alignment');
 %!
 %! figure();
 %! plot(X1(1,:),X1(2,:),'b',X2r(1,:),X2r(2,:),'r');
@@ -47,5 +47,5 @@ end
 %! xu=max([X1(1,:) X2r(1,:)]);
 %! yl=min([X1(2,:) X2r(2,:)]);
 %! yu=max([X1(2,:) X2r(2,:)]);
-%! axis([xl xu yl yu],"square");
-%! title("Curves after rotational alignment");
+%! axis([xl xu yl yu],'square');
+%! title('Curves after rotational alignment');

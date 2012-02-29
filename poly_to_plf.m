@@ -36,7 +36,7 @@ function [F T] = poly_to_plf(P,tv)
       
     F = P;
     if ( nargout > 2 )
-      error "S is only useful for 1-D curves";
+      error 'S is only useful for 1-D curves';
     end
   else
     S = updown_sequence(P);

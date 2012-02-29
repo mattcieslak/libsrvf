@@ -21,7 +21,7 @@
 % Outputs
 % xvi:  preimages of xv
 function xvi = plf_preimages( F, T, xv )
-  assert( rows(F) == 1 );
+  assert( size(F,1) == 1 );
   assert( min(diff(F)) >= 0 );
   assert( min(diff(T)) >= 0 );
 

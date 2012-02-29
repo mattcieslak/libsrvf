@@ -21,6 +21,6 @@ function plot_srvf( Q, T, fmt )
   elseif ( dim == 3 )
     plot3(Q(1,:),Q(2,:),Q(3,:),fmt);
   else
-    error( "SRVFs must be dimension 3 or lower." );
+    error( 'SRVFs must be dimension 3 or lower.' );
   end
 end
