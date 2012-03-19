@@ -16,21 +16,4 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#ifndef SRVF_UTIL_H
-#define SRVF_UTIL_H 1
-
-#include "matrix.h"
-
-namespace srvf
-{
-
-namespace util
-{
-
-Matrix linspace(double a, double b, int n);
-
-} // namespace srvf::util
-
-} // namespace srvf
-
-#endif // SRVF_UTIL_H
+#include "interp.h"

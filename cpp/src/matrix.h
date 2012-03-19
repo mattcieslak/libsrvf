@@ -29,6 +29,7 @@ public:
   Matrix () : data_(0), rows_(0), cols_(0) { }
   Matrix (int rows, int cols);
   Matrix (int rows, int cols, double val);
+  Matrix (int rows, int cols, double *data);
   Matrix (const Matrix &A);
   Matrix &operator= (const Matrix &A);
   ~Matrix ();
@@ -69,11 +70,20 @@ public:
   Matrix& operator*= (const Matrix &A);
   Matrix& operator/= (const Matrix &A);
 
+  Matrix& operator+= (double v);
+  Matrix& operator-= (double v);
+  Matrix& operator*= (double v);
+  Matrix& operator/= (double v);
+
   // Elementwise operations
   friend Matrix operator+ (const Matrix &A, const Matrix &B);
   friend Matrix operator- (const Matrix &A, const Matrix &B);
   friend Matrix operator* (const Matrix &A, const Matrix &B);
   friend Matrix operator/ (const Matrix &A, const Matrix &B);
+  friend Matrix operator+ (const Matrix &A, double v);
+  friend Matrix operator- (const Matrix &A, double v);
+  friend Matrix operator* (const Matrix &A, double v);
+  friend Matrix operator/ (const Matrix &A, double v);
 
   // Matrix multiplication
   friend Matrix product(const Matrix &A, const Matrix &B);
@@ -91,6 +101,10 @@ Matrix operator+ (const Matrix &A, const Matrix &B);
 Matrix operator- (const Matrix &A, const Matrix &B);
 Matrix operator* (const Matrix &A, const Matrix &B);
 Matrix operator/ (const Matrix &A, const Matrix &B);
+Matrix operator+ (const Matrix &A, double v);
+Matrix operator- (const Matrix &A, double v);
+Matrix operator* (const Matrix &A, double v);
+Matrix operator/ (const Matrix &A, double v);
 Matrix product (const Matrix &A, const Matrix &B);
 Matrix transpose(const Matrix &A);
 

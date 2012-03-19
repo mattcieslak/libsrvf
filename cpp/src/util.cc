@@ -24,6 +24,9 @@
 namespace srvf
 {
 
+namespace util
+{
+
 Matrix linspace(double a, double b, int n)
 {
   if (n<0) std::invalid_argument("n<0");
@@ -45,4 +48,6 @@ Matrix linspace(double a, double b, int n)
   return R;
 }
 
-}
+} // namespace srvf::util
+
+} // namespace srvf

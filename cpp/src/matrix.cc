@@ -27,6 +27,12 @@ namespace srvf{
   for (int i=0; i<nc; ++i) { \
     (A)(i) = (B)(i) op (C)(i); \
   }
+
+#define __SCALAR_OP(A,B,v,op) \
+  int nc=(A).size(); \
+  for (int i=0; i<nc; ++i) { \
+    (A)(i) = (B)(i) op (v); \
+  }
   
 #define __MATRIX_MUL(A,B,C) \
   for (int i=0; i<(B).rows(); ++i) { \
@@ -70,6 +76,31 @@ Matrix::Matrix (int rows, int cols, double val)
   data_ = new double[rows*cols];
   for (int i=0; i<rows*cols; ++i)
     data_[i]=val;
+}
+
+/**
+ * Create a new \c Matrix initialized with the given data.
+ *
+ * A deep copy of the data is made.
+ *
+ * \param rows
+ * \param cols
+ * \param data pointer to a \c (rows)x(cols) array of \c doubles
+ */
+Matrix::Matrix (int rows, int cols, double *data)
+  : data_((double*)0), rows_(rows), cols_(cols)
+{
+  if (rows<0) throw std::invalid_argument("rows < 0");
+  if (cols<0) throw std::invalid_argument("cols < 0");
+  int nc=rows*cols;
+  if (nc<0) throw std::overflow_error("rows*cols<0");
+  if (!data) throw std::invalid_argument("data is null");
+  
+  data_=new double[nc];
+  for (int i=0; i<nc; ++i)
+  {
+    data_[i]=data[i];
+  }
 }
 
 /**
@@ -235,6 +266,50 @@ Matrix& Matrix::operator/= (const Matrix &A)
 }
 
 /**
+ * Add \a v to all elements of this \c Matrix.
+ *
+ * \param v
+ * \return a reference to this \c Matrix
+ */
+Matrix& Matrix::operator+= (double v)
+{
+  __SCALAR_OP(*this,*this,v,+);
+}
+
+/**
+ * Subtract \a v from all elements of this \c Matrix.
+ *
+ * \param v
+ * \return a reference to this \c Matrix
+ */
+Matrix& Matrix::operator-= (double v)
+{
+  __SCALAR_OP(*this,*this,v,-);
+}
+
+/**
+ * Multiply all elements of this \c Matrix by \a v.
+ *
+ * \param v
+ * \return a reference to this \c Matrix
+ */
+Matrix& Matrix::operator*= (double v)
+{
+  __SCALAR_OP(*this,*this,v,*);
+}
+
+/**
+ * Divide all elements of this \c Matrix by \a v.
+ *
+ * \param v
+ * \return a reference to this \c Matrix
+ */
+Matrix& Matrix::operator/= (double v)
+{
+  __SCALAR_OP(*this,*this,v,/);
+}
+
+/**
  * Elementwise sum of two matrices.
  *
  * \param A
@@ -299,6 +374,56 @@ Matrix operator/ (const Matrix &A, const Matrix &B)
 
   Matrix R(A.rows(),A.cols());
   __ELEMENTWISE_OP(R,A,B,/);
+  return R;
+}
+
+/**
+ * Scalar addition.
+ *
+ * \param A
+ * \param v
+ */
+Matrix operator+ (const Matrix &A, double v)
+{
+  Matrix R(A);
+  R+=v;
+  return R;
+}
+
+/**
+ * Scalar subtraction.
+ *
+ * \param A
+ * \param v
+ */
+Matrix operator- (const Matrix &A, double v)
+{
+  return A+(-v);
+}
+
+/**
+ * Scalar multiplication.
+ *
+ * \param A
+ * \param v
+ */
+Matrix operator* (const Matrix &A, double v)
+{
+  Matrix R(A);
+  R*=v;
+  return R;
+}
+
+/**
+ * Scalar division.
+ *
+ * \param A
+ * \param v
+ */
+Matrix operator/ (const Matrix &A, double v)
+{
+  Matrix R(A);
+  R/=v;
   return R;
 }
 

@@ -33,6 +33,12 @@ public:
   Plf() { }
   Plf(const Matrix &samples);
   Plf(const Matrix &samples, const Matrix &parameters);
+
+  Matrix &samples() { return samps_; }
+  const Matrix &samples() const { return samps_; }
+
+  Matrix &parameters() { return params_; }
+  const Matrix &parameters() const { return params_; }
  
   void evaluate(double t, Matrix &result);
   void evaluate(const Matrix &tv, Matrix &result);
