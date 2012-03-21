@@ -16,24 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#ifndef SRVF_UTIL_H
-#define SRVF_UTIL_H 1
+#ifndef SRVF_QMAP_H
+#define SRVF_QMAP_H 1
 
-#include "matrix.h"
+#include "plf.h"
+#include "srvf.h"
 
 namespace srvf
 {
 
-namespace util
-{
-
-Matrix linspace(double a, double b, int n);
-Matrix unique(Matrix v1, Matrix v2);
-Matrix diff(const Matrix &X);
-Matrix diff(const Matrix &X, const Matrix &tv);
-
-} // namespace srvf::util
+Srvf plf_to_srvf(const Plf &F);
+Plf  srvf_to_plf(const Srvf &Q);
 
 } // namespace srvf
 
-#endif // SRVF_UTIL_H
+#endif // SRVF_QMAP_H

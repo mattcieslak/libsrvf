@@ -16,71 +16,56 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
+#include <cmath>
+#include "qmap.h"
+#include "util.h"
+#include "plf.h"
 #include "srvf.h"
 
 namespace srvf
 {
 
-void Srvf::evaluate(double t, Matrix &result)
+/**
+ * Returns a new \c Srvf representing the square-root velocity function of 
+ * the given \c Plf.
+ *
+ * \param F a \c Plf
+ * \return a new \c Srvf representing the SRVF of \a F
+ */
+Srvf plf_to_srvf(const Plf &F)
 {
+  Matrix dF=srvf::util::diff(F.samps(),F.params());
+  for (int i=0; i<dF.cols(); ++i)
+  {
+    double nqi=0.0;
+    for (int j=0; j<dF.rows(); ++j)
+    {
+      nqi+=dF(j,i)*dF(j,i);
+    }
+    nqi=sqrt(sqrt(nqi));
+    if (nqi>1e-6)
+    {
+      for (int j=0; j<dF.rows(); ++j)
+      {
+        dF(j,i)/=nqi;
+      }
+    }
+    else
+    {
+      for (int j=0; j<dF.rows(); ++j)
+      {
+        dF(j,i)=0.0;
+      }
+    }
+  }
 
+  return Srvf(dF,F.params());
 }
 
-void Srvf::evaluate(const Matrix &tv, Matrix &result)
-{
 
-}
-
-void Srvf::rotate(const Matrix &R)
+Plf srvf_to_plf(const Srvf &Q)
 {
   
 }
-
-void Srvf::scale(double sf)
-{
-  
-}
-
-////////////////////////////////////////////////////////////////////////////
-///////////////////////// friend functions /////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-//
-
-double l2_norm(const Srvf &Q)
-{
-
-}
-
-double l2_product(const Srvf &Q1, const Srvf &Q2)
-{
-
-}
-
-double l2_distance(const Srvf &Q1, const Srvf &Q2)
-{
-
-}
-
-double sphere_distance(const Srvf &Q1, const Srvf &Q2)
-{
-
-}
-
-Srvf linear_combination(const Srvf &Q1, const Srvf &Q2, 
-                double w1, double w2)
-{
-
-}
-
-Srvf refinement(const Srvf &Q, const Matrix &tv)
-{
-
-}
-
-Srvf gamma_action(const Srvf &Q, const Plf &gamma)
-{
-
-}
-
 
 } // namespace srvf

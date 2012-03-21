@@ -135,14 +135,7 @@ Matrix& Matrix::operator= (const Matrix &A)
     for (int i=0; i<rows_*cols_; ++i)
       data_[i]=A.data_[i];
   }
-}
-
-/**
- * Destructor
- */
-Matrix::~Matrix ()
-{
-  clear();
+  return *this;
 }
 
 /**

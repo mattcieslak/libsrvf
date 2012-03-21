@@ -20,11 +20,8 @@
 #define SRVF_PLF_H 1
 
 #include "matrix.h"
-#include "srvf.h"
 
 namespace srvf {
-
-class Srvf;
 
 class Plf
 {
@@ -34,31 +31,26 @@ public:
   Plf(const Matrix &samples);
   Plf(const Matrix &samples, const Matrix &parameters);
 
-  Matrix &samples() { return samps_; }
-  const Matrix &samples() const { return samps_; }
+  Matrix &samps() { return samps_; }
+  const Matrix &samps() const { return samps_; }
 
-  Matrix &parameters() { return params_; }
-  const Matrix &parameters() const { return params_; }
+  Matrix &params() { return params_; }
+  const Matrix &params() const { return params_; }
+
+  int dim() const { return samps_.rows(); }
+  int nsamps() const { return samps_.cols(); }
  
-  void evaluate(double t, Matrix &result);
-  void evaluate(const Matrix &tv, Matrix &result);
-  void preimages(const Matrix &tv, Matrix &result);
+  void evaluate(double t, Matrix &result) const;
+  void evaluate(const Matrix &tv, Matrix &result) const;
+  void preimages(const Matrix &tv, Matrix &result) const;
   double arc_length() const;
 
   void translate(const Matrix &v);
   void rotate(const Matrix &R);
   void scale(double s);
-  void linear_combine(const Plf &F, double w1, double w2);
-  void compose(const Plf &F);
-  void invert();
 
-  Srvf to_srvf() const;
-
-  friend Plf translation(const Plf &F, const Matrix &v);
-  friend Plf rotation(const Plf &F, const Matrix &R);
-  friend Plf scaling(const Plf &F, double s);
   friend Plf linear_combination(const Plf &F1, const Plf &F2, 
-               double w1, double w2);
+                                double w1, double w2);
   friend Plf composition(const Plf &F1, const Plf &F2);
   friend Plf inverse(const Plf &F);
 
@@ -66,6 +58,10 @@ private:
   Matrix samps_;
   Matrix params_;
 };
+
+Plf  linear_combination(const Plf &F1, const Plf &F2, double w1, double w2);
+Plf  composition(const Plf &F1, const Plf &F2);
+Plf  inverse(const Plf &F);
 
 } // namespace srvf
 

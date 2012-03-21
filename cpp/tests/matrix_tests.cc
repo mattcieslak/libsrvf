@@ -40,6 +40,25 @@ BOOST_AUTO_TEST_CASE(ctor_test3)
 
 BOOST_AUTO_TEST_CASE(ctor_test4)
 {
+  double Adata[]={
+    0.0, 1.0, 2.0, 3.0,
+    4.0, 5.0, 6.0, 7.0
+  };
+  int rows=2;
+  int cols=4;
+  int sz=rows*cols;
+  srvf::Matrix A(rows, cols, Adata);
+  BOOST_CHECK_EQUAL(A.rows(),rows);
+  BOOST_CHECK_EQUAL(A.cols(),cols);
+  BOOST_CHECK(A.data()!=Adata); // deep copy
+  for (int i=0; i<sz; ++i)
+  {
+    BOOST_CHECK_EQUAL(Adata[i],A(i));
+  }
+}
+
+BOOST_AUTO_TEST_CASE(ctor_test5)
+{
   srvf::Matrix A(20,20,0.125);
   srvf::Matrix B(A);
   BOOST_CHECK_EQUAL(A.rows(),B.rows());
@@ -221,6 +240,86 @@ BOOST_AUTO_TEST_CASE(inplace_div_test2)
         BOOST_CHECK_EQUAL(A(i,j),2.0);
       }
     }
+  }
+}
+
+BOOST_AUTO_TEST_CASE(inplace_scalar_plus_test1)
+{
+  srvf::Matrix A(3,4,0.0);
+  A+=1.0;
+  for (int i=0; i<A.size(); ++i)
+  {
+    BOOST_CHECK_EQUAL(A(i),1.0);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(inplace_scalar_minus_test1)
+{
+  srvf::Matrix A(3,4,0.0);
+  A-=1.0;
+  for (int i=0; i<A.size(); ++i)
+  {
+    BOOST_CHECK_EQUAL(A(i),-1.0);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(inplace_scalar_times_test1)
+{
+  srvf::Matrix A(3,4,1.0);
+  A*=0.25;
+  for (int i=0; i<A.size(); ++i)
+  {
+    BOOST_CHECK_EQUAL(A(i),0.25);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(inplace_scalar_div_test1)
+{
+  srvf::Matrix A(3,4,1.0);
+  A/=0.25;
+  for (int i=0; i<A.size(); ++i)
+  {
+    BOOST_CHECK_EQUAL(A(i),4.0);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(scalar_plus_test1)
+{
+  srvf::Matrix A(20,32,0.25);
+  srvf::Matrix B=A+0.75;
+  for (int i=0; i<B.size(); ++i)
+  {
+    BOOST_CHECK_EQUAL(B(i),1.0);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(scalar_minus_test1)
+{
+  srvf::Matrix A(20,32,0.25);
+  srvf::Matrix B=A-0.75;
+  for (int i=0; i<B.size(); ++i)
+  {
+    BOOST_CHECK_EQUAL(B(i),-0.5);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(scalar_times_test1)
+{
+  srvf::Matrix A(20,32,1.0);
+  srvf::Matrix B=A*0.5;
+  for (int i=0; i<B.size(); ++i)
+  {
+    BOOST_CHECK_EQUAL(B(i),0.5);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(scalar_div_test1)
+{
+  srvf::Matrix A(20,32,1.0);
+  srvf::Matrix B=A/0.5;
+  for (int i=0; i<B.size(); ++i)
+  {
+    BOOST_CHECK_EQUAL(B(i),2.0);
   }
 }
 

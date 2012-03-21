@@ -22,30 +22,39 @@
 #include <vector>
 
 #include "matrix.h"
-#include "plf.h"
 
 namespace srvf {
 
 class Plf;
-  
+
 class Srvf
 {
 public:
 
+  Srvf() { }
+  Srvf(const Matrix &samples)
+   : samps_(samples)
+  { }
+  Srvf(const Matrix &samples, const Matrix &parameters)
+   : samps_(samples), params_(parameters)
+  { }
+
   void evaluate(double t, Matrix &result);
   void evaluate(const Matrix &tv, Matrix &result);
 
-  double l2_norm();
-  double l2_product(const Srvf &Q);
-  double l2_distance(const Srvf &Q);
-  double sphere_distance(const Srvf &Q);
+  Matrix &samps() { return samps_; }
+  const Matrix &samps() const { return samps_; }
 
-  void linear_combine(const Srvf &Q, double w1, double w2);
-  void refine(const Matrix &tv);
-  void gamma_act(const Plf &gamma);
+  Matrix &params() { return params_; }
+  const Matrix &params() const { return params_; }
 
-  Plf to_plf();
+  int dim() const { return samps_.rows(); }
+  int nsamps() const { return params_.cols(); }
 
+  void rotate(const Matrix &R);
+  void scale(double sf);
+
+  friend double l2_norm(const Srvf &Q);
   friend double l2_product(const Srvf &Q1, const Srvf &Q2);
   friend double l2_distance(const Srvf &Q1, const Srvf &Q2);
   friend double sphere_distance(const Srvf &Q1, const Srvf &Q2);
@@ -58,6 +67,15 @@ private:
   Matrix samps_;
   Matrix params_;
 };
+
+double l2_norm(const Srvf &Q);
+double l2_product(const Srvf &Q1, const Srvf &Q2);
+double l2_distance(const Srvf &Q1, const Srvf &Q2);
+double sphere_distance(const Srvf &Q1, const Srvf &Q2);
+Srvf   linear_combination(const Srvf &Q1, const Srvf &Q2, 
+         double w1, double w2);
+Srvf   refinement(const Srvf &Q, const Matrix &tv);
+Srvf   gamma_action(const Srvf &Q, const Plf &gamma);
 
 } // namespace srvf
 

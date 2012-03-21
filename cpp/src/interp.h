@@ -70,34 +70,40 @@ inline int lookup(const double *table, int n, double t)
     return -1;
 }
 
-
 /**
- * Computes a weighted sum of two columns from \c A.
+ * Computes a weighted sum of a column of \a A with a column of \a B.
  *
- * The result is stored in column \c idx3 of the matrix \c R, which 
- * must have the same number of rows as \c A.
+ * The result is stored in column \a idx3 of the matrix \a R, which 
+ * must have the same number of rows as \a A and \a B.
  *
- * \param A the matrix
- * \param idx1 index of the first column
- * \param idx2 index of the second column
+ * \param A the first matrix
+ * \param B the second matrix
+ * \param idx1 column index for \a A
+ * \param idx2 column index for \a B
  * \param w1 first weight
  * \param w2 second weight
  * \param R a matrix to receive the result
- * \param idx3 index of the column of R that will receive the result
+ * \param idx3 column index for \a R
  */
-inline void weighted_column_sum(const Matrix &A, int idx1, int idx2, 
-                         double w1, double w2, Matrix &R, int idx3)
+inline void weighted_column_sum(const Matrix &A, const Matrix &B, 
+                                int idx1, int idx2, 
+                                double w1, double w2, 
+                                Matrix &R, int idx3)
 {
   for (int i=0; i<A.rows(); ++i)
   {
-    R(i,idx3) = w1*A(i,idx1) + w2*A(i,idx2);
+    R(i,idx3) = w1*A(i,idx1) + w2*B(i,idx2);
   }
 }
 
 /**
  * Linear interpolation.
  *
- * \param samps the sample points
+ * If \c params(i)==params(i+1) for some \c i, the interpolant has a jump 
+ * discontinuity.  In this case, we take the function to be right-continuous 
+ * at that point.
+ *
+ * \param samps a \c Matrix containing the sample points, one point per column
  * \param params the parameter values corresponding to \a samps
  * \param tv parameters at which to interpolated.  Must be non-decreasing.
  * \param result [output] a \c Matrix to hold the result
@@ -115,7 +121,7 @@ inline void interp_linear(const Matrix &samps, const Matrix &params,
   for (int i=0; i<tv.cols(); ++i)
   {
     double tvi=tv(i);
-    while (idx<params.cols()-1 && tvi>params(idx+1)) 
+    while (idx<params.cols()-1 && tvi>=params(idx+1)) 
     {
       ++idx;
     }
@@ -137,15 +143,15 @@ inline void interp_linear(const Matrix &samps, const Matrix &params,
       }
       else
       {
-        w1 = 1.0;
-        w2 = 0.0;
+        w1 = 0.0;
+        w2 = 1.0;
       }
 
-      weighted_column_sum(samps,idx,idx+1,w1,w2,result,i);
+      weighted_column_sum(samps,samps,idx,idx+1,w1,w2,result,i);
     }
     else
     {
-      weighted_column_sum(samps,idx,idx,1.0,0.0,result,i);
+      weighted_column_sum(samps,samps,idx,idx,1.0,0.0,result,i);
     }
   }
 }

@@ -32,7 +32,7 @@ public:
   Matrix (int rows, int cols, double *data);
   Matrix (const Matrix &A);
   Matrix &operator= (const Matrix &A);
-  ~Matrix ();
+  ~Matrix () { delete[] data_; data_=0; rows_=0; cols_=0; }
 
   int rows() const 
   { return rows_; }
