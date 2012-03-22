@@ -19,7 +19,9 @@
 #ifndef SRVF_PLF_H
 #define SRVF_PLF_H 1
 
+#include <stdexcept>
 #include "matrix.h"
+#include "util.h"
 
 namespace srvf {
 
@@ -27,18 +29,81 @@ class Plf
 {
 public:
   
+  /** Default constructor. */
   Plf() { }
-  Plf(const Matrix &samples);
-  Plf(const Matrix &samples, const Matrix &parameters);
 
+  /**
+   * Creates a new \c Plf with the given sample points.
+   *
+   * Corresponding parameter values will be uniformly spaced from 0 to 1.
+   *
+   * \param samples
+   */
+  Plf(const Matrix &samples)
+    : samps_(samples), params_()
+  {
+    params_=srvf::util::linspace(0.0,1.0,samples.cols());
+  }
+
+  /**
+   * Creates a new \c Plf with the given sample points and parameters.
+   *
+   * \param samples
+   * \param parameters
+   */
+  Plf(const Matrix &samples, const Matrix &parameters)
+    : samps_(samples), params_(parameters)
+  {
+    if (parameters.rows()!=1)
+      std::invalid_argument("parameters must have 1 row");
+    if (samples.cols()!=parameters.cols())
+      std::invalid_argument("samples.cols()!=parameters.cols()");
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * Creates a deep copy of \a F
+   * \param F an existing \c Plf
+   */
+  Plf(const Plf &F)
+    : samps_(F.samps_), params_(F.params_)
+  { }
+
+  /**
+   * Assignment operator.
+   *
+   * Sets the current \c Plf to a deep copy of \a F.
+   * \param F an existing \c Plf
+   * \return a reference to the current \c Plf
+   */
+  Plf &operator= (const Plf &F)
+  {
+    samps_ = F.samps_;    // deep copy
+    params_ = F.params_;  // deep copy
+    return *this;
+  }
+
+  /** Returns the sample point matrix. */
   Matrix &samps() { return samps_; }
+
+  /** Returns the sample point matrix. */
   const Matrix &samps() const { return samps_; }
 
+  /** Returns the changepoint parameter matrix. */
   Matrix &params() { return params_; }
+
+  /** Returns the changepoint parameter matrix. */
   const Matrix &params() const { return params_; }
 
+  /** Returns the dimension of the ambient space. */
   int dim() const { return samps_.rows(); }
-  int nsamps() const { return samps_.cols(); }
+
+  /** Returns the number of changepoints. */
+  int ncp() const { return samps_.cols(); }
+
+  /** Does this \c Plf represent the empty map? */
+  bool is_empty() const { return (samps_.size() == 0); }
  
   void evaluate(double t, Matrix &result) const;
   void evaluate(const Matrix &tv, Matrix &result) const;

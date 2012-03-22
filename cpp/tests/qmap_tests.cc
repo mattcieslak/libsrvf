@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_CASE(plf_to_srvf_test1)
   srvf::Srvf Q=srvf::plf_to_srvf(F);
 
   BOOST_REQUIRE_EQUAL(Q.dim(),1);
-  BOOST_REQUIRE_EQUAL(Q.nsamps(),4);
+  BOOST_REQUIRE_EQUAL(Q.ncp(),4);
 
   // The Srvf should have same parameters as the Plf
   for (int i=0; i<4; ++i)
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(plf_to_srvf_test2)
   srvf::Srvf Q=srvf::plf_to_srvf(F);
 
   BOOST_REQUIRE_EQUAL(Q.dim(),2);
-  BOOST_REQUIRE_EQUAL(Q.nsamps(),5);
+  BOOST_REQUIRE_EQUAL(Q.ncp(),5);
 
   // The Srvf should have same parameters as the Plf
   for (int i=0; i<5; ++i)

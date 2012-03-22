@@ -19,37 +19,118 @@
 #ifndef SRVF_SRVF_H
 #define SRVF_SRVF_H 1
 
-#include <vector>
+#include <stdexcept>
 
 #include "matrix.h"
+#include "util.h"
 
 namespace srvf {
 
 class Plf;
 
+/**
+ * Represents a piecewise-constant square-root velocity function.
+ *
+ * Any continuous piecewise-linear function \f$ f:[a,b]\to R^n \f$ will 
+ * have a piecewise-constant square-root velocity function 
+ * \f$ q\in L^2([a,b],R^n) \f$.  To represent such a function, we only 
+ * have to keep track of the changepoint parameters 
+ * \f[ t_0=a \le t_1 \le \ldots \le t_k=b \f]
+ * and the \f$ k\f$ function values between the \f$ t_i \f$.
+ *
+ * Since these functions are piecewise-constant, things like norms, distances, 
+ * and inner products in the \f$ L^2 \f$ space can be computed exactly.
+ */
 class Srvf
 {
 public:
 
   Srvf() { }
+
+  /**
+   * Creates a new \c Srvf with the specified values.
+   *
+   * Changepoint parameters will be uniformly spaced from 0 to 1.
+   * \param samples the sample points (will be deep-copied)
+   */
   Srvf(const Matrix &samples)
    : samps_(samples)
-  { }
+  { 
+    params_=srvf::util::linspace(0.0, 1.0, samples.cols()+1);
+  }
+
+  /**
+   * Creates a new \c Srvf with the specified values and 
+   * changepoint parameters.
+   *
+   * \param samples the sample points (will be deep-copied)
+   * \param params the changepoint parameters (will be deep-copied).  Must 
+   *        be a \c 1xN \c Matrix, where \c N=samples().cols()+1.
+   */
   Srvf(const Matrix &samples, const Matrix &parameters)
    : samps_(samples), params_(parameters)
+  {
+    if ((parameters.rows()!=1) || (parameters.cols()!=samples.cols()+1))
+      std::invalid_argument("parameters has bad size");
+  }
+
+  /**
+   * Copy constructor.
+   *
+   * Creates a new \c Srvf which is a deep copy of \a Q.
+   *
+   * \param Q reference to an existing \c Srvf
+   */
+  Srvf(const Srvf &Q)
+   : samps_(Q.samps_), params_(Q.params_)
   { }
 
-  void evaluate(double t, Matrix &result);
-  void evaluate(const Matrix &tv, Matrix &result);
+  /**
+   * Assignment operator.
+   *
+   * Sets the current \c Srvf to a deep copy of \a Q.
+   *
+   * \param Q reference to an existing \c Srvf, to be deep copied
+   * \return a reference to the current \c Srvf
+   */
+  Srvf &operator= (const Srvf &Q)
+  {
+    samps_  = Q.samps_;   // deep copy
+    params_ = Q.params_;  // deep copy
+    return *this;
+  }
 
+  void evaluate(double t, Matrix &result) const;
+  void evaluate(const Matrix &tv, Matrix &result) const;
+
+  /** Returns a reference to the samples matrix. */
   Matrix &samps() { return samps_; }
+
+  /** Returns a reference to the samples matrix. */
   const Matrix &samps() const { return samps_; }
 
+  /** Returns a reference to the parameter matrix. */
   Matrix &params() { return params_; }
+
+  /** Returns a reference to the parameter matrix. */
   const Matrix &params() const { return params_; }
 
+  /** Returns the dimension of the ambient space. */
   int dim() const { return samps_.rows(); }
-  int nsamps() const { return params_.cols(); }
+
+  /** Returns the number of change points. */
+  int ncp() const { return params_.cols(); }
+
+  /** Does this \c Srvf represent the empty map? */
+  bool is_empty() const { return ncp()<2; }
+
+  /** Returns the left endpoint of the domain interval. */
+  double domain_lb() const 
+  { return (params_.size()>0 ? params_(0) : 0.0); };
+
+  /** Returns the right endpoint of the domain interval. */
+  double domain_ub() const 
+  { return (params_.size()>0 ? params_(params_.cols()-1) : 0.0); };
 
   void rotate(const Matrix &R);
   void scale(double sf);

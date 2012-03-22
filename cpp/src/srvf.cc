@@ -16,71 +16,404 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
+#include <cmath>
+#include <stdexcept>
+
 #include "srvf.h"
+#include "plf.h"
+#include "matrix.h"
+#include "interp.h"
+#include "util.h"
 
 namespace srvf
 {
 
-void Srvf::evaluate(double t, Matrix &result)
+/**
+ * Evaluate this \c Srvf at a single point.
+ *
+ * The result will be stored in \a result, which must have at least 
+ * \c this->dim() rows.
+ *
+ * \param t the parameter value at which the function will be evaluated
+ * \param result a \c Matrix with at least \c this->dim() rows, which 
+ *   will receive the result.
+ */
+void Srvf::evaluate(double t, Matrix &result) const
 {
-
+  Matrix tv(1, 1, &t);
+  evaluate(tv, result);
 }
 
-void Srvf::evaluate(const Matrix &tv, Matrix &result)
+/**
+ * Evaluate this \c Srvf at one or more points.
+ *
+ * The matrix \a tv must be a \c 1xN matrix whose entries are sorted 
+ * in non-decreasing order.
+ *
+ * The result will be stored in \a result, which must have at least 
+ * \c this->dim() rows and at least \c tv.cols() columns.
+ *
+ * \param tv the parameter values at which the function will be evaluated
+ * \param result a \c Matrix with at least \c this->dim() rows, and 
+ *   \c tv.cols() columns, which will receive the result.
+ */
+void Srvf::evaluate(const Matrix &tv, Matrix &result) const
 {
-
+  srvf::interp::interp_const(samps(), params(), tv, result);
 }
 
+/**
+ * Apply a rotation to this \c Srvf.
+ *
+ * \param R a \c DxD rotation matrix, where \c D=this->dim().
+ */
 void Srvf::rotate(const Matrix &R)
 {
-  
+  samps_ = product(R, samps_);
 }
 
+/**
+ * Apply a uniform scaling to this \c Srvf.
+ *
+ * \param sf the scale factor
+ */
 void Srvf::scale(double sf)
 {
-  
+  samps_ *= sf;
 }
 
 ////////////////////////////////////////////////////////////////////////////
 ///////////////////////// friend functions /////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-//
 
+/**
+ * Computes the L^2 norm of the given \c Srvf.
+ *
+ * The \f$L^2\f$ norm of a function \f$f:[a,b]\to R^n\f$ is defined as
+ * \f[ |f| = \left( \int_a^b |f(t)| dt \right)^{1/2} \f]
+ *
+ * \param Q the \c Srvf
+ * \return the L^2 norm of \a Q
+ */
 double l2_norm(const Srvf &Q)
 {
-
+  double res=0.0;
+  for (int i=0; i<Q.ncp()-1; ++i)
+  {
+    double nqi=0.0;
+    for (int j=0; j<Q.dim(); ++j)
+    {
+      double x=Q.samps()(j,i);
+      nqi += x*x;
+    }
+    double dt = Q.params()(i+1)-Q.params()(i);
+    res += nqi * dt;
+  }
+  return sqrt(res);
 }
 
+/**
+ * Computes the L^2 inner product of two \c Srvf's.
+ *
+ * The \f$L^2\f$ inner product of two functions 
+ * \f$f_1,f_2:[a,b]\to R^n\f$ is defined as
+ *
+ * \f[ \left\langle f_1,f_2 \right\rangle = 
+ *     \int_a^b \left\langle f_1(t),f_2(t) \right\rangle dt \f]
+ *
+ * If either \a Q1 or \a Q2 has fewer than 2 sample points (i.e. is empty, 
+ * or is defined on an interval of length 0), then the result is 0.
+ *
+ * \param Q1 the first \c Srvf
+ * \param Q2 the second \c Srvf.  Must be defined on the same interval 
+ *        as \a Q1.
+ * \return the L^2 inner product of \a Q1 and \a Q2
+ */
 double l2_product(const Srvf &Q1, const Srvf &Q2)
 {
+  if (Q1.ncp()<2 || Q2.ncp()<2) return 0.0;
 
+  double Q1a=Q1.params()(0), Q1b=Q1.params()(Q1.ncp()-1);
+  double Q2a=Q2.params()(0), Q2b=Q2.params()(Q2.ncp()-1);
+
+  if (Q1.dim()!=Q2.dim())
+    std::invalid_argument("Q1 and Q2 must have the same dimension");
+  if (fabs(Q1a-Q2a)>1e-4 || fabs(Q1b-Q2b)>1e-4)
+    std::invalid_argument("Q1 and Q2 must have the same domain");
+
+  int dim=Q1.dim();
+  double tlast=(Q1a<Q2a ? Q1a : Q2a);
+  int i1=0, i2=0;
+  double res=0.0;
+
+  while ((i1<Q1.ncp()-1) && (i2<Q2.ncp()-1))
+  {
+    double ipi=0.0;
+    for (int j=0; j<dim; ++j)
+    {
+      ipi += Q1.samps()(j,i1)*Q2.samps()(j,i2);
+    }
+
+    double tnext1=Q1.params()(i1+1);
+    double tnext2=Q2.params()(i2+1);
+    double dt;
+    if (tnext1<tnext2)
+    {
+      dt=tnext1-tlast;
+      tlast=tnext1;
+      ++i1;
+      if (fabs(tnext1-tnext2)<1e-6) ++i2;
+    }
+    else
+    {
+      dt=tnext2-tlast;
+      tlast=tnext2;
+      ++i2;
+      if (fabs(tnext1-tnext2)<1e-6) ++i1;
+    }
+
+    res += ipi*dt;
+  }
+
+  return res;
 }
 
+/**
+ * Compute the L^2 distance between \a Q1 and \a Q2.
+ *
+ * The \f$L^2\f$ distance between two functions 
+ * \f$f_1,f_2:[a,b]\to R^n\f$ is defined as
+ *
+ * \f[ |f_1-f_2| = \left(\int_a^b |f_1(t)-f_2(t)|^2 dt \right)^{1/2}\f]
+ *
+ * \param Q1 the first \c Srvf
+ * \param Q2 the second \c Srvf.  Must have the same dimension and domain 
+ *           as \a Q1.
+ * \return the L^2 distance between \a Q1 and \a Q2
+ */
 double l2_distance(const Srvf &Q1, const Srvf &Q2)
 {
+  // TODO: refactor (this is basically the same thing as l2_product())
+  if (Q1.ncp()<2 || Q2.ncp()<2) return 0.0;
 
+  double Q1a=Q1.params()(0), Q1b=Q1.params()(Q1.ncp()-1);
+  double Q2a=Q2.params()(0), Q2b=Q2.params()(Q2.ncp()-1);
+
+  if (Q1.dim()!=Q2.dim())
+    std::invalid_argument("Q1 and Q2 must have the same dimension");
+  if (fabs(Q1a-Q2a)>1e-4 || fabs(Q1b-Q2b)>1e-4)
+    std::invalid_argument("Q1 and Q2 must have the same domain");
+
+  int dim=Q1.dim();
+  double tlast=(Q1a<Q2a ? Q1a : Q2a);
+  int i1=0, i2=0;
+  double res=0.0;
+
+  while ((i1<Q1.ncp()-1) && (i2<Q2.ncp()-1))
+  {
+    double ipi=0.0;
+    for (int j=0; j<dim; ++j)
+    {
+      double dqi = Q1.samps()(j,i1)-Q2.samps()(j,i2);
+      ipi += dqi*dqi;
+    }
+
+    double tnext1=Q1.params()(i1+1);
+    double tnext2=Q2.params()(i2+1);
+    double dt;
+    if (tnext1<tnext2)
+    {
+      dt=tnext1-tlast;
+      tlast=tnext1;
+      ++i1;
+      if (fabs(tnext1-tnext2)<1e-6) ++i2;
+    }
+    else
+    {
+      dt=tnext2-tlast;
+      tlast=tnext2;
+      ++i2;
+      if (fabs(tnext1-tnext2)<1e-6) ++i1;
+    }
+
+    res += ipi*dt;
+  }
+
+  return sqrt(res);
 }
 
+/**
+ * Computes the great circle distance between two SRVFs.
+ *
+ * The great circle distance between two functions 
+ * \f$ q_1,q_2\in L^2([a,b],R^n) \f$
+ *
+ * having the same norm is given by 
+ *
+ * \f[ \theta=\cos^{-1}\left(\frac{\left\langle q_1, q_2 \right\rangle}
+ *                                {|q_1||q_2|} \right) \f]
+ *
+ * \param Q1 the first \c Srvf
+ * \param Q2 the second \c Srvf.  Must have the same dimension, domain, 
+ *           and L^2 norm as \a Q1.
+ * \return the great circle distance between \a Q1 and \a Q2.
+ */
 double sphere_distance(const Srvf &Q1, const Srvf &Q2)
 {
+  double nrm1=l2_norm(Q1);
+  double nrm2=l2_norm(Q2);
 
+  // TODO: is this a good tolerance?
+  if (fabs(nrm1-nrm2)>5e-3)
+    throw std::invalid_argument("Difference between norms exceeds tolerance.");
+
+  if (fabs(nrm1*nrm2)>1e-6)
+  {
+    double ip=l2_product(Q1,Q2);
+    double ct=ip/(nrm1*nrm2);
+    if (ct<-1.0) ct=-1.0;
+    if (ct>1.0)  ct=1.0;
+    return acos(ct);
+  }
+  else
+  {
+    return 0.0;
+  }
 }
 
+/**
+ * Linear combination of \a Q1 and \a Q2 with the specified weights.
+ *
+ * Returns a new \c Srvf representing a linear combination of \a Q1 and 
+ * \a Q2 with the specified weights \a w1 and \a w2.
+ *
+ * If \a Q1 is empty, then the result will be \c w2*Q2.  Similarly, if \a Q2 
+ * is empty, then the result will be \c w1*Q1.
+ *
+ * \a Q1 and \a Q2 must be defined on the same interval.
+ *
+ * \param Q1 the first \c Srvf
+ * \param Q2 the second \c Srvf
+ * \param w1 the first weight
+ * \param w2 the second weight
+ * \return a new \c Srvf representing \f$ w_1Q_1 + w_2Q_2 \f$.
+ */
 Srvf linear_combination(const Srvf &Q1, const Srvf &Q2, 
                 double w1, double w2)
 {
+  if ((fabs(Q1.domain_lb()-Q2.domain_lb()) > 1e-6) ||
+      (fabs(Q1.domain_ub()-Q2.domain_ub()) > 1e-6) )
+  { std::invalid_argument("Q1 and Q2 must have the same domain."); }
+  if (Q1.dim() != Q2.dim())
+  { std::invalid_argument("Q1 and Q2 must have the same dimension."); }
 
+
+  if (Q1.is_empty())
+  {
+    Srvf res(Q2);
+    res.samps() *= w2;
+    return res;
+  }
+  else if (Q2.is_empty())
+  {
+    Srvf res(Q1);
+    res.samps() *= w1;
+    return res;
+  }
+  else
+  {
+    // Get new changepoints
+    Matrix params=srvf::util::unique(Q1.params(), Q2.params());
+    int dim=Q1.dim();
+    int ncp=params.cols();
+
+    // Evaluate Q1 and Q2 at the midpoint of each interval
+    Matrix samps1(dim, ncp-1);
+    Matrix samps2(dim, ncp-1);
+    Matrix tv(1,ncp-1);
+    for (int i=0; i<ncp-1; ++i)
+    {
+      tv(i) = 0.5*(params(i) + params(i+1));
+    }
+    Q1.evaluate(tv, samps1);
+    Q2.evaluate(tv, samps2);
+
+    // New samps is linear combination of samps1 and samps2
+    samps1 *= w1;
+    samps2 *= w2;
+    Srvf res(samps1 + samps2, params);
+    return res;
+  }
 }
 
-Srvf refinement(const Srvf &Q, const Matrix &tv)
+/**
+ * Returns a refinement of \a Q whose changepoint parameters include \a tv.
+ *
+ * \a tv is a 1-row matrix containing additional changepoints.
+ *
+ * The resulting \c Srvf will have the union of \c Q.params() and \a tv as 
+ * its changepoint parameters.  On each of the resulting subintervals, the 
+ * value of the new \c Srvf will be the same as the value of \a Q.
+ *
+ * \param Q reference to an existing \c Srvf
+ * \param tv a \c Matrix containing the new changepoint parameters
+ * \return a new \c Srvf representing the specified refinement of \a Q
+ */
+Srvf refinement(const Srvf &Q, const Matrix &new_params)
 {
+  Matrix params=srvf::util::unique(Q.params(), new_params);
+  Matrix tv(1,params.cols()-1);
+  for (int i=0; i<tv.size(); ++i)
+  {
+    tv(i) = 0.5*(params(i)+params(i+1));
+  }
+  Matrix samps(Q.dim(),tv.size());
+  Q.evaluate(tv,samps);
 
+  return Srvf(samps,params);
 }
 
+/**
+ * Returns a new \c Srvf representing the action of \a gamma on \a Q.
+ *
+ * If \a Q is defined on the interval \f$ [a,b] \f$, then \a gamma must 
+ * represent a non-decreasing map \f$ \gamma:[a,b]\to[a,b] \f$ sending 
+ * \f$ a \mapsto a \f$ and \f$ b \mapsto b \f$.
+ *
+ * The action of \f$ \gamma \f$ on \a Q is defined as
+ * \f[ Q*\gamma = \sqrt{\dot{\gamma}}(Q\circ\gamma) \f]
+ *
+ * \param Q an existing \c Srvf
+ * \param gamma a \c Plf representing a reparametrization function
+ */
 Srvf gamma_action(const Srvf &Q, const Plf &gamma)
 {
+  if (gamma.dim() != 1)
+  { std::invalid_argument("gamma must be 1-dimensional"); }
+  if ((gamma.samps()(0) < Q.domain_lb()-1e-6) ||
+      (gamma.samps()(gamma.ncp()-1) > Q.domain_ub()+1e-6))
+  { std::invalid_argument("Range of gamma must be contained in domain of Q"); }
 
+  Matrix xparams(1,Q.ncp());
+  gamma.preimages(Q.params(),xparams);
+  Matrix params = srvf::util::unique(gamma.params(),xparams);
+  Srvf Qr = refinement(Q,gamma.samps());
+  Matrix samps(Qr.samps());
+
+  int dim=Q.dim();
+  int ncp=params.cols();
+  for (int i=0; i<ncp-1; ++i)
+  {
+    double gdi = (Qr.params()(i+1)-Qr.params()(i)) / (params(i+1)-params(i));
+    double rgdi = sqrt(gdi);
+    
+    for (int j=0; j<dim; ++j)
+    {
+      samps(j,i) *= rgdi;
+    }
+  }
+
+  return Srvf(samps,params);
 }
-
 
 } // namespace srvf

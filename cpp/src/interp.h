@@ -156,6 +156,43 @@ inline void interp_linear(const Matrix &samps, const Matrix &params,
   }
 }
 
+/**
+ * Piecewise-constant interpolation.
+ *
+ * \param samps a \c Matrix containing the sample points, one point per column
+ * \param params the parameter values corresponding to \a samps
+ * \param tv parameters at which to interpolated.  Must be non-decreasing.
+ * \param result [output] a \c Matrix to hold the result
+ */
+inline void interp_const(const Matrix &samps, const Matrix &params, 
+                         const Matrix &tv, Matrix &result)
+{
+  int idx=0;
+  if (params.cols()>1 && tv(0)>params(1))
+  {
+    idx=lookup(params.data(), params.cols(), tv(0));
+    if (idx<0) idx=0;
+  }
+
+  for (int i=0; i<tv.cols(); ++i)
+  {
+    double tvi=tv(i);
+    while (idx<params.cols()-1 && tvi>=params(idx+1)) 
+    {
+      ++idx;
+    }
+    if (tvi<params(idx))
+    {
+      tvi=params(idx);
+    }
+    if (idx>=params.cols()-1)
+    {
+      --idx;
+    }
+    weighted_column_sum(samps,samps,idx,idx,1.0,0.0,result,i);
+  }
+}
+
 } // namespace srvf::interp
 
 } // namespace srvf

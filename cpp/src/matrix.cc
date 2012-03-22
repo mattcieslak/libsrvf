@@ -267,6 +267,7 @@ Matrix& Matrix::operator/= (const Matrix &A)
 Matrix& Matrix::operator+= (double v)
 {
   __SCALAR_OP(*this,*this,v,+);
+  return *this;
 }
 
 /**
@@ -278,6 +279,7 @@ Matrix& Matrix::operator+= (double v)
 Matrix& Matrix::operator-= (double v)
 {
   __SCALAR_OP(*this,*this,v,-);
+  return *this;
 }
 
 /**
@@ -289,6 +291,7 @@ Matrix& Matrix::operator-= (double v)
 Matrix& Matrix::operator*= (double v)
 {
   __SCALAR_OP(*this,*this,v,*);
+  return *this;
 }
 
 /**
@@ -300,6 +303,7 @@ Matrix& Matrix::operator*= (double v)
 Matrix& Matrix::operator/= (double v)
 {
   __SCALAR_OP(*this,*this,v,/);
+  return *this;
 }
 
 /**

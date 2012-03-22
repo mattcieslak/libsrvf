@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(linear_combination_test1)
   srvf::Plf Fr=srvf::linear_combination(F1,F2,0.75,0.25);
 
   BOOST_REQUIRE_EQUAL(Fr.samps().size(),8);
-  BOOST_REQUIRE_EQUAL(Fr.nsamps(),8);
+  BOOST_REQUIRE_EQUAL(Fr.ncp(),8);
   for (int i=0; i<8; ++i)
   {
     BOOST_CHECK_EQUAL(Fr.samps()(i),0.5);
@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(composition_test1)
   srvf::Plf F2(samps2,params2);
   srvf::Plf F12=srvf::composition(F1,F2);
   
-  BOOST_REQUIRE_EQUAL(F12.nsamps(),n3);
+  BOOST_REQUIRE_EQUAL(F12.ncp(),n3);
   for (int i=0; i<n3; ++i)
   {
     BOOST_CHECK_EQUAL(F12.params()(i),exp_params[i]);
@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE(inverse_test1)
   srvf::Plf F(samps,params);
   srvf::Plf Fi=srvf::inverse(F);
   
-  BOOST_REQUIRE_EQUAL(Fi.nsamps(),nexp);
+  BOOST_REQUIRE_EQUAL(Fi.ncp(),nexp);
   for (int i=0; i<nexp; ++i)
   {
     BOOST_CHECK_EQUAL(Fi.params()(i),samps_data[i]);

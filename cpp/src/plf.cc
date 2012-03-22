@@ -29,34 +29,6 @@ namespace srvf
 {
 
 /**
- * Creates a new \c Plf with the given sample points.
- *
- * Corresponding parameter values will be uniformly spaced from 0 to 1.
- *
- * \param samples
- */
-Plf::Plf(const Matrix &samples)
-  : samps_(samples), params_()
-{
-  params_=srvf::util::linspace(0.0,1.0,samples.cols());
-}
-
-/**
- * Creates a new \c Plf with the given sample points and parameters.
- *
- * \param samples
- * \param parameters
- */
-Plf::Plf(const Matrix &samples, const Matrix &parameters)
-  : samps_(samples), params_(parameters)
-{
-  if (parameters.rows()!=1)
-    std::invalid_argument("parameters must have 1 row");
-  if (samples.cols()!=parameters.cols())
-    std::invalid_argument("samples.cols()!=parameters.cols()");
-}
-
-/**
  * Evaluate the PLF at the given parameter value.
  *
  * The result is stored in the first column of \a result.
@@ -97,7 +69,7 @@ void Plf::evaluate(const Matrix &tv, Matrix &result) const
  *
  * The \c Plf must represent a non-decreasing 1-D function (i.e. 
  * \c dim()==1 and samps()(i)<=samps()(i+1) for 
- * \c i=0,...,nsamps()-2 ).
+ * \c i=0,...,ncp()-2 ).
  *
  * If the function is not strictly increasing, then a number in \a tv may 
  * not have a unique preimage.  In this case, the rightmost preimage is used.
@@ -105,7 +77,7 @@ void Plf::evaluate(const Matrix &tv, Matrix &result) const
  * The numbers in \a tv must be sorted in non-decreasing order, and 
  * must lie between the first and last elements of \c samps(), provided 
  * that this \c Plf is non-empty.  If this \c Plf is empty (i.e. 
- * nsamps()==0), then this routine will return immediately and 
+ * ncp()==0), then this routine will return immediately and 
  * \a result will be left unchanged.
  *
  * The matrix \a result must be the same size as \a tv.
@@ -126,7 +98,7 @@ void Plf::preimages(const Matrix &tv, Matrix &result) const
     std::invalid_argument("tv and result must have the same size");
   
   // Do nothing if this PLF is the empty map, or if tv is empty
-  if (nsamps()==0) return;
+  if (ncp()==0) return;
   if (tv.size()==0) return;
 
   srvf::interp::interp_linear(params(), samps(), tv, result);
@@ -243,7 +215,7 @@ Plf composition(const Plf &F1, const Plf &F2)
   if (F2.dim()!=1)
     throw std::invalid_argument("F2 must be 1-dimensional");
   
-  Matrix T1pi(1,F1.nsamps());
+  Matrix T1pi(1,F1.ncp());
   F2.preimages(F1.params(),T1pi);
   Matrix T=srvf::util::unique(F2.params(),T1pi);
 

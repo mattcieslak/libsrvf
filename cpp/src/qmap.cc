@@ -65,7 +65,8 @@ Srvf plf_to_srvf(const Plf &F)
 
 Plf srvf_to_plf(const Srvf &Q)
 {
-  
+  Plf dummy;
+  return dummy;
 }
 
 } // namespace srvf
