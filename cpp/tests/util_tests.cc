@@ -8,12 +8,11 @@ BOOST_AUTO_TEST_SUITE(util_tests)
 BOOST_AUTO_TEST_CASE(linspace_test1)
 {
   double expdata[]={ 0.0, 0.25, 0.5, 0.75, 1.0 };
-  srvf::Matrix A=srvf::util::linspace(0.0,1.0,5);
-  BOOST_CHECK_EQUAL(A.rows(),1);
-  BOOST_CHECK_EQUAL(A.cols(),5);
-  for (int i=0; i<5; ++i)
+  std::vector<double> A=srvf::util::linspace(0.0,1.0,5);
+  BOOST_CHECK_EQUAL(A.size(),5);
+  for (size_t i=0; i<5; ++i)
   {
-    BOOST_CHECK_EQUAL(A(i),expdata[i]);
+    BOOST_CHECK_EQUAL(A[i],expdata[i]);
   }
 }
 
@@ -22,48 +21,56 @@ BOOST_AUTO_TEST_CASE(unique_test1)
   double v1_data[]={ 0.67, 0.23, 0.9, 0.42 };
   double v2_data[]={ 1.0, 0.0, 0.23, 0.89999, 0.4200001, 0.67  };
   double exp_data[]={ 0.0, 0.23, 0.42, 0.4200001, 0.67, 0.89999, 0.9, 1.0 };
-  int nv1=sizeof(v1_data)/sizeof(double);
-  int nv2=sizeof(v2_data)/sizeof(double);
-  int nexp=sizeof(exp_data)/sizeof(double);
-  srvf::Matrix v1(1,nv1,v1_data);
-  srvf::Matrix v2(1,nv2,v2_data);
-  srvf::Matrix v=srvf::util::unique(v1,v2);
+  size_t nv1=sizeof(v1_data)/sizeof(double);
+  size_t nv2=sizeof(v2_data)/sizeof(double);
+  size_t nexp=sizeof(exp_data)/sizeof(double);
+  std::vector<double> v1(&v1_data[0], &v1_data[nv1]);
+  std::vector<double> v2(&v2_data[0], &v2_data[nv2]);
+  std::vector<double> v=srvf::util::unique(v1, v2, 1e-9);
   BOOST_REQUIRE_EQUAL(v.size(),nexp);
-  for (int i=0; i<v.size(); ++i)
+  for (size_t i=0; i<v.size(); ++i)
   {
-    BOOST_CHECK_CLOSE(v(i),exp_data[i],1e-9);
+    BOOST_CHECK_CLOSE(v[i], exp_data[i],1e-9);
   }
 }
 
 BOOST_AUTO_TEST_CASE(diff_test1)
 {
-  srvf::Matrix X(2,10,1.523);
-  srvf::Matrix dX=srvf::util::diff(X);
-  BOOST_REQUIRE_EQUAL(dX.rows(),2);
-  BOOST_REQUIRE_EQUAL(dX.cols(),9);
-  for (int i=0; i<dX.size(); ++i)
+  srvf::Matrix Xdata(10,2,1.523);
+  srvf::Pointset X(Xdata);
+  srvf::Pointset dX=srvf::util::diff(X);
+  BOOST_REQUIRE_EQUAL(dX.dim(),2);
+  BOOST_REQUIRE_EQUAL(dX.npts(),9);
+  for (size_t i=0; i<dX.npts(); ++i)
   {
-    BOOST_CHECK_CLOSE(dX(i),0.0,1e-9);
+    for (size_t j=0; j<dX.dim(); ++j)
+    {
+      BOOST_CHECK_CLOSE(dX(i,j),0.0,1e-9);
+    }
   }
 }
 
 BOOST_AUTO_TEST_CASE(diff_test2)
 {
-  srvf::Matrix X(3,11);
-  srvf::Matrix tv=srvf::util::linspace(0.0,1.0,11);
-  for (int i=0; i<3; ++i)
+  size_t dim=3, npts=11;
+  srvf::Pointset X(dim,npts);
+  std::vector<double> tv=srvf::util::linspace(0.0,1.0,npts);
+  for (size_t i=0; i<npts; ++i)
   {
-    for (int j=0; j<11; ++j)
+    for (size_t j=0; j<dim; ++j)
     {
-      X(i,j)=(double)j;
+      X(i,j)=(double)(i+j);
     }
   }
-  srvf::Matrix dX=srvf::util::diff(X,tv);
-  BOOST_REQUIRE_EQUAL(dX.rows(),3);
-  BOOST_REQUIRE_EQUAL(dX.cols(),10);
-  for (int i=0; i<dX.size(); ++i)
+  srvf::Pointset dX=srvf::util::diff(X,tv);
+  BOOST_REQUIRE_EQUAL(dX.dim(),3);
+  BOOST_REQUIRE_EQUAL(dX.npts(),10);
+  for (size_t i=0; i<dX.npts(); ++i)
   {
-    BOOST_CHECK_CLOSE(dX(i),10.0,1e-6);
+    for (size_t j=0; j<dX.dim(); ++j)
+    {
+      BOOST_CHECK_CLOSE(dX(i,j),10.0,1e-6);
+    }
   }
 }
 

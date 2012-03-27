@@ -20,6 +20,7 @@
 #define SRVF_MATRIX_H 1
 
 #include <vector>
+#include <cmath>
 
 namespace srvf
 {
@@ -68,6 +69,30 @@ public:
   /** Returns the total number of entries in this \c Matrix. */
   size_t size() const 
   { return rows_*cols_; }
+
+  /** 
+   * Equality test.
+   *
+   * Returns true if and only if \a X is a \c Matrix having the same 
+   * dimensions as this \c Matrix, with all corresponding entries equal.
+   *
+   * Elements are considered equal if they differ by less than \a thresh.
+   */
+  bool equals(const Matrix &X, double thresh=1e-9) const 
+  {
+    if (X.rows() != rows() || X.cols() != cols()) return false;
+    for (size_t i=0; i<rows(); ++i)
+    {
+      for (size_t j=0; j<cols(); ++j)
+      {
+        if ( fabs((*this)(i,j) - X(i,j)) >= thresh )
+        {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
 
   void clear();
   void resize(size_t rows, size_t cols);
