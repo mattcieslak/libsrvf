@@ -38,26 +38,24 @@ namespace srvf
  * \param result a \c Matrix with at least \c this->dim() rows, which 
  *   will receive the result.
  */
-void Srvf::evaluate(double t, Matrix &result) const
+void Srvf::evaluate(double t, Pointset &result) const
 {
-  Matrix tv(1, 1, &t);
+  std::vector<double> tv(1, t);
   evaluate(tv, result);
 }
 
 /**
  * Evaluate this \c Srvf at one or more points.
  *
- * The matrix \a tv must be a \c 1xN matrix whose entries are sorted 
- * in non-decreasing order.
+ * The \a tv must be sorted in non-decreasing order.
  *
- * The result will be stored in \a result, which must have at least 
- * \c this->dim() rows and at least \c tv.cols() columns.
+ * The result will be stored in \a result, which must have the correct 
+ * dimension and at least \c tv.size() points.
  *
  * \param tv the parameter values at which the function will be evaluated
- * \param result a \c Matrix with at least \c this->dim() rows, and 
- *   \c tv.cols() columns, which will receive the result.
+ * \param result receives result
  */
-void Srvf::evaluate(const Matrix &tv, Matrix &result) const
+void Srvf::evaluate(const std::vector<double> &tv, Pointset &result) const
 {
   srvf::interp::interp_const(samps(), params(), tv, result);
 }
@@ -69,7 +67,7 @@ void Srvf::evaluate(const Matrix &tv, Matrix &result) const
  */
 void Srvf::rotate(const Matrix &R)
 {
-  samps_ = product(R, samps_);
+  samps_.rotate(R);
 }
 
 /**
@@ -79,7 +77,7 @@ void Srvf::rotate(const Matrix &R)
  */
 void Srvf::scale(double sf)
 {
-  samps_ *= sf;
+  samps_.scale(sf);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -98,15 +96,15 @@ void Srvf::scale(double sf)
 double l2_norm(const Srvf &Q)
 {
   double res=0.0;
-  for (int i=0; i<Q.ncp()-1; ++i)
+  for (size_t i=0; i<Q.ncp()-1; ++i)
   {
     double nqi=0.0;
-    for (int j=0; j<Q.dim(); ++j)
+    for (size_t j=0; j<Q.dim(); ++j)
     {
-      double x=Q.samps()(j,i);
+      double x=Q.samps()(i,j);
       nqi += x*x;
     }
-    double dt = Q.params()(i+1)-Q.params()(i);
+    double dt = Q.params()[i+1]-Q.params()[i];
     res += nqi * dt;
   }
   return sqrt(res);
@@ -133,29 +131,29 @@ double l2_product(const Srvf &Q1, const Srvf &Q2)
 {
   if (Q1.ncp()<2 || Q2.ncp()<2) return 0.0;
 
-  double Q1a=Q1.params()(0), Q1b=Q1.params()(Q1.ncp()-1);
-  double Q2a=Q2.params()(0), Q2b=Q2.params()(Q2.ncp()-1);
+  double Q1a=Q1.params()[0], Q1b=Q1.params()[Q1.ncp()-1];
+  double Q2a=Q2.params()[0], Q2b=Q2.params()[Q2.ncp()-1];
 
   if (Q1.dim()!=Q2.dim())
-    std::invalid_argument("Q1 and Q2 must have the same dimension");
+    throw std::invalid_argument("Q1 and Q2 must have the same dimension");
   if (fabs(Q1a-Q2a)>1e-4 || fabs(Q1b-Q2b)>1e-4)
-    std::invalid_argument("Q1 and Q2 must have the same domain");
+    throw std::invalid_argument("Q1 and Q2 must have the same domain");
 
-  int dim=Q1.dim();
+  size_t dim=Q1.dim();
   double tlast=(Q1a<Q2a ? Q1a : Q2a);
-  int i1=0, i2=0;
+  size_t i1=0, i2=0;
   double res=0.0;
 
   while ((i1<Q1.ncp()-1) && (i2<Q2.ncp()-1))
   {
     double ipi=0.0;
-    for (int j=0; j<dim; ++j)
+    for (size_t j=0; j<dim; ++j)
     {
-      ipi += Q1.samps()(j,i1)*Q2.samps()(j,i2);
+      ipi += Q1.samps()(i1,j)*Q2.samps()(i2,j);
     }
 
-    double tnext1=Q1.params()(i1+1);
-    double tnext2=Q2.params()(i2+1);
+    double tnext1=Q1.params()[i1+1];
+    double tnext2=Q2.params()[i2+1];
     double dt;
     if (tnext1<tnext2)
     {
@@ -196,30 +194,30 @@ double l2_distance(const Srvf &Q1, const Srvf &Q2)
   // TODO: refactor (this is basically the same thing as l2_product())
   if (Q1.ncp()<2 || Q2.ncp()<2) return 0.0;
 
-  double Q1a=Q1.params()(0), Q1b=Q1.params()(Q1.ncp()-1);
-  double Q2a=Q2.params()(0), Q2b=Q2.params()(Q2.ncp()-1);
+  double Q1a=Q1.params()[0], Q1b=Q1.params()[Q1.ncp()-1];
+  double Q2a=Q2.params()[0], Q2b=Q2.params()[Q2.ncp()-1];
 
   if (Q1.dim()!=Q2.dim())
-    std::invalid_argument("Q1 and Q2 must have the same dimension");
+    throw std::invalid_argument("Q1 and Q2 must have the same dimension");
   if (fabs(Q1a-Q2a)>1e-4 || fabs(Q1b-Q2b)>1e-4)
-    std::invalid_argument("Q1 and Q2 must have the same domain");
+    throw std::invalid_argument("Q1 and Q2 must have the same domain");
 
-  int dim=Q1.dim();
+  size_t dim=Q1.dim();
   double tlast=(Q1a<Q2a ? Q1a : Q2a);
-  int i1=0, i2=0;
+  size_t i1=0, i2=0;
   double res=0.0;
 
   while ((i1<Q1.ncp()-1) && (i2<Q2.ncp()-1))
   {
     double ipi=0.0;
-    for (int j=0; j<dim; ++j)
+    for (size_t j=0; j<dim; ++j)
     {
-      double dqi = Q1.samps()(j,i1)-Q2.samps()(j,i2);
+      double dqi = Q1.samps()(i1,j)-Q2.samps()(i2,j);
       ipi += dqi*dqi;
     }
 
-    double tnext1=Q1.params()(i1+1);
-    double tnext2=Q2.params()(i2+1);
+    double tnext1=Q1.params()[i1+1];
+    double tnext2=Q2.params()[i2+1];
     double dt;
     if (tnext1<tnext2)
     {
@@ -303,46 +301,49 @@ Srvf linear_combination(const Srvf &Q1, const Srvf &Q2,
 {
   if ((fabs(Q1.domain_lb()-Q2.domain_lb()) > 1e-6) ||
       (fabs(Q1.domain_ub()-Q2.domain_ub()) > 1e-6) )
-  { std::invalid_argument("Q1 and Q2 must have the same domain."); }
+  { throw std::invalid_argument("Q1 and Q2 must have the same domain."); }
   if (Q1.dim() != Q2.dim())
-  { std::invalid_argument("Q1 and Q2 must have the same dimension."); }
+  { throw std::invalid_argument("Q1 and Q2 must have the same dimension."); }
 
 
   if (Q1.is_empty())
   {
     Srvf res(Q2);
-    res.samps() *= w2;
+    res.samps().scale(w2);
     return res;
   }
   else if (Q2.is_empty())
   {
     Srvf res(Q1);
-    res.samps() *= w1;
+    res.samps().scale(w1);
     return res;
   }
   else
   {
     // Get new changepoints
-    Matrix params=srvf::util::unique(Q1.params(), Q2.params());
-    int dim=Q1.dim();
-    int ncp=params.cols();
+    std::vector<double> params=srvf::util::unique(Q1.params(), Q2.params());
+    size_t dim=Q1.dim();
+    size_t ncp=params.size();
 
     // Evaluate Q1 and Q2 at the midpoint of each interval
-    Matrix samps1(dim, ncp-1);
-    Matrix samps2(dim, ncp-1);
-    Matrix tv(1,ncp-1);
-    for (int i=0; i<ncp-1; ++i)
+    Pointset samps1(dim, ncp-1);
+    Pointset samps2(dim, ncp-1);
+    std::vector<double> tv(ncp-1);
+    for (size_t i=0; i<ncp-1; ++i)
     {
-      tv(i) = 0.5*(params(i) + params(i+1));
+      tv[i] = 0.5*(params[i] + params[i+1]);
     }
     Q1.evaluate(tv, samps1);
     Q2.evaluate(tv, samps2);
 
     // New samps is linear combination of samps1 and samps2
-    samps1 *= w1;
-    samps2 *= w2;
-    Srvf res(samps1 + samps2, params);
-    return res;
+    Pointset samps(dim, ncp-1);
+    for (size_t i=0; i<ncp-1; ++i)
+    {
+      weighted_sum(samps1,samps2,i,i,w1,w2,samps,i);
+    }
+
+    return Srvf(samps, params);
   }
 }
 
@@ -359,15 +360,15 @@ Srvf linear_combination(const Srvf &Q1, const Srvf &Q2,
  * \param tv a \c Matrix containing the new changepoint parameters
  * \return a new \c Srvf representing the specified refinement of \a Q
  */
-Srvf refinement(const Srvf &Q, const Matrix &new_params)
+Srvf refinement(const Srvf &Q, const std::vector<double> &new_params)
 {
-  Matrix params=srvf::util::unique(Q.params(), new_params);
-  Matrix tv(1,params.cols()-1);
-  for (int i=0; i<tv.size(); ++i)
+  std::vector<double> params=srvf::util::unique(Q.params(), new_params);
+  std::vector<double> tv(params.size()-1);
+  for (size_t i=0; i<tv.size(); ++i)
   {
-    tv(i) = 0.5*(params(i)+params(i+1));
+    tv[i] = 0.5*(params[i]+params[i+1]);
   }
-  Matrix samps(Q.dim(),tv.size());
+  Pointset samps(Q.dim(),tv.size());
   Q.evaluate(tv,samps);
 
   return Srvf(samps,params);
@@ -389,27 +390,29 @@ Srvf refinement(const Srvf &Q, const Matrix &new_params)
 Srvf gamma_action(const Srvf &Q, const Plf &gamma)
 {
   if (gamma.dim() != 1)
-  { std::invalid_argument("gamma must be 1-dimensional"); }
-  if ((gamma.samps()(0) < Q.domain_lb()-1e-6) ||
-      (gamma.samps()(gamma.ncp()-1) > Q.domain_ub()+1e-6))
-  { std::invalid_argument("Range of gamma must be contained in domain of Q"); }
+  { throw std::invalid_argument("gamma must be 1-dimensional"); }
 
-  Matrix xparams(1,Q.ncp());
+  if ((gamma.samps()(0,0) < Q.domain_lb()-1e-6) ||
+      (gamma.samps()(gamma.ncp()-1,0) > Q.domain_ub()+1e-6))
+  { throw std::invalid_argument(
+      "Range of gamma must be contained in domain of Q"); }
+
+  std::vector<double> xparams(Q.ncp());
   gamma.preimages(Q.params(),xparams);
-  Matrix params = srvf::util::unique(gamma.params(),xparams);
-  Srvf Qr = refinement(Q,gamma.samps());
-  Matrix samps(Qr.samps());
+  std::vector<double> params = srvf::util::unique(gamma.params(),xparams);
+  Srvf Qr = refinement(Q,gamma.samps().to_vector());
+  Pointset samps(Qr.samps());
 
-  int dim=Q.dim();
-  int ncp=params.cols();
-  for (int i=0; i<ncp-1; ++i)
+  size_t dim=Q.dim();
+  size_t ncp=params.size();
+  for (size_t i=0; i<ncp-1; ++i)
   {
-    double gdi = (Qr.params()(i+1)-Qr.params()(i)) / (params(i+1)-params(i));
+    double gdi = (Qr.params()[i+1]-Qr.params()[i]) / (params[i+1]-params[i]);
     double rgdi = sqrt(gdi);
     
-    for (int j=0; j<dim; ++j)
+    for (size_t j=0; j<dim; ++j)
     {
-      samps(j,i) *= rgdi;
+      samps(i,j) *= rgdi;
     }
   }
 

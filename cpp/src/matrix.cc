@@ -16,31 +16,43 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
+#include <vector>
+#include <cstring>
 #include <stdexcept>
 
 #include "matrix.h"
 
+static const size_t SIZE_MAX_ = (size_t)-1;
+
 namespace srvf{
 
 #define __ELEMENTWISE_OP(A,B,C,op) \
-  int nc=(A).size(); \
-  for (int i=0; i<nc; ++i) { \
+  size_t nc=(A).size(); \
+  for (size_t i=0; i<nc; ++i) { \
     (A)(i) = (B)(i) op (C)(i); \
   }
 
 #define __SCALAR_OP(A,B,v,op) \
-  int nc=(A).size(); \
-  for (int i=0; i<nc; ++i) { \
+  size_t nc=(A).size(); \
+  for (size_t i=0; i<nc; ++i) { \
     (A)(i) = (B)(i) op (v); \
   }
   
-#define __MATRIX_MUL(A,B,C) \
-  for (int i=0; i<(B).rows(); ++i) { \
-    for (int j=0; j<(C).cols(); ++j) { \
-      (A)(i,j)=0.0; \
-      for (int k=0; k<(B).cols(); ++k) { \
-        (A)(i,j) += (B)(i,k)*(C)(k,j); \
+#define __MATRIX_MUL(R,A,B) \
+  for (size_t i=0; i<(A).rows(); ++i) { \
+    for (size_t j=0; j<(B).cols(); ++j) { \
+      (R)(i,j)=0.0; \
+      for (size_t k=0; k<(A).cols(); ++k) { \
+        (R)(i,j) += (A)(i,k)*(B)(k,j); \
   } } } \
+
+
+/** 
+ * Creates an empty \c Matrix. 
+ */
+Matrix::Matrix () 
+ : data_(NULL), rows_(0), cols_(0) 
+{ }
 
 /**
  * Create a new \c Matrix with the specified size.
@@ -48,34 +60,49 @@ namespace srvf{
  * \param rows
  * \param cols
  */
-Matrix::Matrix (int rows, int cols)
-  : data_(0), rows_(rows), cols_(cols)
+Matrix::Matrix (size_t rows, size_t cols)
+  : data_(NULL), rows_(rows), cols_(cols)
 {
-  if (rows<0) throw std::invalid_argument("rows < 0");
-  if (cols<0) throw std::invalid_argument("cols < 0");
-  if (rows*cols<0) throw std::overflow_error("rows*cols<0");
+  if (rows>0 && cols>0)
+  {
+    if (rows > SIZE_MAX_/cols)
+      throw std::overflow_error("rows*cols exceeds SIZE_MAX");
 
-  data_ = new double[rows*cols];
+    data_ = new double[rows*cols];
+  }
+  else
+  {
+    rows_=0;
+    cols_=0;
+  }
 }
 
 /**
- * Create a new \c Matrix with the specified size, with all elements 
+ * Create a new \c Matrix with the specified size, with all entries 
  * set to the given value.
  *
  * \param rows
  * \param cols
  * \param val
  */
-Matrix::Matrix (int rows, int cols, double val)
-  : data_(0), rows_(rows), cols_(cols)
+Matrix::Matrix (size_t rows, size_t cols, double val)
+  : data_(NULL), rows_(rows), cols_(cols)
 {
-  if (rows<0) throw std::invalid_argument("rows < 0");
-  if (cols<0) throw std::invalid_argument("cols < 0");
-  if (rows*cols<0) throw std::overflow_error("rows*cols<0");
+  if (rows>0 && cols>0)
+  {
+    if (rows > SIZE_MAX_/cols)
+      throw std::overflow_error("rows*cols exceeds SIZE_MAX");
 
-  data_ = new double[rows*cols];
-  for (int i=0; i<rows*cols; ++i)
-    data_[i]=val;
+    size_t alloc_size=rows*cols;
+    data_ = new double[alloc_size];
+    for (size_t i=0; i<alloc_size; ++i)
+      data_[i]=val;
+  }
+  else
+  {
+    rows_=0;
+    cols_=0;
+  }
 }
 
 /**
@@ -86,20 +113,88 @@ Matrix::Matrix (int rows, int cols, double val)
  * \param rows
  * \param cols
  * \param data pointer to a \c (rows)x(cols) array of \c doubles
+ * \param layout \c ROW_MAJOR if \a data is in row major order, otherwise 
+ *        \c COLUMN_MAJOR.  Default is \c ROW_MAJOR.
  */
-Matrix::Matrix (int rows, int cols, double *data)
-  : data_((double*)0), rows_(rows), cols_(cols)
+Matrix::Matrix (size_t rows, size_t cols, const double *data, Majorness layout)
+  : data_(NULL), rows_(rows), cols_(cols)
 {
-  if (rows<0) throw std::invalid_argument("rows < 0");
-  if (cols<0) throw std::invalid_argument("cols < 0");
-  int nc=rows*cols;
-  if (nc<0) throw std::overflow_error("rows*cols<0");
-  if (!data) throw std::invalid_argument("data is null");
-  
-  data_=new double[nc];
-  for (int i=0; i<nc; ++i)
+  if (rows>0 && cols>0)
   {
-    data_[i]=data[i];
+    if (!data) 
+      throw std::invalid_argument("data is null");
+    if (rows > SIZE_MAX_/cols)
+      throw std::overflow_error("rows*cols exceeds max element count");
+
+    size_t alloc_size=rows*cols;
+    data_=new double[alloc_size];
+    if (layout==ROW_MAJOR)
+    {
+      memcpy(data_, data, alloc_size*sizeof(double));
+    }
+    else
+    {
+      for (size_t i=0; i<rows; ++i)
+      {
+        for (size_t j=0; j<cols; ++j)
+        {
+          data_[i*cols+j]=data[j*rows+i];
+        }
+      }
+    }
+  }
+  else
+  {
+    rows_=0;
+    cols_=0;
+  }
+}
+
+/**
+ * Create a new \c Matrix initialized with the given data.
+ *
+ * A deep copy of the data is made.
+ *
+ * \param rows
+ * \param cols
+ * \param data a \c vector containing the data
+ * \param layout \c ROW_MAJOR if \a data is in row major order, otherwise 
+ *        \c COLUMN_MAJOR.  Default is \c ROW_MAJOR.
+ */
+Matrix::Matrix (size_t rows, size_t cols, const std::vector<double> &data, 
+                Majorness layout)
+  : data_(NULL), rows_(rows), cols_(cols)
+{
+  if (rows>0 && cols>0)
+  {
+    if (rows > SIZE_MAX_/cols)
+      throw std::overflow_error("rows*cols exceeds SIZE_MAX");
+
+    size_t alloc_size=rows*cols;
+    data_=new double[alloc_size];
+
+    if (layout==ROW_MAJOR)
+    {
+      for (size_t i=0; i<alloc_size; ++i)
+      {
+        data_[i]=data[i];
+      }
+    }
+    else
+    {
+      for (size_t i=0; i<rows; ++i)
+      {
+        for (size_t j=0; j<cols; ++j)
+        {
+          data_[i*cols+j]=data[j*rows+i];
+        }
+      }
+    }
+  }
+  else
+  {
+    rows_=0;
+    cols_=0;
   }
 }
 
@@ -111,11 +206,22 @@ Matrix::Matrix (int rows, int cols, double *data)
  * \param A
  */
 Matrix::Matrix (const Matrix &A)
-  : data_(0), rows_(A.rows_), cols_(A.cols_)
+  : data_(NULL), rows_(A.rows_), cols_(A.cols_)
 {
-  data_ = new double[rows_*cols_];
-  for (int i=0; i<rows_*cols_; ++i)
-    data_[i]=A.data_[i];
+  if (A.rows_>0 && A.cols_>0)
+  {
+    if (A.rows_ > SIZE_MAX_/A.cols_)
+      throw std::overflow_error("rows*cols exceeds SIZE_MAX");
+      
+    int alloc_size=A.rows_*A.cols_;
+    data_ = new double[alloc_size];
+    memcpy(data_, A.data_, alloc_size*sizeof(double));
+  }
+  else
+  {
+    rows_=0;
+    cols_=0;
+  }
 }
 
 /**
@@ -129,11 +235,17 @@ Matrix& Matrix::operator= (const Matrix &A)
 {
   if (this != &A)
   {
+    size_t alloc_size=A.size();
+    if (size() != alloc_size)
+    {
+      clear();
+      data_ = new double[alloc_size];
+    }
+
     rows_ = A.rows_;
     cols_ = A.cols_;
-    data_ = new double[rows_*cols_];
-    for (int i=0; i<rows_*cols_; ++i)
-      data_[i]=A.data_[i];
+
+    memcpy(data_, A.data_, alloc_size*sizeof(double));
   }
   return *this;
 }
@@ -144,9 +256,9 @@ Matrix& Matrix::operator= (const Matrix &A)
 void Matrix::clear()
 {
   delete[] data_;
+  data_=NULL;
   rows_=0;
   cols_=0;
-  data_=(double*)0;
 }
 
 /**
@@ -161,41 +273,40 @@ void Matrix::clear()
  * \param rows the new number of rows
  * \param cols the new number of columns
  */
-void Matrix::resize(int rows, int cols)
+void Matrix::resize(size_t rows, size_t cols)
 {
-  if (rows<0) throw std::invalid_argument("rows<0");
-  if (cols<0) throw std::invalid_argument("cols<0");
-  int new_size=rows*cols;
-  if (new_size<0) throw std::overflow_error("rows*cols<0");
-  if (new_size==0)
-  { clear(); return; }
-
-  if (rows!=rows_ || cols!=cols_)
+  if (rows==rows_ && cols==cols_)
   {
-    double *old_data=data_;
-    int old_cols=cols_;
-    int copy_rows=(rows<rows_ ? rows : rows_);
-    int copy_cols=(cols<cols_ ? cols : cols_);
+    return;
+  }
+  if (rows==0 || cols==0)
+  {
+    clear();
+    return;
+  }
 
-    data_=new double[new_size];
-    rows_=rows;
-    cols_=cols;
-    
-    for (int i=0; i<copy_rows; ++i)
+  if (rows > SIZE_MAX_/cols)
+    throw std::overflow_error("rows*cols exceeds max element count");
+
+  size_t new_size=rows*cols;
+
+  double *old_data=data_;
+  size_t old_cols=cols_;
+  size_t copy_rows=(rows<rows_ ? rows : rows_);
+  size_t copy_cols=(cols<cols_ ? cols : cols_);
+
+  data_=new double[new_size];
+  rows_=rows;
+  cols_=cols;
+  
+  for (size_t i=0; i<copy_rows; ++i)
+  {
+    for (size_t j=0; j<copy_cols; ++j)
     {
-      for (int j=0; j<copy_cols; ++j)
-      {
-        data_[i*cols_+j]=old_data[i*old_cols+j];
-      }
+      data_[i*cols_+j]=old_data[i*old_cols+j];
     }
-    delete[] old_data;
   }
-  else
-  {
-    data_=new double[new_size];
-    rows_=rows;
-    cols_=cols;
-  }
+  delete[] old_data;
 }
 
 /**
@@ -207,7 +318,7 @@ void Matrix::resize(int rows, int cols)
 Matrix& Matrix::operator+= (const Matrix &A)
 {
   if (rows_!=A.rows_ || cols_!=A.cols_)
-    std::invalid_argument("size mismatch");
+    throw std::invalid_argument("size mismatch");
 
   __ELEMENTWISE_OP(*this,*this,A,+);
   return *this;
@@ -222,7 +333,7 @@ Matrix& Matrix::operator+= (const Matrix &A)
 Matrix& Matrix::operator-= (const Matrix &A)
 {
   if (rows_!=A.rows_ || cols_!=A.cols_)
-    std::invalid_argument("size mismatch");
+    throw std::invalid_argument("size mismatch");
 
   __ELEMENTWISE_OP(*this,*this,A,-);
   return *this;
@@ -237,7 +348,7 @@ Matrix& Matrix::operator-= (const Matrix &A)
 Matrix& Matrix::operator*= (const Matrix &A)
 {
   if (rows_!=A.rows_ || cols_!=A.cols_)
-    std::invalid_argument("size mismatch");
+    throw std::invalid_argument("size mismatch");
 
   __ELEMENTWISE_OP(*this,*this,A,*);
   return *this;
@@ -252,7 +363,7 @@ Matrix& Matrix::operator*= (const Matrix &A)
 Matrix& Matrix::operator/= (const Matrix &A)
 {
   if (rows_!=A.rows_ || cols_!=A.cols_)
-    std::invalid_argument("size mismatch");
+    throw std::invalid_argument("size mismatch");
 
   __ELEMENTWISE_OP(*this,*this,A,/);
   return *this;
@@ -316,7 +427,7 @@ Matrix& Matrix::operator/= (double v)
 Matrix operator+ (const Matrix &A, const Matrix &B)
 {
   if (A.rows()!=B.rows() || A.cols()!=B.cols())
-    std::invalid_argument("size mismatch");
+    throw std::invalid_argument("size mismatch");
 
   Matrix R(A.rows(),A.cols());
   __ELEMENTWISE_OP(R,A,B,+);
@@ -333,7 +444,7 @@ Matrix operator+ (const Matrix &A, const Matrix &B)
 Matrix operator- (const Matrix &A, const Matrix &B)
 {
   if (A.rows()!=B.rows() || A.cols()!=B.cols())
-    std::invalid_argument("size mismatch");
+    throw std::invalid_argument("size mismatch");
 
   Matrix R(A.rows(),A.cols());
   __ELEMENTWISE_OP(R,A,B,-);
@@ -350,7 +461,7 @@ Matrix operator- (const Matrix &A, const Matrix &B)
 Matrix operator* (const Matrix &A, const Matrix &B)
 {
   if (A.rows()!=B.rows() || A.cols()!=B.cols())
-    std::invalid_argument("size mismatch");
+    throw std::invalid_argument("size mismatch");
 
   Matrix R(A.rows(),A.cols());
   __ELEMENTWISE_OP(R,A,B,*);
@@ -367,7 +478,7 @@ Matrix operator* (const Matrix &A, const Matrix &B)
 Matrix operator/ (const Matrix &A, const Matrix &B)
 {
   if (A.rows()!=B.rows() || A.cols()!=B.cols())
-    std::invalid_argument("size mismatch");
+    throw std::invalid_argument("size mismatch");
 
   Matrix R(A.rows(),A.cols());
   __ELEMENTWISE_OP(R,A,B,/);
@@ -428,12 +539,15 @@ Matrix operator/ (const Matrix &A, double v)
  * Matrix product of two matrices.
  *
  * \param A
+ * \param At \c true to multiply by the transpose of \a A
  * \param B
- * \return a new \c Matrix representing the matrix product \c AB
+ * \param Bt \c true to multiply by the transpose of \a B
+ * \return a new \c Matrix representing the matrix product
  */
 Matrix product(const Matrix &A, const Matrix &B)
 {
-  if (A.cols()!=B.rows()) std::invalid_argument("size mismatch");
+  if (A.cols() != B.rows()) 
+    throw std::invalid_argument("size mismatch");
 
   Matrix R(A.rows(),B.cols());
   __MATRIX_MUL(R,A,B);
@@ -449,9 +563,9 @@ Matrix product(const Matrix &A, const Matrix &B)
 Matrix transpose(const Matrix &A)
 {
   Matrix At(A.cols(),A.rows());
-  for (int i=0; i<A.rows(); ++i)
+  for (size_t i=0; i<A.rows(); ++i)
   {
-    for (int j=0; j<A.cols(); ++j)
+    for (size_t j=0; j<A.cols(); ++j)
     {
       At(j,i)=A(i,j);
     }

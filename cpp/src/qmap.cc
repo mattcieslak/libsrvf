@@ -21,6 +21,7 @@
 #include "util.h"
 #include "plf.h"
 #include "srvf.h"
+#include "pointset.h"
 
 namespace srvf
 {
@@ -34,27 +35,19 @@ namespace srvf
  */
 Srvf plf_to_srvf(const Plf &F)
 {
-  Matrix dF=srvf::util::diff(F.samps(),F.params());
-  for (int i=0; i<dF.cols(); ++i)
+  Pointset dF=srvf::util::diff(F.samps(),F.params());
+  for (size_t i=0; i<dF.npts(); ++i)
   {
-    double nqi=0.0;
-    for (int j=0; j<dF.rows(); ++j)
+    double rnqi=sqrt(dF.norm(i));
+    if (rnqi>1e-6)
     {
-      nqi+=dF(j,i)*dF(j,i);
-    }
-    nqi=sqrt(sqrt(nqi));
-    if (nqi>1e-6)
-    {
-      for (int j=0; j<dF.rows(); ++j)
-      {
-        dF(j,i)/=nqi;
-      }
+      dF.scale(i,1.0/rnqi);
     }
     else
     {
-      for (int j=0; j<dF.rows(); ++j)
+      for (size_t j=0; j<dF.dim(); ++j)
       {
-        dF(j,i)=0.0;
+        dF(i,j)=0.0;
       }
     }
   }

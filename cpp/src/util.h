@@ -19,6 +19,8 @@
 #ifndef SRVF_UTIL_H
 #define SRVF_UTIL_H 1
 
+#include <vector>
+#include "pointset.h"
 #include "matrix.h"
 
 namespace srvf
@@ -27,10 +29,14 @@ namespace srvf
 namespace util
 {
 
-Matrix linspace(double a, double b, int n);
-Matrix unique(Matrix v1, Matrix v2);
-Matrix diff(const Matrix &X);
-Matrix diff(const Matrix &X, const Matrix &tv);
+std::vector<double> 
+linspace(double a, double b, size_t n);
+
+std::vector<double> 
+unique (std::vector<double> v1, std::vector<double> v2, double thresh=1e-6);
+
+Pointset diff(const Pointset &X);
+Pointset diff(const Pointset &X, const std::vector<double> &tv);
 
 } // namespace srvf::util
 

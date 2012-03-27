@@ -21,6 +21,7 @@
 
 #include <stdexcept>
 
+#include "pointset.h"
 #include "matrix.h"
 #include "util.h"
 
@@ -53,10 +54,10 @@ public:
    * Changepoint parameters will be uniformly spaced from 0 to 1.
    * \param samples the sample points (will be deep-copied)
    */
-  Srvf(const Matrix &samples)
+  Srvf(const Pointset &samples)
    : samps_(samples)
   { 
-    params_=srvf::util::linspace(0.0, 1.0, samples.cols()+1);
+    params_=srvf::util::linspace(0.0, 1.0, samples.npts()+1);
   }
 
   /**
@@ -67,11 +68,11 @@ public:
    * \param params the changepoint parameters (will be deep-copied).  Must 
    *        be a \c 1xN \c Matrix, where \c N=samples().cols()+1.
    */
-  Srvf(const Matrix &samples, const Matrix &parameters)
+  Srvf(const Pointset &samples, const std::vector<double> &parameters)
    : samps_(samples), params_(parameters)
   {
-    if ((parameters.rows()!=1) || (parameters.cols()!=samples.cols()+1))
-      std::invalid_argument("parameters has bad size");
+    if (parameters.size() != samples.npts()+1)
+      throw std::invalid_argument("parameters has bad size");
   }
 
   /**
@@ -100,37 +101,37 @@ public:
     return *this;
   }
 
-  void evaluate(double t, Matrix &result) const;
-  void evaluate(const Matrix &tv, Matrix &result) const;
+  void evaluate(double t, Pointset &result) const;
+  void evaluate(const std::vector<double> &tv, Pointset &result) const;
 
-  /** Returns a reference to the samples matrix. */
-  Matrix &samps() { return samps_; }
+  /** Returns a reference to the samples. */
+  Pointset &samps() { return samps_; }
 
-  /** Returns a reference to the samples matrix. */
-  const Matrix &samps() const { return samps_; }
+  /** Returns a reference to the samples. */
+  const Pointset &samps() const { return samps_; }
 
-  /** Returns a reference to the parameter matrix. */
-  Matrix &params() { return params_; }
+  /** Returns a reference to the parameters. */
+  std::vector<double> &params() { return params_; }
 
-  /** Returns a reference to the parameter matrix. */
-  const Matrix &params() const { return params_; }
+  /** Returns a reference to the parameters. */
+  const std::vector<double> &params() const { return params_; }
 
   /** Returns the dimension of the ambient space. */
-  int dim() const { return samps_.rows(); }
+  size_t dim() const { return samps_.dim(); }
 
   /** Returns the number of change points. */
-  int ncp() const { return params_.cols(); }
+  size_t ncp() const { return params_.size(); }
 
   /** Does this \c Srvf represent the empty map? */
   bool is_empty() const { return ncp()<2; }
 
   /** Returns the left endpoint of the domain interval. */
   double domain_lb() const 
-  { return (params_.size()>0 ? params_(0) : 0.0); };
+  { return (params_.size()>0 ? params_[0] : 0.0); };
 
   /** Returns the right endpoint of the domain interval. */
   double domain_ub() const 
-  { return (params_.size()>0 ? params_(params_.cols()-1) : 0.0); };
+  { return (params_.size()>0 ? params_[params_.size()-1] : 0.0); };
 
   void rotate(const Matrix &R);
   void scale(double sf);
@@ -141,12 +142,12 @@ public:
   friend double sphere_distance(const Srvf &Q1, const Srvf &Q2);
   friend Srvf   linear_combination(const Srvf &Q1, const Srvf &Q2, 
                   double w1, double w2);
-  friend Srvf   refinement(const Srvf &Q, const Matrix &tv);
+  friend Srvf   refinement(const Srvf &Q, const std::vector<double> &tv);
   friend Srvf   gamma_action(const Srvf &Q, const Plf &gamma);
 
 private:
-  Matrix samps_;
-  Matrix params_;
+  Pointset samps_;
+  std::vector<double> params_;
 };
 
 double l2_norm(const Srvf &Q);
@@ -155,7 +156,7 @@ double l2_distance(const Srvf &Q1, const Srvf &Q2);
 double sphere_distance(const Srvf &Q1, const Srvf &Q2);
 Srvf   linear_combination(const Srvf &Q1, const Srvf &Q2, 
          double w1, double w2);
-Srvf   refinement(const Srvf &Q, const Matrix &tv);
+Srvf   refinement(const Srvf &Q, const std::vector<double> &tv);
 Srvf   gamma_action(const Srvf &Q, const Plf &gamma);
 
 } // namespace srvf

@@ -28,92 +28,82 @@ namespace srvf
 namespace util
 {
 
-Matrix linspace(double a, double b, int n)
+std::vector<double> linspace(double a, double b, size_t n)
 {
-  if (n<0) std::invalid_argument("n<0");
-
-  Matrix R(1,n);
+  std::vector<double> R(n);
   if (n>1)
   {
-    R(0)=a;
+    R[0]=a;
     double dt=(b-a)/(double)(n-1);
-    for (int i=1; i<n; ++i)
+    for (size_t i=1; i<n; ++i)
     {
-      R(i)=R(i-1)+dt;
+      R[i]=R[i-1]+dt;
     }
   }
   else if (n>0)
   {
-    R(0)=a;
+    R[0]=a;
   }
   return R;
 }
 
 /**
- * Returns a new \c Matrix containing unique elements of \a v1 and \a v2, 
+ * Returns a new \c vector containing unique elements of \a v1 and \a v2, 
  * sorted in ascending order.
  *
- * The result will be a \c 1xN matrix, where \c N is the number of elements 
- * in the set-theoretic union of \c v1 and \c v2.
+ * The result will be a \c vector with \c N elements, where \c N is the 
+ * number of elements in the set-theoretic union of \c v1 and \c v2.
  *
  * For the purposes of this function, two \c doubles \c a and \c b are 
- * considered unique if \c fabs(a-b)>=1e-6 .
+ * considered unique if \c fabs(a-b)>=thresh.
  *
  * \param v1
  * \param v2
+ * \param thresh
  */
-Matrix unique(Matrix v1, Matrix v2)
+std::vector<double> unique (std::vector<double> v1, 
+                            std::vector<double> v2, 
+                            double thresh)
 {
-  int nv1=v1.size();
-  int nv2=v2.size();
-  double *buf = new double[nv1+nv2];
-  int bufsize=0;
-
-  std::sort(&(v1.data()[0]), &(v1.data()[nv1]));
-  std::sort(&(v2.data()[0]), &(v2.data()[nv2]));
+  std::vector<double> res;
+  std::sort(v1.begin(),v1.end());
+  std::sort(v2.begin(),v2.end());
   
-  int i1=0;
-  int i2=0;
-  while (i1<nv1 && i2<nv2)
+  size_t i1=0;
+  size_t i2=0;
+  while (i1<v1.size() && i2<v2.size())
   {
-    if (v1(i1) < v2(i2)-1e-9)
+    if (v1[i1] < v2[i2]-thresh)
     {
-      buf[bufsize++]=v1(i1++);
+      res.push_back(v1[i1++]);
     }
-    else if (v2(i2) < v1(i1)-1e-9)
+    else if (v2[i2] < v1[i1]-thresh)
     {
-      buf[bufsize++]=v2(i2++);
+      res.push_back(v2[i2++]);
     }
     else
     {
-      buf[bufsize++]=v1(i1++);
+      res.push_back(v1[i1++]);
       ++i2;
     }
   }
-  while (i1<nv1) buf[bufsize++]=v1(i1++);
-  while (i2<nv2) buf[bufsize++]=v2(i2++);
-
-  Matrix result(1,bufsize,buf);
-  delete[] buf;
-  return result;
+  while (i1<v1.size()) res.push_back(v1[i1++]);
+  while (i2<v2.size()) res.push_back(v2[i2++]);
+  return res;
 }
 
 /**
- * Compute the first-order differences of the columns of \a X.
+ * Compute the first-order differences of the points in \a X.
  *
- * \param X
- * \return a new \c Matrix containing the first differences of the columns 
- *   of \a X.
+ * \param X a \c Pointset
+ * \return a new \c Pointset containing the first-order differences of \a X
  */
-Matrix diff(const Matrix &X)
+Pointset diff(const Pointset &X)
 {
-  Matrix res(X.rows(),X.cols()-1);
-  for (int i=0; i<res.cols(); ++i)
+  Pointset res(X.dim(),X.npts()-1);
+  for (size_t i=0; i<res.npts(); ++i)
   {
-    for (int j=0; j<res.rows(); ++j)
-    {
-      res(j,i)=X(j,i+1)-X(j,i);
-    }
+    weighted_sum(X,X,i+1,i,1.0,-1.0,res,i);
   }
   return res;
 }
@@ -121,27 +111,21 @@ Matrix diff(const Matrix &X)
 /**
  * Forward difference approximation of first derivative.
  *
- * Equivalent to \c diff(X)./diff(tv)
- *
- * \param X
- * \param tv abscissae corresponding to the columns of \a X
- * \return a new \c Matrix containing the forward difference approximation
+ * \param X a \c Pointset
+ * \param tv abscissae corresponding to the points in \a X
+ * \return a new \c Pointset containing the forward difference approximation
  */
-Matrix diff(const Matrix &X, const Matrix &tv)
+Pointset diff(const Pointset &X, const std::vector<double> &tv)
 {
-  if (X.cols()!=tv.cols())
-    std::invalid_argument("X and tv must have the same length.");
-  if (tv.rows()!=1)
-    std::invalid_argument("tv must have 1 row");
+  if (X.npts()!=tv.size())
+    throw std::invalid_argument("X and tv must have the same length.");
 
-  Matrix res(X.rows(),X.cols()-1);
-  for (int i=0; i<res.cols(); ++i)
+  Pointset res(X.dim(),X.npts()-1);
+  for (size_t i=0; i<res.npts(); ++i)
   {
-    double dt=tv(i+1)-tv(i);
-    for (int j=0; j<res.rows(); ++j)
-    {
-      res(j,i)=(X(j,i+1)-X(j,i)) / dt;
-    }
+    double dt=tv[i+1]-tv[i];
+    weighted_sum(X,X,i+1,i,1.0,-1.0,res,i);
+    res.scale(i,1.0/dt);
   }
   return res;
 }

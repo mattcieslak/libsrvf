@@ -19,6 +19,7 @@
 #ifndef SRVF_INTERP_H
 #define SRVF_INTERP_H 1
 
+#include "pointset.h"
 #include "matrix.h"
 
 namespace srvf
@@ -34,23 +35,24 @@ namespace interp
  * Given a table of numbers \c table[0]<=table[1]<=...<=table[n-1] and 
  * a number t, returns the smallest integer \c idx such that 
  * \c table[idx]<=t<table[idx+1].  If \c t<table[0], then the result is 
- * \c -1, and if \c t>=table[n-1], then the result is \c n-1.
+ * \c 0, and if \c t>=table[n-1], then the result is \c n-1.
  *
- * \param table an array sorted in non-decreasing order
- * \param n the number of elements in \a table
+ * \param table a \c vector of \c n \c double's sorted in non-decreasing order
  * \param t the query
  * \result an index between \c -1 and \c n-1, inclusive
  */
-inline int lookup(const double *table, int n, double t)
+inline int lookup(const std::vector<double> &table, double t)
 {
-  if (n>1)
+  size_t n=table.size();
+
+  if (n>=2)
   {
-    if (t<table[0]) return -1;
+    if (t<table[0]) return 0;
     else if (t>=table[n-1]) return n-1;
     else
     {
-      int i1=0, i3=n-2;
-      int i2=(i1+i3)/2;
+      size_t i1=0, i3=n-2;
+      size_t i2=(i1+i3)/2;
       while(i1<i3)
       {
         if (t<table[i2]) i3=i2;
@@ -62,39 +64,44 @@ inline int lookup(const double *table, int n, double t)
       return i2;
     }
   }
-  else if (n==1)
-  {
-    return (t<table[0] ? -1 : 0);
-  }
   else
-    return -1;
+  {
+    return 0;
+  }
 }
 
 /**
- * Computes a weighted sum of a column of \a A with a column of \a B.
- *
- * The result is stored in column \a idx3 of the matrix \a R, which 
- * must have the same number of rows as \a A and \a B.
- *
- * \param A the first matrix
- * \param B the second matrix
- * \param idx1 column index for \a A
- * \param idx2 column index for \a B
- * \param w1 first weight
- * \param w2 second weight
- * \param R a matrix to receive the result
- * \param idx3 column index for \a R
+ * Lookup using 1-D \c Pointset as table.
  */
-inline void weighted_column_sum(const Matrix &A, const Matrix &B, 
-                                int idx1, int idx2, 
-                                double w1, double w2, 
-                                Matrix &R, int idx3)
+inline int lookup(const Pointset &table, double t)
 {
-  for (int i=0; i<A.rows(); ++i)
+  size_t n=table.npts();
+
+  if (n>=2)
   {
-    R(i,idx3) = w1*A(i,idx1) + w2*B(i,idx2);
+    if (t<table(0,0)) return 0;
+    else if (t>=table(n-1,0)) return n-1;
+    else
+    {
+      size_t i1=0, i3=n-2;
+      size_t i2=(i1+i3)/2;
+      while(i1<i3)
+      {
+        if (t<table(i2,0)) i3=i2;
+        else if (t>=table(i2+1,0)) i1=i2+1;
+        else break;
+
+        i2=(i1+i3)/2;
+      }
+      return i2;
+    }
+  }
+  else
+  {
+    return 0;
   }
 }
+
 
 /**
  * Linear interpolation.
@@ -108,32 +115,33 @@ inline void weighted_column_sum(const Matrix &A, const Matrix &B,
  * \param tv parameters at which to interpolated.  Must be non-decreasing.
  * \param result [output] a \c Matrix to hold the result
  */
-inline void interp_linear(const Matrix &samps, const Matrix &params, 
-                          const Matrix &tv, Matrix &result)
+inline void interp_linear(const Pointset &samps, 
+                          const std::vector<double> &params, 
+                          const std::vector<double> &tv, 
+                          Pointset &result)
 {
-  int idx=0;
-  if (params.cols()>1 && tv(0)>params(1))
+  size_t idx=0;
+  if (params.size()>1 && tv[0]>params[1])
   {
-    idx=lookup(params.data(), params.cols(), tv(0));
-    if (idx<0) idx=0;
+    idx=lookup(params, tv[0]);
   }
 
-  for (int i=0; i<tv.cols(); ++i)
+  for (size_t i=0; i<tv.size(); ++i)
   {
-    double tvi=tv(i);
-    while (idx<params.cols()-1 && tvi>=params(idx+1)) 
+    double tvi=tv[i];
+    while (idx<params.size()-1 && tvi>=params[idx+1]) 
     {
       ++idx;
     }
-    if (tvi<params(idx))
+    if (tvi<params[idx])
     {
-      tvi=params(idx);
+      tvi=params[idx];
     }
 
-    if (idx<params.cols()-1)
+    if (idx<params.size()-1)
     {
-      double w1 = params(idx+1)-tvi;
-      double w2 = tvi-params(idx);
+      double w1 = params[idx+1]-tvi;
+      double w2 = tvi-params[idx];
       double w = w1+w2;
 
       if (w>1e-6)
@@ -147,11 +155,68 @@ inline void interp_linear(const Matrix &samps, const Matrix &params,
         w2 = 1.0;
       }
 
-      weighted_column_sum(samps,samps,idx,idx+1,w1,w2,result,i);
+      weighted_sum(samps,samps,idx,idx+1,w1,w2,result,i);
     }
     else
     {
-      weighted_column_sum(samps,samps,idx,idx,1.0,0.0,result,i);
+      weighted_sum(samps,samps,idx,idx,1.0,0.0,result,i);
+    }
+  }
+}
+
+/**
+ * Linear interpolation for \c Plf::preimages().
+ */
+inline void interp_linear (const std::vector<double> &samps, 
+                           const Pointset &params, 
+                           const std::vector<double> &tv, 
+                           std::vector<double> &result)
+{
+  if (params.dim() != 1)
+    throw std::invalid_argument("params must be a 1-D pointset");
+  if (params.npts() != samps.size())
+    throw std::invalid_argument("params and samps must have same size");
+
+  size_t idx=0;
+  if (params.npts()>1 && tv[0]>params(1,0))
+  {
+    idx=lookup(params, tv[0]);
+  }
+
+  for (size_t i=0; i<tv.size(); ++i)
+  {
+    double tvi=tv[i];
+    while (idx<params.npts()-1 && tvi>=params(idx+1,0)) 
+    {
+      ++idx;
+    }
+    if (tvi<params(idx,0))
+    {
+      tvi=params(idx,0);
+    }
+
+    if (idx<params.npts()-1)
+    {
+      double w1 = params(idx+1,0)-tvi;
+      double w2 = tvi-params(idx,0);
+      double w = w1+w2;
+
+      if (w>1e-6)
+      {
+        w1 /= w;
+        w2 /= w;
+      }
+      else
+      {
+        w1 = 0.0;
+        w2 = 1.0;
+      }
+
+      result[i] = w1*samps[idx] + w2*samps[idx+1];
+    }
+    else
+    {
+      result[i] = samps[idx];
     }
   }
 }
@@ -164,32 +229,31 @@ inline void interp_linear(const Matrix &samps, const Matrix &params,
  * \param tv parameters at which to interpolated.  Must be non-decreasing.
  * \param result [output] a \c Matrix to hold the result
  */
-inline void interp_const(const Matrix &samps, const Matrix &params, 
-                         const Matrix &tv, Matrix &result)
+inline void interp_const(const Pointset &samps, const std::vector<double> &params, 
+                         const std::vector<double> &tv, Pointset &result)
 {
-  int idx=0;
-  if (params.cols()>1 && tv(0)>params(1))
+  size_t idx=0;
+  if (params.size()>1 && tv[0]>params[1])
   {
-    idx=lookup(params.data(), params.cols(), tv(0));
-    if (idx<0) idx=0;
+    idx=lookup(params, tv[0]);
   }
 
-  for (int i=0; i<tv.cols(); ++i)
+  for (size_t i=0; i<tv.size(); ++i)
   {
-    double tvi=tv(i);
-    while (idx<params.cols()-1 && tvi>=params(idx+1)) 
+    double tvi=tv[i];
+    while (idx<params.size()-1 && tvi>=params[idx+1]) 
     {
       ++idx;
     }
-    if (tvi<params(idx))
+    if (tvi<params[idx])
     {
-      tvi=params(idx);
+      tvi=params[idx];
     }
-    if (idx>=params.cols()-1)
+    if (idx>=params.size()-1)
     {
       --idx;
     }
-    weighted_column_sum(samps,samps,idx,idx,1.0,0.0,result,i);
+    weighted_sum(samps,samps,idx,idx,1.0,0.0,result,i);
   }
 }
 

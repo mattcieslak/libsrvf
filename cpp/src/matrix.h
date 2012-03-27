@@ -19,50 +19,90 @@
 #ifndef SRVF_MATRIX_H
 #define SRVF_MATRIX_H 1
 
+#include <vector>
+
 namespace srvf
 {
 
+/**
+ * A basic matrix class.
+ */
 class Matrix
 {
 public:
+
+  /**
+   * Indicates either row-major or column-major ordering.
+   * This is used when converting between \c Matrix objects and linear 
+   * representations.  In row-major ordering, rows are stored contiguously 
+   * in memory, and in column-major ordering, columns are stored 
+   * contiguously.
+   */
+  enum Majorness
+  {
+    ROW_MAJOR=0,
+    COLUMN_MAJOR=1
+  };
   
-  Matrix () : data_(0), rows_(0), cols_(0) { }
-  Matrix (int rows, int cols);
-  Matrix (int rows, int cols, double val);
-  Matrix (int rows, int cols, double *data);
+  Matrix ();
+  Matrix (size_t rows, size_t cols);
+  Matrix (size_t rows, size_t cols, double val);
+  Matrix (size_t rows, size_t cols, 
+          const double *data, Majorness layout=ROW_MAJOR);
+  Matrix (size_t rows, size_t cols, 
+          const std::vector<double> &data, Majorness layout=ROW_MAJOR);
   Matrix (const Matrix &A);
   Matrix &operator= (const Matrix &A);
-  ~Matrix () { delete[] data_; data_=0; rows_=0; cols_=0; }
 
-  int rows() const 
+  /** Destructor. */
+  ~Matrix () { delete[] data_; }
+
+  /** Returns the number of rows in this \c Matrix. */
+  size_t rows() const 
   { return rows_; }
 
-  int cols() const 
+  /** Returns the number of columns in this \c Matrix. */
+  size_t cols() const 
   { return cols_; }
 
-  int size() const 
+  /** Returns the total number of entries in this \c Matrix. */
+  size_t size() const 
   { return rows_*cols_; }
 
   void clear();
-  void resize(int rows, int cols);
+  void resize(size_t rows, size_t cols);
   
-  double& operator() (int n)
+  /** 
+   * Returns the \f$ n^{th} \f$ entry in the matrix.
+   * Row-major ordering is used.  For example, in a \c 2x3 \c Matrix, 
+   * calling this method with \c n=3 references the entry in row 1, column 0. 
+   */ 
+  double& operator() (size_t n)
   { return data_[n]; }
 
-  const double& operator() (int n) const
+  /** 
+   * Returns the \f$ n^{th} \f$ entry in the matrix.
+   * Row-major ordering is used.  For example, in a \c 2x3 \c Matrix, 
+   * calling this method with \c n=3 references the entry in row 1, column 0. 
+   */ 
+  const double& operator() (size_t n) const
   { return data_[n]; };
 
-  double& operator() (int r, int c)
+  /** Returns the specified entry. */
+  double& operator() (size_t r, size_t c)
   { return data_[r*cols_+c]; }
 
-  const double& operator() (int r, int c) const
+  /** Returns the specified entry. */
+  const double& operator() (size_t r, size_t c) const
   { return data_[r*cols_+c]; }
 
+  /** Returns a pointer to the raw data for this \c Matrix. */
   double* data()
   { return data_; }
 
+  /** Returns a \c const pointer to the raw data for this \c Matrix. */
   const double* data() const 
-  { return (const double*)data_; }
+  { return data_; }
 
   // In-place elementwise operations
   Matrix& operator+= (const Matrix &A);
@@ -92,9 +132,9 @@ public:
   friend Matrix transpose(const Matrix &A);
 
 private:
-  double   *data_;
-  int       rows_;
-  int       cols_;
+  double *data_;
+  size_t  rows_;
+  size_t  cols_;
 };
 
 Matrix operator+ (const Matrix &A, const Matrix &B);

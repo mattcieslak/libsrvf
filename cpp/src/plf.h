@@ -20,11 +20,18 @@
 #define SRVF_PLF_H 1
 
 #include <stdexcept>
+#include <vector>
+
+#include "pointset.h"
 #include "matrix.h"
 #include "util.h"
 
 namespace srvf {
 
+
+/**
+ * Represents a piecewise-linear function.
+ */
 class Plf
 {
 public:
@@ -39,10 +46,10 @@ public:
    *
    * \param samples
    */
-  Plf(const Matrix &samples)
+  Plf(const Pointset &samples)
     : samps_(samples), params_()
   {
-    params_=srvf::util::linspace(0.0,1.0,samples.cols());
+    params_=srvf::util::linspace(0.0,1.0,samples.npts());
   }
 
   /**
@@ -51,13 +58,11 @@ public:
    * \param samples
    * \param parameters
    */
-  Plf(const Matrix &samples, const Matrix &parameters)
+  Plf(const Pointset &samples, const std::vector<double> &parameters)
     : samps_(samples), params_(parameters)
   {
-    if (parameters.rows()!=1)
-      std::invalid_argument("parameters must have 1 row");
-    if (samples.cols()!=parameters.cols())
-      std::invalid_argument("samples.cols()!=parameters.cols()");
+    if (samples.npts()!=parameters.size())
+      throw std::invalid_argument("number of samples != number of parameters");
   }
 
   /**
@@ -84,33 +89,38 @@ public:
     return *this;
   }
 
-  /** Returns the sample point matrix. */
-  Matrix &samps() { return samps_; }
+  /** Returns the sample points. */
+  Pointset &samps() { return samps_; }
 
-  /** Returns the sample point matrix. */
-  const Matrix &samps() const { return samps_; }
+  /** Returns the sample points. */
+  const Pointset &samps() const { return samps_; }
 
-  /** Returns the changepoint parameter matrix. */
-  Matrix &params() { return params_; }
+  /** Returns the changepoint parameters. */
+  std::vector<double> &params() { return params_; }
 
-  /** Returns the changepoint parameter matrix. */
-  const Matrix &params() const { return params_; }
+  /** Returns the changepoint parameters. */
+  const std::vector<double> &params() const { return params_; }
 
   /** Returns the dimension of the ambient space. */
-  int dim() const { return samps_.rows(); }
+  size_t dim() const { return samps_.dim(); }
 
   /** Returns the number of changepoints. */
-  int ncp() const { return samps_.cols(); }
+  size_t ncp() const { return samps_.npts(); }
 
   /** Does this \c Plf represent the empty map? */
-  bool is_empty() const { return (samps_.size() == 0); }
+  bool is_empty() const { return (samps_.npts() == 0); }
  
-  void evaluate(double t, Matrix &result) const;
-  void evaluate(const Matrix &tv, Matrix &result) const;
-  void preimages(const Matrix &tv, Matrix &result) const;
+  void evaluate(double t, Pointset &result) const;
+  void evaluate(const std::vector<double> &tv, Pointset &result) const;
+  void preimages(const std::vector<double> &tv, 
+                 std::vector<double> &result) const;
+
+  Pointset evaluate(double t) const;
+  Pointset evaluate(const std::vector<double> &tv) const;
+  std::vector<double> preimages(const std::vector<double> &tv) const;
   double arc_length() const;
 
-  void translate(const Matrix &v);
+  void translate(const std::vector<double> &v);
   void rotate(const Matrix &R);
   void scale(double s);
 
@@ -120,13 +130,13 @@ public:
   friend Plf inverse(const Plf &F);
 
 private:
-  Matrix samps_;
-  Matrix params_;
+  Pointset samps_;
+  std::vector<double> params_;
 };
 
-Plf  linear_combination(const Plf &F1, const Plf &F2, double w1, double w2);
-Plf  composition(const Plf &F1, const Plf &F2);
-Plf  inverse(const Plf &F);
+Plf linear_combination(const Plf &F1, const Plf &F2, double w1, double w2);
+Plf composition(const Plf &F1, const Plf &F2);
+Plf inverse(const Plf &F);
 
 } // namespace srvf
 
