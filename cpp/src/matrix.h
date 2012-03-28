@@ -55,6 +55,17 @@ public:
   Matrix (const Matrix &A);
   Matrix &operator= (const Matrix &A);
 
+  /** Returns a new \c Matrix representing the identity matrix. */
+  static Matrix identity(size_t dim)
+  {
+    Matrix I(dim, dim, 0.0);
+    for (size_t i=0; i<dim; ++i)
+    {
+      I(i,i) = 1.0;
+    }
+    return I;
+  }
+
   /** Destructor. */
   ~Matrix () { delete[] data_; }
 
