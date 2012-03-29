@@ -8,7 +8,15 @@ function d = srvf_preshape_distance( Q1, T1, Q2, T2 )
   assert( abs(n1-n2) < max(0.01*max(n1,n2), 1e-3) );
   
   if ( n1*n2 > 1e-4 )
-    d = acos( ip / n1 / n2 );
+    x = ip / n1 / n2;
+    if ( x < -1.001 || x > 1.001 )
+      error('srvf_preshape_distance: x=%f out of bounds\n', x);
+    elseif ( x < -1 )
+      x=-1;
+    elseif ( x > 1 )
+      x=1;
+    end
+    d=acos(x);
   else
     d = 0;
   end

@@ -10,7 +10,7 @@ function R = srvf_optimal_rotation( Q1, T1, Q2, T2 )
     Q2r(i,:) = Q2r(i,:) .* diff( Tr );
   end
 
-  A = Q1r * Q2r'
+  A = Q1r * Q2r';
   [U,S,V] = svd(A);
   if det(A) > 0
     S = eye(dim);

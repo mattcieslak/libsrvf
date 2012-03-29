@@ -14,12 +14,13 @@ function plot_srvf( Q, T, fmt )
   if ( dim == 1 )
     hold on;
     for i=1:length(Q)
-      plot([T(i) T(i+1)], [Q(i), Q(i)], fmt );
+      H=plot([T(i) T(i+1)], [Q(i), Q(i)], fmt );
+      set(H,'linewidth',2);
     end
   elseif ( dim == 2 )
-    plot(Q(1,:),Q(2,:),fmt);
+    H=plot(Q(1,:),Q(2,:),fmt);
   elseif ( dim == 3 )
-    plot3(Q(1,:),Q(2,:),Q(3,:),fmt);
+    H=plot3(Q(1,:),Q(2,:),Q(3,:),fmt);
   else
     error( 'SRVFs must be dimension 3 or lower.' );
   end

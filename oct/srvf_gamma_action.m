@@ -17,7 +17,7 @@ function [Qr Tr] = srvf_gamma_action(Q,TQ,G,TG)
   Gr = unique([TQ G]);
   DGr = (Gr(2:end)-Gr(1:(end-1))) ./ (Tr(2:end)-Tr(1:(end-1)));
   Qr = srvf_refine(Q,TQ,Gr);
-  Qr = Qr .* sqrt(DGr);
+  Qr = Qr .* repmat(sqrt(DGr),size(Qr,1),1);
 end
 
 

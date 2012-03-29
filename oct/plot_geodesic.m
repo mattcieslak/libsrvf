@@ -43,10 +43,15 @@ function plot_geodesic( G, T, plot_type, colors )
 
   for i=1:nsteps
     cidx = mod( i-1, length(colors) ) + 1;  % cycle through the colors
-    if ( i==1 || i==nsteps )
-      keystr = sprintf('%s;f%d;', colors{cidx}, i);
+    if (i==1)
+      %keystr = sprintf('%s;F1;', colors{cidx});
+      keystr='b;F1;';
+    elseif (i==nsteps )
+      %keystr = sprintf('%s;F2;', colors{cidx});
+      keystr='r;F2;';
     else
-      keystr = colors{cidx};
+      %keystr = colors{cidx};
+      keystr='k';
     end
 
     if ( plot_type == 'q' )
