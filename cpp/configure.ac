@@ -7,6 +7,8 @@ AC_CONFIG_HEADERS([config.h])
 AC_PROG_CXX
 AC_PROG_RANLIB
 
+# Check for GSL
+AC_CHECK_LIB([gsl],[gsl_matrix_alloc])
 
 # Check for Boost
 AC_LANG(C++)
