@@ -28,6 +28,11 @@ namespace srvf
 Plf 
 optimal_reparam (const Srvf &Q1, const Srvf &Q2);
 
+//TODO: support arbitrary grids
+//Plf 
+//optimal_reparam (const Srvf &Q1, const Srvf &Q2
+//                 std::vector<double> &gv1, std::vector<double> &gv2);
+
 
 /**
  * Computes a partial matching cost.

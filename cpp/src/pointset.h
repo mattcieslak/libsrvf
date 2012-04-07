@@ -213,6 +213,29 @@ public:
   }
 
   /**
+   * Computes the centroid of this \c Pointset.
+   */
+  std::vector<double> centroid() const
+  {
+    std::vector<double> res(dim(),0.0);
+    if (npts() < 1) return res;
+
+    for (size_t i=0; i<npts(); ++i)
+    {
+      for (size_t j=0; j<dim(); ++j)
+      {
+        res[j] += data_(i,j);
+      }
+    }
+
+    for (size_t j=0; j<dim(); ++j)
+    {
+      res[j] /= (double)npts();
+    }
+    return res;
+  }
+
+  /**
    * Returns a \c vector containing this \c Pointset's data.
    *
    * \param packing if \c POINT_PER_ROW, then each point will be stored 

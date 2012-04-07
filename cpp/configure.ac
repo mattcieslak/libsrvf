@@ -10,6 +10,21 @@ AC_PROG_RANLIB
 # Check for GSL
 AC_CHECK_LIB([gsl],[gsl_matrix_alloc])
 
+# Check for OpenGL
+AC_CHECK_LIB([GL],[glBegin])
+AC_CHECK_LIB([GLU],[gluLookAt])
+
+# Check for FLTK
+AC_LANG(C++)
+saved_LDFLAGS="$LDFLAGS"
+LDFLAGS="$LDFLAGS -lfltk2"
+AC_LINK_IFELSE(
+  [AC_LANG_PROGRAM([#include <fltk/Widget.h>],[fltk::Widget w(0,0,0,0,"")])],dnl
+  [LIBS="-lfltk2 -lfltk2_gl $LIBS"]dnl
+  AC_DEFINE([HAVE_FLTK],[],[FLTK]),dnl
+  [AC_MSG_WARN([FLTK not found])])dnl
+LDFLAGS="$saved_LDFLAGS"
+
 # Check for Boost
 AC_LANG(C++)
 saved_LDFLAGS="$LDFLAGS"

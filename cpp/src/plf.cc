@@ -114,6 +114,39 @@ double Plf::arc_length() const
 }
 
 /**
+ * Computes the centroid of this \c Plf.
+ */
+std::vector<double> Plf::centroid() const
+{
+  return samps_.centroid();
+}
+
+/**
+ * Scale this \c Plf to unit arc length.
+ */
+void Plf::scale_to_unit_arc_length()
+{
+  double L = arc_length();
+  if (L > 1e-9)
+  {
+    scale(1.0 / L);
+  }
+}
+
+/**
+ * Subtract the centroid from this \c Plf.
+ */
+void Plf::translate_to_origin()
+{
+  std::vector<double> ctr = centroid();
+  for (size_t i=0; i<ctr.size(); ++i)
+  {
+    ctr[i] *= -1;
+  }
+  translate(ctr);
+}
+
+/**
  * Apply a translation to this \c Plf.
  *
  * Adds \a v to each of this function's sample points.  \a v must have 

@@ -119,10 +119,14 @@ public:
   Pointset evaluate(const std::vector<double> &tv) const;
   std::vector<double> preimages(const std::vector<double> &tv) const;
   double arc_length() const;
+  std::vector<double> centroid() const;
 
   void translate(const std::vector<double> &v);
   void rotate(const Matrix &R);
   void scale(double s);
+
+  void scale_to_unit_arc_length();
+  void translate_to_origin();
 
   friend Plf linear_combination(const Plf &F1, const Plf &F2, 
                                 double w1, double w2);
