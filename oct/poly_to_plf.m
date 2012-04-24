@@ -11,7 +11,7 @@
 % In this case, the optional argument tv may be used to specify the parameter 
 % values corresponding to the vertices in P.  If tv is omitted, then parameter 
 % values will be calculated automatically so that, for i=1,2,...,size(P,2), 
-% tv(i) = sum of first (i-1) segments of the polygon.
+% tv(i) = sum of lengths of first (i-1) segments of the polygon.
 %
 % Inputs:
 %  P - the polygon.  An n x k matrix, where n is the dimension of the 

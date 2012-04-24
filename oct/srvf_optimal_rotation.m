@@ -2,6 +2,12 @@
 function R = srvf_optimal_rotation( Q1, T1, Q2, T2 )
   dim = size(Q1,1);
 
+  % Rotations don't make sense for 1-D functions
+  if (dim < 2)
+    R = [1];
+    return;
+  end
+
   Tr = unique( [T1 T2] );
   Q1r = srvf_refine( Q1, T1, Tr );
   Q2r = srvf_refine( Q2, T2, Tr );
