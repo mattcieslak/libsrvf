@@ -7,6 +7,20 @@
 
 BOOST_AUTO_TEST_SUITE(srvf_tests)
 
+BOOST_AUTO_TEST_CASE(ctor_test1)
+{
+  srvf::Srvf z1(0.0, 1.0, std::vector<double>(2,0.25));
+  BOOST_CHECK_EQUAL(z1.dim(), 2);
+  BOOST_CHECK_EQUAL(z1.ncp(), 2);
+  BOOST_CHECK_EQUAL(z1.domain_lb(), 0.0);
+  BOOST_CHECK_EQUAL(z1.domain_ub(), 1.0);
+
+  srvf::Pointset samps(2,1);
+  z1.evaluate(0.5, samps);
+  BOOST_CHECK_EQUAL(samps(0,0), 0.25);
+  BOOST_CHECK_EQUAL(samps(0,1), 0.25);
+}
+
 BOOST_AUTO_TEST_CASE(evaluate_test1)
 {
   double samps_data[] = 

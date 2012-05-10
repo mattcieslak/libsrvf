@@ -80,9 +80,26 @@ void Srvf::scale(double sf)
   samps_.scale(sf);
 }
 
+/**
+ * Radial projection to the unit sphere in Hilbert space.
+ *
+ * If the current norm is zero, then this \c Srvf represents the zero 
+ * function and no action is taken.
+ */
+void Srvf::scale_to_unit_norm()
+{
+  double nrm = l2_norm(*this);
+  if (nrm > 1e-6)
+  {
+    scale(1.0 / nrm);
+  }
+}
+
+
 ////////////////////////////////////////////////////////////////////////////
 ///////////////////////// friend functions /////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
+
 
 /**
  * Computes the L^2 norm of the given \c Srvf.

@@ -19,20 +19,21 @@
 #ifndef SRVF_REPARAM_H
 #define SRVF_REPARAM_H 1
 
+#include <vector>
+
 #include "plf.h"
 #include "srvf.h"
 
 namespace srvf
 {
 
-Plf 
-optimal_reparam (const Srvf &Q1, const Srvf &Q2);
+Plf optimal_reparam(const Srvf &Q1, const Srvf &Q2);
 
 //TODO: support arbitrary grids
-//Plf 
-//optimal_reparam (const Srvf &Q1, const Srvf &Q2
+//Plf optimal_reparam (const Srvf &Q1, const Srvf &Q2
 //                 std::vector<double> &gv1, std::vector<double> &gv2);
 
+std::vector<Plf> optimal_reparam_1D(const Srvf &Q1, const Srvf &Q2);
 
 /**
  * Computes a partial matching cost.

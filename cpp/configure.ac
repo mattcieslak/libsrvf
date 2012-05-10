@@ -36,6 +36,10 @@ AC_LINK_IFELSE(
   [AC_MSG_WARN([Boost unit testing libraries not found])])dnl
 LDFLAGS="$saved_LDFLAGS"
 
+# Check for OpenMP
+AC_LANG(C++)
+AC_OPENMP
+CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
 
 AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile])
 AC_OUTPUT

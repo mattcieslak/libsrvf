@@ -76,6 +76,22 @@ public:
   }
 
   /**
+   * Creates a new \c Srvf which represents a constant function on the 
+   * specified interval.
+   *
+   * \param a the left endpoint of the parameter interval
+   * \param b the right endpoint of the parameter interval
+   * \param val a \c vector<double> representing the value of the \c Srvf.  
+   *   The dimension of the \c Srvf will be equal to \c val.size().
+   */
+  Srvf(double a, double b, std::vector<double> val)
+   : samps_(val.size(), 1, val, Pointset::POINT_PER_ROW), params_(2)
+  {
+    params_[0]=a;
+    params_[1]=b;
+  }
+
+  /**
    * Copy constructor.
    *
    * Creates a new \c Srvf which is a deep copy of \a Q.
@@ -135,6 +151,7 @@ public:
 
   void rotate(const Matrix &R);
   void scale(double sf);
+  void scale_to_unit_norm();
 
   friend double l2_norm(const Srvf &Q);
   friend double l2_product(const Srvf &Q1, const Srvf &Q2);

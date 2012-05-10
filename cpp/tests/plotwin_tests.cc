@@ -8,10 +8,12 @@
 #include "srvf.h"
 #include "qmap.h"
 #include "rotate.h"
+#include "reparam.h"
 #include "fileio.h"
 
 BOOST_AUTO_TEST_SUITE(plotwin_tests)
 
+/*
 BOOST_AUTO_TEST_CASE(superimposed_test1)
 {
   std::ifstream is1("data/horse-1.csv");
@@ -32,16 +34,21 @@ BOOST_AUTO_TEST_CASE(superimposed_test1)
   srvf::Srvf Q1=srvf::plf_to_srvf(F1);
   srvf::Srvf Q2=srvf::plf_to_srvf(F2);
   srvf::Matrix R=srvf::optimal_rotation(Q1, Q2);
+  Q2.rotate(R);
   F2.rotate(R);
+  srvf::Plf G=srvf::optimal_reparam(Q1, Q2);
+  srvf::Plf F2r=composition(F2, G);
+  srvf::Srvf Q2r=gamma_action(Q2, G);
 
   srvf::SuperimposedPlot plot1;
   plot1.insert(F1, srvf::Color(0.0f,0.0f,1.0f));
-  plot1.insert(F2, srvf::Color(1.0f,0.0f,0.0f));
+  plot1.insert(F2r, srvf::Color(1.0f,0.0f,0.0f));
 
   srvf::FltkGlPlotWindow win(400, 400, "SuperimposedPlot Test 1");
   win.add_plot(&plot1);
   win.show();
   fltk::run();
 }
+*/
 
 BOOST_AUTO_TEST_SUITE_END()

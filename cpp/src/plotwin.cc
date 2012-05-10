@@ -19,6 +19,7 @@
 #include <vector>
 #include <iostream>
 
+#include <fltk/events.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 
@@ -32,11 +33,15 @@ namespace srvf
 
 
 FltkGlPlotWindow::FltkGlPlotWindow(int w, int h, const char *l)
- : fltk::GlWindow(w, h, l)
+ : fltk::GlWindow(w, h, l), 
+   prev_x_(0), prev_y_(0), button_state_(0), 
+   camera_x_(0.0), camera_y_(0.0), camera_z_(1.0)
 { }
 
 FltkGlPlotWindow::FltkGlPlotWindow(int w, int h, int x, int y, const char *l)
- : fltk::GlWindow(w, h, x, y, l)
+ : fltk::GlWindow(w, h, x, y, l),
+   prev_x_(0), prev_y_(0), button_state_(0), 
+   camera_x_(0.0), camera_y_(0.0), camera_z_(1.0)
 { }
 
 void 
@@ -53,7 +58,8 @@ FltkGlPlotWindow::draw()
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  glTranslatef(0.0, 0.0, -1.0);
+  glTranslatef(camera_x_, -camera_y_, -1.0);
+  glScalef(camera_z_, camera_z_, camera_z_);
 
   glClearColor(0.0, 0.0, 0.0, 1.0);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -62,20 +68,58 @@ FltkGlPlotWindow::draw()
   {
     plots_[i]->render(renderer_);
   }
-
-  //glColor3f(1.0, 1.0, 1.0);
-  //glBegin(GL_QUADS);
-  //glVertex2d(0.0, 0.0);
-  //glVertex2d(1.0, 0.0);
-  //glVertex2d(1.0, 1.0);
-  //glVertex2d(0.0, 1.0);
-  //glEnd();
 }
 
 void 
 FltkGlPlotWindow::add_plot(Plot *p)
 {
   plots_.push_back(p);
+}
+
+
+#define DX  0.02f
+#define DY  0.02f
+#define DZ  0.05f
+int
+FltkGlPlotWindow::handle(int event)
+{
+  switch(event) {
+    case fltk::PUSH:
+      prev_x_ = fltk::event_x();
+      prev_y_ = fltk::event_y();
+      if      ( fltk::event_button() == 1 ) button_state_ |= 1;
+      else if ( fltk::event_button() == 2 ) button_state_ |= 2;
+      else if ( fltk::event_button() == 3 ) button_state_ |= 4;
+      return 1;
+    case fltk::DRAG:
+      if ( button_state_ == 1 ){
+        camera_x_ += DX * (float)(fltk::event_x() - prev_x_);
+        camera_y_ += DY * (float)(fltk::event_y() - prev_y_);
+        prev_x_ = fltk::event_x();
+        prev_y_ = fltk::event_y();
+        redraw();
+      } else if ( button_state_ == 2 ){
+        camera_z_ += DZ * (float)(fltk::event_y() - prev_y_);
+        prev_x_ = fltk::event_x();
+        prev_y_ = fltk::event_y();
+        redraw();
+      }
+      return 1;
+    case fltk::RELEASE:   
+      if      ( fltk::event_button() == 1 ) button_state_ &= 6;
+      else if ( fltk::event_button() == 2 ) button_state_ &= 5;
+      else if ( fltk::event_button() == 3 ) button_state_ &= 3;
+      return 1;
+    case fltk::FOCUS :
+    case fltk::UNFOCUS :
+      return 1;  // we want keyboard events
+    case fltk::KEY:
+      return 1;
+    case fltk::SHORTCUT:
+      return 0;
+    default:
+      return GlWindow::handle(event);
+  }
 }
 
 } // namespace srvf

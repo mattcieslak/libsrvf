@@ -173,5 +173,20 @@ Plf optimal_reparam (const Srvf &Q1, const Srvf &Q2)
   return Plf(samps, params);
 }
 
+
+/**
+ * Specialized elastic matching for 1-D functions.
+ *
+ * \param Q1 a 1-D SRVF
+ * \param Q2 a 1-D SRVF
+ * \return a \c vector<Plf> with two elements: the first is the 
+ *   reparametrization to be applied to \a Q1, and the second is the 
+ *   reparametrization to be applied to \a Q2.
+ */
+std::vector<Plf> optimal_reparam_1D(const Srvf &Q1, const Srvf &Q2)
+{
+  
+}
+
 } // namespace srvf
 

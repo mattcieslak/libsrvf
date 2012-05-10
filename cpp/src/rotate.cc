@@ -112,6 +112,10 @@ static void build_A_(const Srvf &Q1, const Srvf &Q2, gsl_matrix *A)
  *
  * Returns a \c Matrix representing a rotation \f$ R \f$ which minimizes 
  * the L^2 norm of \f$ Q_1 - R Q_2 \f$.
+ *
+ * \a Q1 and \a Q2 must have the same dimension.  If the dimension 
+ * is 1, optimizing over rotations doesn't make sense, so the result 
+ * will be the 1x1 identity matrix.
  */
 Matrix optimal_rotation (const Srvf &Q1, const Srvf &Q2)
 {
@@ -120,6 +124,14 @@ Matrix optimal_rotation (const Srvf &Q1, const Srvf &Q2)
   size_t dim = Q1.dim();
   Matrix R;
   Matrix Q2pert;
+
+  if (Q1.dim() != Q2.dim())
+    throw std::invalid_argument("Q1 and Q2 must have same dimension.");
+
+  if (Q1.dim() < 2)
+  {
+    return Matrix(1,1,1.0);
+  }
 
   gsl_matrix *A    = gsl_matrix_alloc(dim, dim);
   gsl_matrix *V    = gsl_matrix_alloc(dim, dim);
@@ -140,7 +152,7 @@ Matrix optimal_rotation (const Srvf &Q1, const Srvf &Q2)
   // If A is singular, apply a small rotation to Q2 and try again.
   sgndet = sgndet_(A);
   while(sgndet == 0){
-    Matrix Rpert = perturbation_matrix_(dim, 0.001);
+    Matrix Rpert = perturbation_matrix_(0.001, dim);
     Srvf Q2pert(Q2);
     Q2pert.rotate(Rpert);
     build_A_(Q1, Q2pert, A);

@@ -43,10 +43,22 @@ public:
 
   void add_plot(Plot *p);
 
+  int handle(int event);
+
 private:
   
   OpenGlRenderer renderer_;
   std::vector<Plot*> plots_;
+
+  // Mouse state
+  int prev_x_;
+  int prev_y_;
+  int button_state_;
+
+  // Camera position
+  float camera_x_;
+  float camera_y_;
+  float camera_z_;
 };
 
 } // namespace srvf
