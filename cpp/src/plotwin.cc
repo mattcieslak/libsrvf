@@ -50,6 +50,7 @@ FltkGlPlotWindow::draw()
   if (!valid())
   {
     glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
     glViewport(0, 0, (GLsizei)w(), (GLsizei)h());
     double r = ((double)h()) / ((double)w());
     glOrtho(-1.0, 1.0, -r, r, -0.1, 10.0);
