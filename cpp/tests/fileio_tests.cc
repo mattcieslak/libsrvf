@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE(load_csv_test1)
     {4.0, 5.0, 6.0, 7.0}
   };
   std::ifstream is("data/load_csv_test1.csv");
-  std::vector<srvf::Matrix> mats = srvf::load_csv(is);
+  std::vector<srvf::Matrix> mats = srvf::io::load_csv(is);
   BOOST_REQUIRE_EQUAL(mats.size(),1);
   BOOST_REQUIRE_EQUAL(mats[0].rows(),2);
   BOOST_REQUIRE_EQUAL(mats[0].cols(),4);
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(load_csv_test2)
     {7.0, 8.0, 9.0}
   };
   std::ifstream is("data/load_csv_test2.csv");
-  std::vector<srvf::Matrix> mats = srvf::load_csv(is);
+  std::vector<srvf::Matrix> mats = srvf::io::load_csv(is);
   BOOST_REQUIRE_EQUAL(mats.size(),2);
   BOOST_REQUIRE_EQUAL(mats[0].rows(),2);
   BOOST_REQUIRE_EQUAL(mats[0].cols(),2);
@@ -77,11 +77,11 @@ BOOST_AUTO_TEST_CASE(save_csv_test1)
   original_mats.push_back(srvf::Matrix(2,4,mat1_data));
 
   std::ofstream os("data/save_csv_test1.csv");
-  srvf::save_csv(os,original_mats);
+  srvf::io::save_csv(os,original_mats);
   os.close();
 
   std::ifstream is("data/save_csv_test1.csv");
-  std::vector<srvf::Matrix> loaded_mats = srvf::load_csv(is);
+  std::vector<srvf::Matrix> loaded_mats = srvf::io::load_csv(is);
   BOOST_REQUIRE_EQUAL(loaded_mats.size(),original_mats.size());
   for (size_t i=0; i<loaded_mats.size(); ++i)
   {

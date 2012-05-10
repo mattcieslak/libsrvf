@@ -16,29 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#ifndef SRVF_FILEIO_H
-#define SRVF_FILEIO_H 1
+#ifndef SRVF_OPENCURVES_H
+#define SRVF_OPENCURVES_H 1
 
 #include <vector>
-#include <istream>
-#include <ostream>
-#include "matrix.h"
+
 
 namespace srvf
 {
-namespace io
+
+class Srvf;
+
+namespace opencurves
 {
 
-std::vector<Matrix> load_csv (std::istream &is, 
-                              char fieldsep=',',
-                              char linesep='\n');
+Srvf karcher_mean(const std::vector<Srvf> &Qs, 
+                  double tol=1e-3, 
+                  size_t max_iters=0);
 
-void save_csv (std::ostream &os, 
-               const std::vector<Matrix> &data,
-               char fieldsep=',',
-               char linesep='\n'); 
+Srvf shooting_vector(const Srvf &Q1, const Srvf &Q2);
 
-} // namespace srvf::io
+} //namespace opencurves
+
 } // namespace srvf
 
-#endif // SRVF_FILEIO_H
+#endif // SRVF_OPENCURVES_H

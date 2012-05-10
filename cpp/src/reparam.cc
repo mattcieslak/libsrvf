@@ -33,7 +33,7 @@
 #endif
 
 #if DP_NBHD_DIM == 17
-size_t dp_nbhd[][2] = {
+static size_t dp_nbhd[][2] = {
 {  1,  1 }, {  1,  2 }, {  1,  3 }, {  1,  4 }, {  1,  5 }, {  1,  6 }, {  1,  7 }, {  1,  8 }, {  1,  9 }, {  1, 10 }, 
 {  1, 11 }, {  1, 12 }, {  1, 13 }, {  1, 14 }, {  1, 15 }, {  1, 16 }, {  1, 17 }, {  2,  1 }, {  2,  3 }, {  2,  5 }, 
 {  2,  7 }, {  2,  9 }, {  2, 11 }, {  2, 13 }, {  2, 15 }, {  2, 17 }, {  3,  1 }, {  3,  2 }, {  3,  4 }, {  3,  5 }, 
@@ -57,7 +57,7 @@ size_t dp_nbhd[][2] = {
 #define DP_NBHD_COUNT 191
 
 #elif DP_NBHD_DIM == 12
-size_t dp_nbhd[][2] = {
+static size_t dp_nbhd[][2] = {
 {  1,  1 }, {  1,  2 }, {  1,  3 }, {  1,  4 }, {  1,  5 }, {  1,  6 }, {  1,  7 }, {  1,  8 }, {  1,  9 }, {  1, 10 }, 
 {  1, 11 }, {  1, 12 }, {  2,  1 }, {  2,  3 }, {  2,  5 }, {  2,  7 }, {  2,  9 }, {  2, 11 }, {  3,  1 }, {  3,  2 }, 
 {  3,  4 }, {  3,  5 }, {  3,  7 }, {  3,  8 }, {  3, 10 }, {  3, 11 }, {  4,  1 }, {  4,  3 }, {  4,  5 }, {  4,  7 }, 
@@ -72,7 +72,7 @@ size_t dp_nbhd[][2] = {
 
 #elif DP_NBHD_DIM == 10
 
-size_t dp_nbhd[][2] = {
+static size_t dp_nbhd[][2] = {
 {  1,  1 }, {  1,  2 }, {  1,  3 }, {  1,  4 }, {  1,  5 }, {  1,  6 }, {  1,  7 }, {  1,  8 }, {  1,  9 }, {  1, 10 }, 
 {  2,  1 }, {  2,  3 }, {  2,  5 }, {  2,  7 }, {  2,  9 }, {  3,  1 }, {  3,  2 }, {  3,  4 }, {  3,  5 }, {  3,  7 }, 
 {  3,  8 }, {  3, 10 }, {  4,  1 }, {  4,  3 }, {  4,  5 }, {  4,  7 }, {  4,  9 }, {  5,  1 }, {  5,  2 }, {  5,  3 }, 
@@ -84,7 +84,7 @@ size_t dp_nbhd[][2] = {
 
 #elif DP_NBHD_DIM == 7
 
-size_t dp_nbhd[][2] = {
+static size_t dp_nbhd[][2] = {
 {  1,  1 }, {  1,  2 }, {  1,  3 }, {  1,  4 }, {  1,  5 }, {  1,  6 }, {  1,  7 }, {  2,  1 }, {  2,  3 }, {  2,  5 }, 
 {  2,  7 }, {  3,  1 }, {  3,  2 }, {  3,  4 }, {  3,  5 }, {  3,  7 }, {  4,  1 }, {  4,  3 }, {  4,  5 }, {  4,  7 }, 
 {  5,  1 }, {  5,  2 }, {  5,  3 }, {  5,  4 }, {  5,  6 }, {  5,  7 }, {  6,  1 }, {  6,  5 }, {  6,  7 }, {  7,  1 }, 
@@ -92,7 +92,7 @@ size_t dp_nbhd[][2] = {
 #define DP_NBHD_COUNT 35
 
 #else // DP_NBHD_DIM = 6
-size_t dp_nbhd[][2] = {
+static size_t dp_nbhd[][2] = {
 {  1,  1 }, {  1,  2 }, {  1,  3 }, {  1,  4 }, {  1,  5 }, {  1,  6 }, {  2,  1 }, {  2,  3 }, {  2,  5 }, {  3,  1 }, 
 {  3,  2 }, {  3,  4 }, {  3,  5 }, {  4,  1 }, {  4,  3 }, {  4,  5 }, {  5,  1 }, {  5,  2 }, {  5,  3 }, {  5,  4 }, 
 {  5,  6 }, {  6,  1 }, {  6,  5 } };
@@ -103,6 +103,9 @@ size_t dp_nbhd[][2] = {
 
 
 namespace srvf
+{
+
+namespace opencurves
 {
 
 
@@ -174,19 +177,6 @@ Plf optimal_reparam (const Srvf &Q1, const Srvf &Q2)
 }
 
 
-/**
- * Specialized elastic matching for 1-D functions.
- *
- * \param Q1 a 1-D SRVF
- * \param Q2 a 1-D SRVF
- * \return a \c vector<Plf> with two elements: the first is the 
- *   reparametrization to be applied to \a Q1, and the second is the 
- *   reparametrization to be applied to \a Q2.
- */
-std::vector<Plf> optimal_reparam_1D(const Srvf &Q1, const Srvf &Q2)
-{
-  
-}
+} // namespace opencurves
 
 } // namespace srvf
-

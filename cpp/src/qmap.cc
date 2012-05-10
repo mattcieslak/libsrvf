@@ -58,8 +58,21 @@ Srvf plf_to_srvf(const Plf &F)
 
 Plf srvf_to_plf(const Srvf &Q)
 {
-  Plf dummy;
-  return dummy;
+  Pointset samps(Q.dim(), Q.ncp());
+
+  for (size_t i=0; i<Q.dim(); ++i)
+  {
+    samps(0,i) = 0.0;
+  }
+  
+  for (size_t i=1; i<samps.npts(); ++i)
+  {
+    double nvi = Q.samps().norm(i-1);
+    double dt = Q.params()[i] - Q.params()[i-1];
+    weighted_sum(samps, Q.samps(), i-1, i-1, 1.0, nvi*dt, samps, i);
+  }
+
+  return Plf(samps, Q.params());
 }
 
 } // namespace srvf

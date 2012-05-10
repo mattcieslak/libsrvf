@@ -53,7 +53,7 @@ FltkGlPlotWindow::draw()
     glLoadIdentity();
     glViewport(0, 0, (GLsizei)w(), (GLsizei)h());
     double r = ((double)h()) / ((double)w());
-    glOrtho(-1.0, 1.0, -r, r, -0.1, 10.0);
+    glOrtho(-1.0, 1.0, -r, r, 0.1, 10.0);
     glMatrixMode(GL_MODELVIEW);
   }
 

@@ -27,13 +27,15 @@
 namespace srvf
 {
 
+namespace opencurves
+{
+
 Plf optimal_reparam(const Srvf &Q1, const Srvf &Q2);
 
 //TODO: support arbitrary grids
 //Plf optimal_reparam (const Srvf &Q1, const Srvf &Q2
 //                 std::vector<double> &gv1, std::vector<double> &gv2);
 
-std::vector<Plf> optimal_reparam_1D(const Srvf &Q1, const Srvf &Q2);
 
 /**
  * Computes a partial matching cost.
@@ -120,6 +122,8 @@ match_cost (const Srvf &Q1, size_t Q1i1, size_t Q1i2,
 
   return res;
 }
+
+} // namespace opencurves
 
 } // namespace srvf
 

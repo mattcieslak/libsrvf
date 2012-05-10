@@ -27,7 +27,8 @@ BOOST_AUTO_TEST_CASE(match_cost_test1)
 
   for (size_t i=0; i<5; ++i)
   {
-    double c = match_cost(Q1, idx[i][0], idx[i][1], Q2, idx[i][2], idx[i][3]);
+    double c = srvf::opencurves::match_cost(
+        Q1, idx[i][0], idx[i][1], Q2, idx[i][2], idx[i][3]);
     BOOST_CHECK_CLOSE(c, exp_costs[i], 1e-4);
   }
 }
@@ -49,7 +50,7 @@ BOOST_AUTO_TEST_CASE(match_cost_test2)
   srvf::Srvf Q1(samps1);
   srvf::Srvf Q2(samps2);
   
-  double c = srvf::match_cost(Q1, 1, 3, Q2, 1, 4);
+  double c = srvf::opencurves::match_cost(Q1, 1, 3, Q2, 1, 4);
   BOOST_CHECK_CLOSE(c, 3.1716, 1e-3);
 }
 

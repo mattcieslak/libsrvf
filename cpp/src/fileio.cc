@@ -28,6 +28,8 @@
 
 namespace srvf
 {
+namespace io
+{
 
 /**
  * Load a collection of sample sets from a CSV file.
@@ -112,4 +114,5 @@ void save_csv (std::ostream &os,
   }
 }
 
+} // namespace srvf::io
 } // namespace srvf

@@ -16,29 +16,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#ifndef SRVF_FILEIO_H
-#define SRVF_FILEIO_H 1
+#include "functions.h"
+
+#include "srvf.h"
+#include "plf.h"
 
 #include <vector>
-#include <istream>
-#include <ostream>
-#include "matrix.h"
+
 
 namespace srvf
 {
-namespace io
+
+namespace functions
 {
 
-std::vector<Matrix> load_csv (std::istream &is, 
-                              char fieldsep=',',
-                              char linesep='\n');
 
-void save_csv (std::ostream &os, 
-               const std::vector<Matrix> &data,
-               char fieldsep=',',
-               char linesep='\n'); 
+std::vector<Plf> optimal_reparam(const Srvf &Q1, const Srvf &Q2)
+{
+  // TODO
+  std::vector<Plf> res;
+  return res;
+}
 
-} // namespace srvf::io
+
+} // namespace srvf::functions
+
 } // namespace srvf
-
-#endif // SRVF_FILEIO_H
