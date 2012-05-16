@@ -161,6 +161,7 @@ public:
                   double w1, double w2);
   friend Srvf   refinement(const Srvf &Q, const std::vector<double> &tv);
   friend Srvf   gamma_action(const Srvf &Q, const Plf &gamma);
+  friend Srvf   constant_speed_param(const Srvf &Q);
 
 private:
   Pointset samps_;
@@ -175,6 +176,7 @@ Srvf   linear_combination(const Srvf &Q1, const Srvf &Q2,
          double w1, double w2);
 Srvf   refinement(const Srvf &Q, const std::vector<double> &tv);
 Srvf   gamma_action(const Srvf &Q, const Plf &gamma);
+Srvf   constant_speed_param(const Srvf &Q);
 
 } // namespace srvf
 

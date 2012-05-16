@@ -55,7 +55,8 @@ std::vector<Plf> optimal_reparam(const Srvf &Q1, const Srvf &Q2);
  * Unlike \c srvf::opencurves::karcher_mean(), this function uses the 
  * new 1-D function matching algorithm.
  */
-Srvf karcher_mean(std::vector<Srvf> Qs, double tol=1e-3, size_t max_iters=0);
+Srvf karcher_mean(const std::vector<Srvf> &Qs, 
+                  double tol=1e-3, size_t max_iters=0);
 
   
 } // namespace srvf::functions

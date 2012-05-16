@@ -436,4 +436,31 @@ Srvf gamma_action(const Srvf &Q, const Plf &gamma)
   return Srvf(samps,params);
 }
 
+/**
+ * Returns a constant-speed parametrization of \a Q.
+ */
+Srvf constant_speed_param(const Srvf &Q)
+{
+  Srvf res(Q);
+  double Qnorm = l2_norm(Q);
+  double int_width = Q.domain_ub() - Q.domain_lb();
+  
+  if (Qnorm == 0.0 || int_width == 0.0) return res;
+
+  double v = Qnorm / int_width;
+  double v2 = v*v;
+  
+  for (size_t i=0; i<Q.samps().npts(); ++i)
+  {
+    double vi = Q.samps().norm(i);
+    double vi2 = vi*vi;
+    double dt = Q.params()[i+1]-Q.params()[i];
+
+    res.params()[i+1] = res.params()[i] + vi2*dt/v2;
+    if (vi > 0.0) res.samps().scale(i, v / vi);
+  }
+
+  return res;
+}
+
 } // namespace srvf

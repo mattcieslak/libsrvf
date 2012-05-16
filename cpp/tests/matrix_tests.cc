@@ -11,7 +11,7 @@ BOOST_AUTO_TEST_CASE(ctor_test1)
   BOOST_CHECK_EQUAL(A.rows(),0);
   BOOST_CHECK_EQUAL(A.cols(),0);
   BOOST_CHECK_EQUAL(A.size(),0);
-  BOOST_CHECK_EQUAL(A.data(),(double*)0);
+  BOOST_CHECK_EQUAL(A.data().size(),0);
 }
 
 BOOST_AUTO_TEST_CASE(ctor_test2)
@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_CASE(ctor_test2)
   BOOST_CHECK_EQUAL(A.rows(),5000);
   BOOST_CHECK_EQUAL(A.cols(),5000);
   BOOST_CHECK_EQUAL(A.size(),25000000);
-  BOOST_CHECK(A.data() != (double*)0);
+  BOOST_CHECK_EQUAL(A.data().size(),25000000);
 }
 
 BOOST_AUTO_TEST_CASE(ctor_test3)
@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(ctor_test3)
   BOOST_CHECK_EQUAL(A.rows(),3);
   BOOST_CHECK_EQUAL(A.cols(),500);
   BOOST_CHECK_EQUAL(A.size(),1500);
-  BOOST_CHECK(A.data() != (double*)0);
+  BOOST_CHECK_EQUAL(A.data().size(),1500);
   // check entries using 2-argument accessor
   for (size_t i=0; i<A.rows(); ++i){
     for (size_t j=0; j<A.cols(); ++j){
@@ -50,7 +50,6 @@ BOOST_AUTO_TEST_CASE(ctor_test4)
   srvf::Matrix A(rows, cols, Adata);
   BOOST_CHECK_EQUAL(A.rows(),rows);
   BOOST_CHECK_EQUAL(A.cols(),cols);
-  BOOST_CHECK(A.data()!=Adata); // deep copy
   for (size_t i=0; i<sz; ++i)
   {
     BOOST_CHECK_EQUAL(Adata[i],A(i));
@@ -63,7 +62,6 @@ BOOST_AUTO_TEST_CASE(ctor_test5)
   srvf::Matrix B(A);
   BOOST_CHECK_EQUAL(A.rows(),B.rows());
   BOOST_CHECK_EQUAL(A.cols(),B.cols());
-  BOOST_CHECK(A.data()!=B.data());
   for (size_t i=0; i<A.rows(); ++i)
   {
     for (size_t j=0; j<A.cols(); ++j)
@@ -81,26 +79,9 @@ BOOST_AUTO_TEST_CASE(assignment_test1)
   BOOST_CHECK_EQUAL(A.rows(),B.rows());
   BOOST_CHECK_EQUAL(A.cols(),B.cols());
   BOOST_CHECK_EQUAL(A.size(),B.size());
-  BOOST_CHECK(A.data()!=B.data());  // deep copy
   for (size_t i=0; i<A.size(); ++i)
   {
     BOOST_CHECK_EQUAL(A(i),B(i));
-  }
-}
-
-// self-assignment test
-BOOST_AUTO_TEST_CASE(assignment_test2)
-{
-  srvf::Matrix A(3,20,0.5);
-  double *old_data=A.data();
-  A=A;
-  BOOST_CHECK_EQUAL(A.rows(),3);
-  BOOST_CHECK_EQUAL(A.cols(),20);
-  BOOST_CHECK_EQUAL(A.size(),60);
-  BOOST_CHECK(A.data()==old_data); // self-assignment shouldn't reallocate data
-  for (size_t i=0; i<A.size(); ++i)
-  {
-    BOOST_CHECK_EQUAL(A(i),0.5);
   }
 }
 
@@ -111,7 +92,7 @@ BOOST_AUTO_TEST_CASE(clear_test1)
   BOOST_CHECK_EQUAL(A.rows(),0);
   BOOST_CHECK_EQUAL(A.cols(),0);
   BOOST_CHECK_EQUAL(A.size(),0);
-  BOOST_CHECK_EQUAL(A.data(),(double*)0);
+  BOOST_CHECK_EQUAL(A.data().size(),0);
 }
 
 BOOST_AUTO_TEST_CASE(resize_test1)
@@ -121,7 +102,6 @@ BOOST_AUTO_TEST_CASE(resize_test1)
   BOOST_CHECK_EQUAL(A.rows(),5);
   BOOST_CHECK_EQUAL(A.cols(),5);
   BOOST_CHECK_EQUAL(A.size(),25);
-  BOOST_CHECK(A.data()!=(double*)0);
 }
 
 BOOST_AUTO_TEST_CASE(resize_test2)
@@ -131,7 +111,6 @@ BOOST_AUTO_TEST_CASE(resize_test2)
   BOOST_CHECK_EQUAL(A.rows(),10);
   BOOST_CHECK_EQUAL(A.cols(),250);
   BOOST_CHECK_EQUAL(A.size(),2500);
-  BOOST_CHECK(A.data()!=(double*)0);
   for (size_t i=0; i<5; ++i)
   {
     for (size_t j=0; j<250; ++j)
@@ -148,7 +127,6 @@ BOOST_AUTO_TEST_CASE(resize_test3)
   BOOST_CHECK_EQUAL(A.rows(),250);
   BOOST_CHECK_EQUAL(A.cols(),10);
   BOOST_CHECK_EQUAL(A.size(),2500);
-  BOOST_CHECK(A.data()!=(double*)0);
   for (size_t i=0; i<250; ++i)
   {
     for (size_t j=0; j<5; ++j)

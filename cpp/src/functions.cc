@@ -39,6 +39,14 @@ std::vector<Plf> optimal_reparam(const Srvf &Q1, const Srvf &Q2)
 }
 
 
+Srvf karcher_mean(const std::vector<Srvf> &Qs, 
+                  double tol, size_t max_iters)
+{
+  // TODO
+  Srvf res;
+  return res;
+}
+
 } // namespace srvf::functions
 
 } // namespace srvf

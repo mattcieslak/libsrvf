@@ -161,6 +161,25 @@ public:
   const double& operator() (size_t point_idx, size_t comp_idx) const
   { return data_(point_idx,comp_idx); }
 
+  /** Append a new point to the end of this pointset. */
+  void push(const std::vector<double> &P)
+  {
+    if (dim()>0 && P.size() != dim())
+      throw std::invalid_argument("New point has wrong dimension.");
+
+    data_.resize(npts()+1, P.size());
+    for (size_t i=0; i<P.size(); ++i)
+    {
+      data_(npts()-1,i) = P[i];
+    }
+  }
+
+  /** Remove the last point from this pointset. */
+  void pop()
+  {
+    if (npts()>0) data_.resize(npts()-1,dim());
+  }
+
   /** 
    * Computes the Euclidean distance between point \a i1 and point \a i2. 
    * 

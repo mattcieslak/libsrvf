@@ -51,7 +51,7 @@ namespace srvf{
  * Creates an empty \c Matrix. 
  */
 Matrix::Matrix () 
- : data_(NULL), rows_(0), cols_(0) 
+ : data_(0), rows_(0), cols_(0) 
 { }
 
 /**
@@ -61,14 +61,14 @@ Matrix::Matrix ()
  * \param cols
  */
 Matrix::Matrix (size_t rows, size_t cols)
-  : data_(NULL), rows_(rows), cols_(cols)
+  : rows_(rows), cols_(cols)
 {
   if (rows>0 && cols>0)
   {
     if (rows > SIZE_MAX_/cols)
       throw std::overflow_error("rows*cols exceeds SIZE_MAX");
 
-    data_ = new double[rows*cols];
+    data_.resize(rows*cols);
   }
   else
   {
@@ -86,7 +86,7 @@ Matrix::Matrix (size_t rows, size_t cols)
  * \param val
  */
 Matrix::Matrix (size_t rows, size_t cols, double val)
-  : data_(NULL), rows_(rows), cols_(cols)
+  : rows_(rows), cols_(cols)
 {
   if (rows>0 && cols>0)
   {
@@ -94,7 +94,7 @@ Matrix::Matrix (size_t rows, size_t cols, double val)
       throw std::overflow_error("rows*cols exceeds SIZE_MAX");
 
     size_t alloc_size=rows*cols;
-    data_ = new double[alloc_size];
+    data_.resize(alloc_size);
     for (size_t i=0; i<alloc_size; ++i)
       data_[i]=val;
   }
@@ -117,7 +117,7 @@ Matrix::Matrix (size_t rows, size_t cols, double val)
  *        \c COLUMN_MAJOR.  Default is \c ROW_MAJOR.
  */
 Matrix::Matrix (size_t rows, size_t cols, const double *data, Majorness layout)
-  : data_(NULL), rows_(rows), cols_(cols)
+  : rows_(rows), cols_(cols)
 {
   if (rows>0 && cols>0)
   {
@@ -127,13 +127,13 @@ Matrix::Matrix (size_t rows, size_t cols, const double *data, Majorness layout)
       throw std::overflow_error("rows*cols exceeds max element count");
 
     size_t alloc_size=rows*cols;
-    data_=new double[alloc_size];
     if (layout==ROW_MAJOR)
     {
-      memcpy(data_, data, alloc_size*sizeof(double));
+      data_.insert(data_.begin(), &(data[0]), &(data[alloc_size]));
     }
     else
     {
+      data_.resize(alloc_size);
       for (size_t i=0; i<rows; ++i)
       {
         for (size_t j=0; j<cols; ++j)
@@ -163,25 +163,20 @@ Matrix::Matrix (size_t rows, size_t cols, const double *data, Majorness layout)
  */
 Matrix::Matrix (size_t rows, size_t cols, const std::vector<double> &data, 
                 Majorness layout)
-  : data_(NULL), rows_(rows), cols_(cols)
+  : rows_(rows), cols_(cols)
 {
   if (rows>0 && cols>0)
   {
     if (rows > SIZE_MAX_/cols)
       throw std::overflow_error("rows*cols exceeds SIZE_MAX");
 
-    size_t alloc_size=rows*cols;
-    data_=new double[alloc_size];
-
     if (layout==ROW_MAJOR)
     {
-      for (size_t i=0; i<alloc_size; ++i)
-      {
-        data_[i]=data[i];
-      }
+      data_.insert(data_.begin(), data.begin(), data.end());
     }
     else
     {
+      data_.resize(rows*cols);
       for (size_t i=0; i<rows; ++i)
       {
         for (size_t j=0; j<cols; ++j)
@@ -206,23 +201,8 @@ Matrix::Matrix (size_t rows, size_t cols, const std::vector<double> &data,
  * \param A
  */
 Matrix::Matrix (const Matrix &A)
-  : data_(NULL), rows_(A.rows_), cols_(A.cols_)
-{
-  if (A.rows_>0 && A.cols_>0)
-  {
-    if (A.rows_ > SIZE_MAX_/A.cols_)
-      throw std::overflow_error("rows*cols exceeds SIZE_MAX");
-      
-    int alloc_size=A.rows_*A.cols_;
-    data_ = new double[alloc_size];
-    memcpy(data_, A.data_, alloc_size*sizeof(double));
-  }
-  else
-  {
-    rows_=0;
-    cols_=0;
-  }
-}
+  : data_(A.data_), rows_(A.rows_), cols_(A.cols_)
+{ }
 
 /**
  * Assignment operator.
@@ -235,17 +215,9 @@ Matrix& Matrix::operator= (const Matrix &A)
 {
   if (this != &A)
   {
-    size_t alloc_size=A.size();
-    if (size() != alloc_size)
-    {
-      clear();
-      data_ = new double[alloc_size];
-    }
-
+    data_ = A.data_;
     rows_ = A.rows_;
     cols_ = A.cols_;
-
-    memcpy(data_, A.data_, alloc_size*sizeof(double));
   }
   return *this;
 }
@@ -255,8 +227,7 @@ Matrix& Matrix::operator= (const Matrix &A)
  */
 void Matrix::clear()
 {
-  delete[] data_;
-  data_=NULL;
+  data_.clear();
   rows_=0;
   cols_=0;
 }
@@ -288,25 +259,9 @@ void Matrix::resize(size_t rows, size_t cols)
   if (rows > SIZE_MAX_/cols)
     throw std::overflow_error("rows*cols exceeds max element count");
 
-  size_t new_size=rows*cols;
-
-  double *old_data=data_;
-  size_t old_cols=cols_;
-  size_t copy_rows=(rows<rows_ ? rows : rows_);
-  size_t copy_cols=(cols<cols_ ? cols : cols_);
-
-  data_=new double[new_size];
-  rows_=rows;
-  cols_=cols;
-  
-  for (size_t i=0; i<copy_rows; ++i)
-  {
-    for (size_t j=0; j<copy_cols; ++j)
-    {
-      data_[i*cols_+j]=old_data[i*old_cols+j];
-    }
-  }
-  delete[] old_data;
+  data_.resize(rows*cols);
+  rows_ = rows;
+  cols_ = cols;
 }
 
 /**

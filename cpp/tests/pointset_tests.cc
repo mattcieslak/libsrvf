@@ -30,6 +30,23 @@ BOOST_AUTO_TEST_CASE(ctor_test1)
   }
 }
 
+BOOST_AUTO_TEST_CASE(push_test1)
+{
+  std::vector<double> v(3,0.2);
+  srvf::Pointset S;
+
+  for (int i=1; i<=5; ++i)
+  {
+    S.push(v);
+    BOOST_CHECK_EQUAL(S.dim(),3);
+    BOOST_CHECK_EQUAL(S.npts(),i);
+    for (size_t j=0; j<v.size(); ++j)
+    {
+      BOOST_CHECK_EQUAL(S(S.npts()-1,j), v[j]);
+    }
+  }
+}
+
 BOOST_AUTO_TEST_CASE(distance_and_dot_product_test1)
 {
   double points_data[] = 

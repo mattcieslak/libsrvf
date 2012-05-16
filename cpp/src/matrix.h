@@ -66,9 +66,6 @@ public:
     return I;
   }
 
-  /** Destructor. */
-  ~Matrix () { delete[] data_; }
-
   /** Returns the number of rows in this \c Matrix. */
   size_t rows() const 
   { return rows_; }
@@ -133,11 +130,11 @@ public:
   { return data_[r*cols_+c]; }
 
   /** Returns a pointer to the raw data for this \c Matrix. */
-  double* data()
+  std::vector<double> &data()
   { return data_; }
 
   /** Returns a \c const pointer to the raw data for this \c Matrix. */
-  const double* data() const 
+  const std::vector<double> &data() const 
   { return data_; }
 
   // In-place elementwise operations
@@ -168,9 +165,9 @@ public:
   friend Matrix transpose(const Matrix &A);
 
 private:
-  double *data_;
-  size_t  rows_;
-  size_t  cols_;
+  std::vector<double> data_;
+  size_t rows_;
+  size_t cols_;
 };
 
 Matrix operator+ (const Matrix &A, const Matrix &B);

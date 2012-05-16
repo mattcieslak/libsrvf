@@ -1,9 +1,10 @@
 #include <boost/test/unit_test.hpp>
 
-#include "qmap.h"
 #include "matrix.h"
+#include "pointset.h"
 #include "plf.h"
 #include "srvf.h"
+#include "qmap.h"
 #include "util.h"
 
 BOOST_AUTO_TEST_SUITE(qmap_tests)
@@ -61,6 +62,29 @@ BOOST_AUTO_TEST_CASE(plf_to_srvf_test2)
     for (size_t j=0; j<2; ++j)
     {
       BOOST_CHECK_CLOSE(Q.samps()(i,j),exp_vals[j*4+i],1e-4);
+    }
+  }
+}
+
+BOOST_AUTO_TEST_CASE(srvf_to_plf_test1)
+{
+  double samps_data[] = {
+    1.0, -1.0, 1.0, -1.0, 
+    -1.0, 1.0, -1.0, 1.0
+  };
+  double exp_data[] = {
+    0.0, M_SQRT2/4.0, 0.0, M_SQRT2/4.0, 0.0, 
+    0.0, -M_SQRT2/4.0, 0.0, -M_SQRT2/4.0, 0.0
+  };
+  std::vector<double> params = srvf::util::linspace(0.0, 1.0, 5);
+  srvf::Pointset samps(2, 4, samps_data, srvf::Pointset::POINT_PER_COLUMN);
+  srvf::Srvf Q(samps, params);
+  srvf::Plf F = srvf_to_plf(Q);
+  for (size_t i=0; i<F.samps().dim(); ++i)
+  {
+    for (size_t j=0; j<F.samps().npts(); ++j)
+    {
+      BOOST_CHECK_SMALL(F.samps()(j,i) - exp_data[5*i+j], 1e-3);
     }
   }
 }
