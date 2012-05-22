@@ -441,26 +441,58 @@ Srvf gamma_action(const Srvf &Q, const Plf &gamma)
  */
 Srvf constant_speed_param(const Srvf &Q)
 {
-  Srvf res(Q);
   double Qnorm = l2_norm(Q);
   double int_width = Q.domain_ub() - Q.domain_lb();
   
-  if (Qnorm == 0.0 || int_width == 0.0) return res;
+  // Check for the zero function
+  if (Qnorm == 0.0 || int_width == 0.0)
+  {
+    return Srvf(Q.domain_lb(), Q.domain_ub(), std::vector<double>(Q.dim(),0.0));
+  }
 
   double v = Qnorm / int_width;
   double v2 = v*v;
-  
+
+  // Initialize result to empty SRVF
+  Srvf Qres;
+  std::vector<double> partial_integrals;
+  size_t last_nonzero=0; bool have_nonzero=false;
+
+  // Build sample points
   for (size_t i=0; i<Q.samps().npts(); ++i)
   {
     double vi = Q.samps().norm(i);
-    double vi2 = vi*vi;
-    double dt = Q.params()[i+1]-Q.params()[i];
+    double dt = Q.params()[i+1] - Q.params()[i];
+    double cur_pi = dt * vi * vi;
 
-    res.params()[i+1] = res.params()[i] + vi2*dt/v2;
-    if (vi > 0.0) res.samps().scale(i, v / vi);
+    if (fabs(cur_pi) < 1e-5) continue;
+
+    if (have_nonzero && Q.samps().nonnegative_scalar_multiples(i,last_nonzero))
+    {
+      partial_integrals[partial_integrals.size()-1] += cur_pi;
+    }
+    else
+    {
+      // Add new sample point and scale it to the correct norm
+      Qres.samps().push(Q.samps()(i));
+      Qres.samps().scale(Qres.samps().npts()-1, v / vi);
+      partial_integrals.push_back(cur_pi);
+    }
+
+    last_nonzero = i;
+    have_nonzero = true;
+  }
+  
+  // Build paramter vector
+  Qres.params().push_back(Q.domain_lb());
+  for (size_t i=0; i<partial_integrals.size(); ++i)
+  {
+    double tlast = Qres.params()[Qres.params().size()-1];
+    double dt = partial_integrals[i] / (v*v);
+    Qres.params().push_back(tlast + dt);
   }
 
-  return res;
+  return Qres;
 }
 
 } // namespace srvf

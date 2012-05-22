@@ -153,6 +153,17 @@ public:
   /** Returns the number of points in the set. */
   size_t npts() const { return data_.rows(); }
 
+  /** Returns a \c vector representing the \a ith point. */
+  std::vector<double> operator() (size_t point_idx) const
+  {
+    std::vector<double> res(dim());
+    for (size_t i=0; i<dim(); ++i)
+    {
+      res[i] = (*this)(point_idx,i);
+    }
+    return res;
+  }
+
   /** Returns component \a comp_idx of point \a point_idx. */
   double& operator() (size_t point_idx, size_t comp_idx)
   { return data_(point_idx,comp_idx); }
@@ -252,6 +263,30 @@ public:
       res[j] /= (double)npts();
     }
     return res;
+  }
+
+  /**
+   * Determines whether or not point \a i1 is equal to the product 
+   * of point \a i2 and a non-negative scalar.
+   *
+   * The result is true if and only if one of these holds:
+   *  - point \a i1 is zero (norm < \a tol), or
+   *  - point \a i2 is zero (norm < \a tol), or
+   *  - after scaling both points to unit norm, their l1 distance 
+   *    is less than \a tol
+   */
+  inline bool nonnegative_scalar_multiples(size_t i1, size_t i2, 
+    double tol=1e-4) const
+  {
+    double n1 = norm(i1), n2 = norm(i2);
+    if (n1 < tol || n2 < tol) return true;
+
+    double d = 0.0;
+    for (size_t i=0; i<dim(); ++i)
+    {
+      d += fabs((*this)(i1,i)/n1 - (*this)(i2,i)/n2);
+    }
+    return (d < tol);
   }
 
   /**

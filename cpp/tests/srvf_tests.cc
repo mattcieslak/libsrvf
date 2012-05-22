@@ -318,4 +318,53 @@ BOOST_AUTO_TEST_CASE(constant_speed_test1)
   }
 }
 
+BOOST_AUTO_TEST_CASE(constant_speed_test2)
+{
+  double samps_data[] = { 1.0, 0.0, 1.0 };
+  double exp_samps[] = { sqrt(2.0/3.0) };
+  double exp_params[] = { 0.0, 1.0 };
+
+  srvf::Pointset samps(1, 3, samps_data);
+  std::vector<double> params = srvf::util::linspace(0.0, 1.0, 4);
+  srvf::Srvf Q(samps, params);
+  srvf::Srvf Qcs = srvf::constant_speed_param(Q);
+
+  BOOST_REQUIRE_EQUAL(Qcs.dim(), Q.dim());
+  BOOST_REQUIRE_EQUAL(Qcs.ncp(), 2);
+  
+  for (size_t i=0; i<Qcs.params().size(); ++i)
+  {
+    BOOST_CHECK_SMALL(Qcs.params()[i] - exp_params[i], 1e-4);
+  }
+  for (size_t i=0; i<Qcs.samps().npts(); ++i)
+  {
+    BOOST_CHECK_SMALL(Qcs.samps()(i,0) - exp_samps[i], 1e-4);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(constant_speed_test3)
+{
+  double samps_data[] = { 1.0, -1.0, 0.0, 1.0, 2.0 };
+  double rsf = sqrt(7.0/5.0);
+  double exp_samps[] = { rsf, -rsf, rsf };
+  double exp_params[] = { 0.0, 1.0/7.0, 2.0/7.0, 1.0 };
+
+  srvf::Pointset samps(1, 5, samps_data);
+  std::vector<double> params = srvf::util::linspace(0.0, 1.0, 6);
+  srvf::Srvf Q(samps, params);
+  srvf::Srvf Qcs = srvf::constant_speed_param(Q);
+
+  BOOST_REQUIRE_EQUAL(Qcs.dim(), Q.dim());
+  BOOST_REQUIRE_EQUAL(Qcs.ncp(), 4);
+  
+  for (size_t i=0; i<Qcs.params().size(); ++i)
+  {
+    BOOST_CHECK_SMALL(Qcs.params()[i] - exp_params[i], 1e-4);
+  }
+  for (size_t i=0; i<Qcs.samps().npts(); ++i)
+  {
+    BOOST_CHECK_SMALL(Qcs.samps()(i,0) - exp_samps[i], 1e-4);
+  }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
