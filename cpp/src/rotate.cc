@@ -99,7 +99,7 @@ static void build_A_(const Srvf &Q1, const Srvf &Q2, gsl_matrix *A)
       for (size_t k=0; k<dim; ++k)
       {
         double vcur = gsl_matrix_get(A, j, k);
-        vcur += Q1vals(i, j) * Q2vals(i, k) * dt;
+        vcur += Q1vals[i][j] * Q2vals[i][k] * dt;
         gsl_matrix_set(A, j, k, vcur);
       }
     }

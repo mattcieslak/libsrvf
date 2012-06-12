@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(shooting_vector_test1)
   }
   for (size_t i=0; i+1<exp_ncp; ++i)
   {
-    BOOST_CHECK_EQUAL(Sv.samps()(i,0), exp_data[i]);
+    BOOST_CHECK_EQUAL(Sv.samps()[i][0], exp_data[i]);
   }
 }
 

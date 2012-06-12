@@ -23,22 +23,6 @@
 namespace srvf
 {
 
-struct Point
-{
-  Point(double x)
-   : x(x), y(0.0), z(0.0)
-  { }
-  Point(double x, double y)
-   : x(x), y(y), z(0.0)
-  { }
-  Point(double x, double y, double z)
-   : x(x), y(y), z(z)
-  { }
-
-  double x;
-  double y;
-  double z;
-};
 
 struct Color
 {
@@ -50,6 +34,7 @@ struct Color
   float green;
   float blue;
 };
+
 
 enum DrawingMode
 {

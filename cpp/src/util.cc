@@ -17,6 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+#include <cstdlib>
+#include <time.h>
 #include <algorithm>
 #include <stdexcept>
 
@@ -46,6 +48,27 @@ std::vector<double> linspace(double a, double b, size_t n)
   }
   return R;
 }
+
+
+std::vector<double> random_vector(size_t len, double first, int dir)
+{
+  //unsigned int seed = (unsigned int)time(NULL);
+  //srandom(seed);
+  std::vector<double> res(len);
+
+  res[0] = first;
+  for (size_t i=1; i<len; ++i)
+  {
+    if (dir > 0)
+      res[i] = res[i-1] + ((double)random()) / (RAND_MAX);
+    else if (dir < 0)
+      res[i] = res[i-1] - ((double)random()) / (RAND_MAX);
+    else
+      res[i] = ((double)random()) / (RAND_MAX);
+  }
+  return res;
+}
+
 
 /**
  * Returns a new \c vector containing unique elements of \a v1 and \a v2, 

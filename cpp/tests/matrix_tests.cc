@@ -311,6 +311,17 @@ BOOST_AUTO_TEST_CASE(matmul_test1)
   }
 }
 
+BOOST_AUTO_TEST_CASE(product_matvec_test1)
+{
+  srvf::Matrix A = srvf::Matrix::identity(2);
+  srvf::Point P1(2,1.0);
+  srvf::Point P2 = product(A, P1);
+  srvf::Point P3 = product(P1, A);
+
+  BOOST_REQUIRE_EQUAL((P1 == P2), true);
+  BOOST_REQUIRE_EQUAL((P1 == P3), true);
+}
+
 BOOST_AUTO_TEST_CASE(transpose_test1)
 {
   srvf::Matrix A(2,3);

@@ -17,8 +17,8 @@ BOOST_AUTO_TEST_CASE(ctor_test1)
 
   srvf::Pointset samps(2,1);
   z1.evaluate(0.5, samps);
-  BOOST_CHECK_EQUAL(samps(0,0), 0.25);
-  BOOST_CHECK_EQUAL(samps(0,1), 0.25);
+  BOOST_CHECK_EQUAL(samps[0][0], 0.25);
+  BOOST_CHECK_EQUAL(samps[0][1], 0.25);
 }
 
 BOOST_AUTO_TEST_CASE(evaluate_test1)
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(evaluate_test1)
   {
     for (size_t j=0; j<result.dim(); ++j)
     {
-      BOOST_CHECK_CLOSE(result(i,j),exp[j*ntv+i],1e-9);
+      BOOST_CHECK_CLOSE(result[i][j],exp[j*ntv+i],1e-9);
     }
   }
 }
@@ -187,7 +187,7 @@ BOOST_AUTO_TEST_CASE(rotate_test1)
   {
     for (size_t j=0; j<Q.samps().dim(); ++j)
     {
-      BOOST_CHECK_CLOSE(Q.samps()(i,j),exp_data[j*(ncp-1)+i],1e-3);
+      BOOST_CHECK_CLOSE(Q.samps()[i][j],exp_data[j*(ncp-1)+i],1e-3);
     }
   }
 }
@@ -223,7 +223,7 @@ BOOST_AUTO_TEST_CASE(linear_combination_test1)
   }
   for (size_t i=0; i<exp_ncp-1; ++i)
   {
-    BOOST_CHECK_CLOSE(Q.samps()(i,0),exp_samps[i],1e-9);
+    BOOST_CHECK_CLOSE(Q.samps()[i][0],exp_samps[i],1e-9);
   }
 }
 
@@ -253,7 +253,7 @@ BOOST_AUTO_TEST_CASE(refinement_test1)
   }
   for (size_t i=0; i<exp_ncp-1; ++i)
   {
-    BOOST_CHECK_CLOSE(Qr.samps()(i,0),exp_samps[i],1e-9);
+    BOOST_CHECK_CLOSE(Qr.samps()[i][0],exp_samps[i],1e-9);
   }
 }
 
@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(gamma_action_test1)
   }
   for (size_t i=0; i<exp_ncp-1; ++i)
   {
-    BOOST_CHECK_CLOSE(Qgamma.samps()(i,0),exp_samps[i],1e-3);
+    BOOST_CHECK_CLOSE(Qgamma.samps()[i][0],exp_samps[i],1e-3);
   }
 }
 
@@ -314,7 +314,7 @@ BOOST_AUTO_TEST_CASE(constant_speed_test1)
   }
   for (size_t i=0; i<Qcs.samps().npts(); ++i)
   {
-    BOOST_CHECK_SMALL(Qcs.samps()(i,0) - exp_samps[i], 1e-4);
+    BOOST_CHECK_SMALL(Qcs.samps()[i][0] - exp_samps[i], 1e-4);
   }
 }
 
@@ -338,7 +338,7 @@ BOOST_AUTO_TEST_CASE(constant_speed_test2)
   }
   for (size_t i=0; i<Qcs.samps().npts(); ++i)
   {
-    BOOST_CHECK_SMALL(Qcs.samps()(i,0) - exp_samps[i], 1e-4);
+    BOOST_CHECK_SMALL(Qcs.samps()[i][0] - exp_samps[i], 1e-4);
   }
 }
 
@@ -363,7 +363,7 @@ BOOST_AUTO_TEST_CASE(constant_speed_test3)
   }
   for (size_t i=0; i<Qcs.samps().npts(); ++i)
   {
-    BOOST_CHECK_SMALL(Qcs.samps()(i,0) - exp_samps[i], 1e-4);
+    BOOST_CHECK_SMALL(Qcs.samps()[i][0] - exp_samps[i], 1e-4);
   }
 }
 

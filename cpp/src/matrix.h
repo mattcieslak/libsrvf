@@ -22,6 +22,9 @@
 #include <vector>
 #include <cmath>
 
+#include "point.h"
+
+
 namespace srvf
 {
 
@@ -160,6 +163,8 @@ public:
 
   // Matrix multiplication
   friend Matrix product(const Matrix &A, const Matrix &B);
+  friend Point  product(const Matrix &A, const Point &v);
+  friend Point  product(const Point &v, const Matrix &A);
 
   // Related matrices
   friend Matrix transpose(const Matrix &A);
@@ -179,6 +184,8 @@ Matrix operator- (const Matrix &A, double v);
 Matrix operator* (const Matrix &A, double v);
 Matrix operator/ (const Matrix &A, double v);
 Matrix product (const Matrix &A, const Matrix &B);
+Point  product (const Matrix &A, const Point &v);
+Point  product (const Point &v, const Matrix &A);
 Matrix transpose(const Matrix &A);
 
 } // namespace srvf

@@ -108,7 +108,7 @@ match_cost (const Srvf &Q1, size_t Q1i1, size_t Q1i2,
     double s = 0.0;
     for (size_t j=0; j<dim; ++j)
     {
-      double dqi = Q1.samps()(i1,j) - rslope * Q2.samps()(i2,j);
+      double dqi = Q1.samps()[i1][j] - rslope * Q2.samps()[i2][j];
       s += dqi * dqi;
     }
     double dt = t1next-t1prev;

@@ -20,8 +20,8 @@ BOOST_AUTO_TEST_CASE(evaluate_test1)
   for (size_t i=0; i<5; ++i)
   {
     F.evaluate(tv[i],Ftv2);
-    BOOST_CHECK_EQUAL(Ftv1(i,0),expdata[i]);
-    BOOST_CHECK_EQUAL(Ftv2(0,0),expdata[i]);
+    BOOST_CHECK_EQUAL(Ftv1[i][0],expdata[i]);
+    BOOST_CHECK_EQUAL(Ftv2[0][0],expdata[i]);
   }
 }
 
@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(evaluate_test2)
   {
     for (size_t j=0; j<500; ++j)
     {
-      X(j,i)=(double)j;
+      X[j][i]=(double)j;
     }
   }
   srvf::Plf F(X,uv);
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(evaluate_test2)
     for (size_t j=0; j<999; ++j)
     {
       double ev=(double)(j) * 499.0 / 998.0;
-      BOOST_CHECK_CLOSE(ev,res(j,i),1e-5);
+      BOOST_CHECK_CLOSE(ev,res[j][i],1e-5);
     }
   }
 }
@@ -97,13 +97,13 @@ BOOST_AUTO_TEST_CASE(translate_test1)
   srvf::Pointset samps(3,20,0.0);
   srvf::Plf F(samps);
   double v_data[]={1.0,2.0,3.0};
-  std::vector<double> v(&v_data[0],&v_data[3]);
+  srvf::Point v(&v_data[0],&v_data[3]);
   F.translate(v);
   for (size_t i=0; i<F.samps().npts(); ++i)
   {
     for (size_t j=0; j<F.samps().dim(); ++j)
     {
-      BOOST_CHECK_EQUAL(F.samps()(i,j),v[j]);
+      BOOST_CHECK_EQUAL(F.samps()[i][j],v[j]);
     }
   }
 }
@@ -121,8 +121,8 @@ BOOST_AUTO_TEST_CASE(rotate_test1)
   F.rotate(R);
   for (size_t i=0; i<F.samps().npts(); ++i)
   {
-    BOOST_CHECK_EQUAL(F.samps()(i,0),-1.0);
-    BOOST_CHECK_EQUAL(F.samps()(i,1),1.0);
+    BOOST_CHECK_EQUAL(F.samps()[i][0],-1.0);
+    BOOST_CHECK_EQUAL(F.samps()[i][1],1.0);
   }
 }
 
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(scale_test1)
   {
     for (size_t j=0; j<F.samps().dim(); ++j)
     {
-      BOOST_CHECK_EQUAL(F.samps()(i,j),2.0);
+      BOOST_CHECK_EQUAL(F.samps()[i][j],2.0);
     }
   }
 }
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(linear_combination_test1)
   BOOST_REQUIRE_EQUAL(Fr.ncp(),8);
   for (size_t i=0; i<8; ++i)
   {
-    BOOST_CHECK_EQUAL(Fr.samps()(i,0),0.5);
+    BOOST_CHECK_EQUAL(Fr.samps()[i][0],0.5);
     BOOST_CHECK_EQUAL(Fr.params()[i],exp_params_data[i]);
   }
 }
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(composition_test1)
   for (size_t i=0; i<n3; ++i)
   {
     BOOST_CHECK_EQUAL(F12.params()[i],exp_params[i]);
-    BOOST_CHECK_EQUAL(F12.samps()(i,0),exp_samps[i]);
+    BOOST_CHECK_EQUAL(F12.samps()[i][0],exp_samps[i]);
   }
 }
 
@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE(inverse_test1)
   for (size_t i=0; i<nexp; ++i)
   {
     BOOST_CHECK_EQUAL(Fi.params()[i],samps_data[i]);
-    BOOST_CHECK_EQUAL(Fi.samps()(i,0),params_data[i]);
+    BOOST_CHECK_EQUAL(Fi.samps()[i][0],params_data[i]);
   }
 }
 

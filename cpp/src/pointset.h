@@ -21,8 +21,11 @@
 
 #include <cmath>
 #include <vector>
+#include <iterator>
+#include <algorithm>
 #include <stdexcept>
 
+#include "point.h"
 #include "matrix.h"
 
 namespace srvf
@@ -34,6 +37,14 @@ namespace srvf
 class Pointset
 {
 public:
+
+  typedef Point value_type;
+  typedef Point* pointer;
+  typedef const Point* const_pointer;
+  typedef Point& reference;
+  typedef const Point& const_reference;
+  typedef size_t size_type;
+  typedef ptrdiff_t difference_type;
   
   /**
    * Indicates how a matrix containing sample points should be interpreted.
@@ -46,7 +57,7 @@ public:
   /**
    * Creates an empty pointset.
    */
-  Pointset () { }
+  Pointset() { }
 
   /**
    * Creates a new \c Pointset with the given size.
@@ -57,7 +68,7 @@ public:
    * \param npts the number of points
    */
   Pointset (size_t dim, size_t npts)
-   : data_(npts,dim)
+   : data_(npts, Point(dim, 0.0))
   { }
 
   /**
@@ -71,7 +82,7 @@ public:
    * \param v all components of all points will be set to this value
    */
   Pointset (size_t dim, size_t npts, double v)
-   : data_(npts,dim,v)
+   : data_(npts, Point(dim, v))
   { }
 
   /**
@@ -81,15 +92,20 @@ public:
    * \param packing indicates how the points are stored in \a data
    */
   Pointset (const Matrix &points, PackingMethod packing=POINT_PER_ROW)
+   : data_( (packing==POINT_PER_ROW ? points.rows() : points.cols()), 
+       Point(packing==POINT_PER_ROW ? points.cols() : points.rows()) )
   { 
-    // Internally, Pointsets always use point per row
     if (packing==POINT_PER_ROW)
     {
-      data_=points;
+      for (size_t i=0; i<points.rows(); ++i)
+        for (size_t j=0; j<points.cols(); ++j)
+          data_[i][j] = points(i, j);
     }
     else
     {
-      data_=transpose(points);
+      for (size_t i=0; i<points.cols(); ++i)
+        for (size_t j=0; j<points.rows(); ++j)
+          data_[i][j] = points(j, i);
     }
   }
 
@@ -106,20 +122,24 @@ public:
   Pointset (size_t dim, size_t npts, 
             const std::vector<double> &data, 
             PackingMethod packing=POINT_PER_ROW)
+   : data_(npts, Point(dim))
   {
-    if (dim==0 || npts==0)
-    {
-      return;
-    }
+    if (dim==0 || npts==0) return;
     if (npts != data.size()/dim)
-    {
       throw std::invalid_argument("data.size() != dim*npts");
+    
+    if (packing==POINT_PER_ROW)
+    {
+      for (size_t i=0; i<npts; ++i)
+        for (size_t j=0; j<dim; ++j)
+          data_[i][j] = data[i*dim + j];
     }
-
-    Matrix::Majorness majorness = 
-      (packing==POINT_PER_ROW ? Matrix::ROW_MAJOR : Matrix::COLUMN_MAJOR);
-
-    data_ = Matrix(npts,dim,data,majorness);
+    else
+    {
+      for (size_t i=0; i<npts; ++i)
+        for (size_t j=0; j<dim; ++j)
+          data_[i][j] = data[j*npts + i];
+    }
   }
 
   /** 
@@ -135,60 +155,58 @@ public:
   Pointset (size_t dim, size_t npts, 
             const double *data, 
             PackingMethod packing=POINT_PER_ROW)
+   : data_(npts, Point(dim))
   {
-    if (dim==0 || npts==0)
-      return;
-    if (!data)
-      throw std::invalid_argument("data is NULL");
+    if (dim==0 || npts==0) return;
+    if (!data) throw std::invalid_argument("data is NULL");
 
-    Matrix::Majorness majorness = 
-      (packing==POINT_PER_ROW ? Matrix::ROW_MAJOR : Matrix::COLUMN_MAJOR);
-
-    data_ = Matrix(npts,dim,data,majorness);
+    if (packing==POINT_PER_ROW)
+    {
+      for (size_t i=0; i<npts; ++i)
+        for (size_t j=0; j<dim; ++j)
+          data_[i][j] = data[i*dim + j];
+    }
+    else
+    {
+      for (size_t i=0; i<npts; ++i)
+        for (size_t j=0; j<dim; ++j)
+          data_[i][j] = data[j*npts + i];
+    }
   }
 
   /** Return the dimension of the space containing the points. */
-  size_t dim() const { return data_.cols(); }
+  inline size_t dim() const { return (!data_.empty() ? data_[0].dim() : 0); }
 
   /** Returns the number of points in the set. */
-  size_t npts() const { return data_.rows(); }
+  inline size_t npts() const { return data_.size(); }
 
-  /** Returns a \c vector representing the \a ith point. */
-  std::vector<double> operator() (size_t point_idx) const
+  /** Returns a reference to the specified point. */
+  inline Point &operator[] (size_t idx)
   {
-    std::vector<double> res(dim());
-    for (size_t i=0; i<dim(); ++i)
-    {
-      res[i] = (*this)(point_idx,i);
-    }
-    return res;
+    if (idx >= npts()) throw std::out_of_range("Point index out of range.");
+    return data_[idx];
   }
 
-  /** Returns component \a comp_idx of point \a point_idx. */
-  double& operator() (size_t point_idx, size_t comp_idx)
-  { return data_(point_idx,comp_idx); }
-
-  /** Returns component \a comp_idx of point \a point_idx. */
-  const double& operator() (size_t point_idx, size_t comp_idx) const
-  { return data_(point_idx,comp_idx); }
+  /** Returns a \c const reference to the specified point. */
+  const inline Point &operator[] (size_t idx) const
+  {
+    if (idx >= npts()) throw std::out_of_range("Point index out of range.");
+    return data_[idx];
+  }
 
   /** Append a new point to the end of this pointset. */
-  void push(const std::vector<double> &P)
+  inline void push_back(const Point &P)
   {
-    if (dim()>0 && P.size() != dim())
+    if (dim()>0 && P.dim() != dim())
       throw std::invalid_argument("New point has wrong dimension.");
 
-    data_.resize(npts()+1, P.size());
-    for (size_t i=0; i<P.size(); ++i)
-    {
-      data_(npts()-1,i) = P[i];
-    }
+    data_.push_back(P);
   }
 
   /** Remove the last point from this pointset. */
-  void pop()
+  inline void pop()
   {
-    if (npts()>0) data_.resize(npts()-1,dim());
+    if (!data_.empty()) data_.pop_back();
   }
 
   /** 
@@ -198,15 +216,13 @@ public:
    * \param i2 index of the second point
    * \return the Euclidean distance between the two points
    */
-  double distance(size_t i1, size_t i2) const
+  inline double distance(size_t i1, size_t i2) const
   {
-    double d=0.0;
-    for (size_t i=0; i<dim(); ++i)
-    {
-      double dxi=data_(i1,i)-data_(i2,i);
-      d += dxi*dxi;
-    }
-    return sqrt(d);
+    if (i1 >= npts()) throw std::out_of_range("i1 out of range");
+    if (i2 >= npts()) throw std::out_of_range("i2 out of range");
+
+    if (i1 == i2) return 0.0;
+    else return data_[i1].distance_to(data_[i2]);
   }
 
   /** 
@@ -216,14 +232,12 @@ public:
    * \param i2 index of the second point
    * \return the dot product of the two points
    */
-  double dot_product(size_t i1, size_t i2) const
+  inline double dot_product(size_t i1, size_t i2) const
   {
-    double ip=0.0;
-    for (size_t i=0; i<dim(); ++i)
-    {
-      ip += data_(i1,i)*data_(i2,i);
-    }
-    return ip;
+    if (i1 >= npts()) throw std::out_of_range("i1 out of range");
+    if (i2 >= npts()) throw std::out_of_range("i2 out of range");
+
+    return data_[i1].dot_product(data_[i2]);
   }
 
   /**
@@ -232,36 +246,24 @@ public:
    * \param idx an index between 0 and \c npts()-1, inclusive
    * \result the norm of the point with index \a idx
    */
-  double norm(size_t idx) const
+  inline double norm(size_t idx) const
   {
-    double nrm=0.0;
-    for (size_t i=0; i<dim(); ++i)
-    {
-      nrm += data_(idx,i)*data_(idx,i);
-    }
-    return sqrt(nrm);
+    if (idx >= npts()) throw std::out_of_range("idx out of range");
+    return data_[idx].norm();
   }
 
   /**
    * Computes the centroid of this \c Pointset.
    */
-  std::vector<double> centroid() const
+  Point centroid() const
   {
-    std::vector<double> res(dim(),0.0);
+    Point res(dim(), 0.0);
     if (npts() < 1) return res;
 
     for (size_t i=0; i<npts(); ++i)
-    {
-      for (size_t j=0; j<dim(); ++j)
-      {
-        res[j] += data_(i,j);
-      }
-    }
+      res += data_[i];
 
-    for (size_t j=0; j<dim(); ++j)
-    {
-      res[j] /= (double)npts();
-    }
+    res /= (double)npts();
     return res;
   }
 
@@ -275,18 +277,12 @@ public:
    *  - after scaling both points to unit norm, their l1 distance 
    *    is less than \a tol
    */
-  inline bool nonnegative_scalar_multiples(size_t i1, size_t i2, 
-    double tol=1e-4) const
+  inline bool on_same_ray(size_t i1, size_t i2, double tol=1e-4) const
   {
-    double n1 = norm(i1), n2 = norm(i2);
-    if (n1 < tol || n2 < tol) return true;
+    if (i1 >= npts()) throw std::out_of_range("i1 out of range");
+    if (i2 >= npts()) throw std::out_of_range("i2 out of range");
 
-    double d = 0.0;
-    for (size_t i=0; i<dim(); ++i)
-    {
-      d += fabs((*this)(i1,i)/n1 - (*this)(i2,i)/n2);
-    }
-    return (d < tol);
+    return data_[i1].on_same_ray(data_[i2], tol);
   }
 
   /**
@@ -305,9 +301,9 @@ public:
       for (size_t j=0; j<dim(); ++j)
       {
         if (packing==POINT_PER_ROW)
-          res[i*dim()+j]=data_(i,j);
+          res[i*dim()+j]=data_[i][j];
         else
-          res[j*npts()+i]=data_(i,j);
+          res[j*npts()+i]=data_[i][j];
       }
     }
     return res;
@@ -319,12 +315,11 @@ public:
    * \param idx the index of the point to be translated
    * \param v a \c vector with size equal to the dimension of this \c Pointset
    */
-  void translate (size_t idx, const std::vector<double> &v)
+  void translate (size_t idx, const Point &v)
   {
-    for (size_t i=0; i<data_.cols(); ++i)
-    {
-      data_(idx,i) += v[i];
-    }
+    if (idx >= npts()) throw std::out_of_range("idx out of range");
+
+    data_[idx] += v;
   }
 
   /**
@@ -332,12 +327,10 @@ public:
    *
    * \param v a \c vector with size equal to the dimension of this \c Pointset
    */
-  void translate (const std::vector<double> &v)
+  void translate (const Point &v)
   {
     for (size_t i=0; i<npts(); ++i)
-    {
-      translate (i, v);
-    }
+      translate(i, v);
   }
 
   /**
@@ -348,23 +341,24 @@ public:
    */
   void rotate (int idx, const Matrix &R)
   {
-    // TODO
-    throw std::logic_error("not implemented");
+    if (idx >= npts()) throw std::out_of_range("idx out of range");
+    if (R.cols() != dim()) throw std::invalid_argument("size mismatch: R");
+    
+    data_[idx] = product(R, data_[idx]);
   }
 
   /**
    * Apply a rotation to each point in this \c Pointset.
    *
-   * \param R a rotation matrix
+   * \param R a rotation matrix having the same dimension as the 
+   *   points in this \c Pointset
    */
   void rotate (const Matrix &R)
   {
-    // Each point is a row in the matrix, so multiply on right by 
-    // the inverse (transpose) of R.
-    // TODO: do the multiplication in place like rather than explicitly 
-    // creating Rt
-    Matrix Rt=transpose(R);
-    data_ = product(data_,Rt);
+    if (R.cols() != dim()) throw std::invalid_argument("size mismatch: R");
+
+    for (size_t i=0; i<npts(); ++i)
+      data_[i] = product(R, data_[i]);
   }
 
   /**
@@ -375,10 +369,9 @@ public:
    */
   void scale (size_t idx, double sf)
   {
-    for (size_t i=0; i<data_.cols(); ++i)
-    {
-      data_(idx,i) *= sf;
-    }
+    if (idx >= npts()) throw std::out_of_range("idx out of range");
+
+    data_[idx] *= sf;
   }
 
   /**
@@ -388,12 +381,133 @@ public:
    */
   void scale (double sf)
   {
-    data_ *= sf;
+    for (size_t i=0; i<npts(); ++i)
+      data_[i] *= sf;
+  }
+
+
+  /**
+   * An iterator that iterates over a single component of this \c Pointset.
+   */
+  class component_iterator
+   : public std::iterator<std::random_access_iterator_tag, double>
+  {
+    friend class Pointset;
+
+  public:
+
+    bool operator== (const component_iterator &A) const
+    { 
+      return ( ((S_) == (A.S_)) && (point_idx_ == A.point_idx_) && 
+               (comp_idx_ == A.comp_idx_) ); 
+    }
+    bool operator!= (const component_iterator &A) const
+    { return !( (*this) == A ); }
+
+    bool operator< (const component_iterator &A) const
+    { return (((S_) == (A.S_)) && (point_idx_ < A.point_idx_)
+      && (comp_idx_ == A.comp_idx_)); }
+    bool operator<= (const component_iterator &A) const
+    { return (((S_) == (A.S_)) && (point_idx_ <= A.point_idx_)
+      && (comp_idx_ == A.comp_idx_)); }
+
+    bool operator> (const component_iterator &A) const
+    { return (((S_) == (A.S_)) && (point_idx_ > A.point_idx_)
+      && (comp_idx_ == A.comp_idx_)); }
+    bool operator>= (const component_iterator &A) const
+    { return (((S_) == (A.S_)) && (point_idx_ >= A.point_idx_)
+      && (comp_idx_ == A.comp_idx_)); }
+
+    component_iterator &operator++ ()
+    { point_idx_ = std::min( point_idx_ + 1, (ptrdiff_t)S_->npts() ); }
+    component_iterator operator++ (int)
+    { 
+      component_iterator tmp(*this); 
+      point_idx_ = std::min( point_idx_ + 1, (ptrdiff_t)S_->npts() ); 
+      return tmp;
+    }
+
+    component_iterator &operator-- ()
+    { point_idx_ = std::max(point_idx_-1, -1); return *this; }
+    component_iterator operator-- (int)
+    { component_iterator tmp(*this);  
+      point_idx_ = std::max(point_idx_-1, -1);  return tmp; }
+
+    component_iterator operator+ (ptrdiff_t n) const
+    { return component_iterator(
+        S_, comp_idx_, std::min(point_idx_+n, (ptrdiff_t)S_->npts())); }
+    component_iterator &operator+= (ptrdiff_t n)
+    { point_idx_ = std::min(point_idx_+n, (ptrdiff_t)S_->npts());  
+      return *this; }
+
+    component_iterator operator- (ptrdiff_t n) const
+    { return component_iterator(
+        S_, comp_idx_, std::max(point_idx_-n, -1)); }
+    component_iterator &operator-= (ptrdiff_t n)
+    { point_idx_ = std::max(point_idx_-n, -1); return *this; }
+
+    ptrdiff_t operator- (const component_iterator &A)
+    { return (point_idx_ - A.point_idx_); }
+
+    double& operator* ()
+    {
+      // Bounds checking done in Pointset, exceptions propagate to caller
+      return (*S_)[point_idx_][comp_idx_];
+    }
+
+    double& operator[] (ptrdiff_t n)
+    {
+      // Bounds checking done in Pointset, exceptions propagate to caller
+      return (*S_)[point_idx_+n][comp_idx_];
+    }
+
+  private:
+    
+    component_iterator(Pointset *S, ptrdiff_t comp_idx, ptrdiff_t point_idx)
+     : S_(S), comp_idx_(comp_idx), point_idx_(point_idx)
+    { }
+
+    Pointset *S_;
+    ptrdiff_t comp_idx_;
+    ptrdiff_t point_idx_;
+  };
+
+
+  /**
+   * Returns an iterator to iterate over the points in this \c Pointset.
+   */
+  std::vector<Point>::iterator begin_points()
+  {
+    return data_.begin();
+  }
+
+  /**
+   * Returns a past-the-end value for the points iterator.
+   */
+  std::vector<Point>::iterator end_points()
+  {
+    return data_.end();
+  }
+
+  /**
+   * Returns an iterator for a single component of this \c Pointset.
+   */
+  component_iterator begin_component(size_t comp_idx)
+  {
+    return component_iterator(this, comp_idx, 0);
+  }
+
+  /**
+   * Returns a past-the-end iterator for the specified component.
+   */
+  component_iterator end_component(size_t comp_idx)
+  {
+    return component_iterator(this, comp_idx, npts());
   }
 
 private:
   
-  Matrix data_;
+  std::vector<Point> data_;
 };
 
 /**
@@ -409,15 +523,7 @@ private:
  */
 inline double distance(const Pointset &S1, const Pointset &S2, int i1, int i2)
 {
-  size_t dim=S1.dim();
-  double d=0.0;
-
-  for (size_t i=0; i<dim; ++i)
-  {
-    double dxi=S1(i1,i)-S1(i2,i);
-    d += dxi*dxi;
-  }
-  return sqrt(d);
+  return S1[i1].distance_to(S2[i2]);
 }
 
 /**
@@ -430,18 +536,10 @@ inline double distance(const Pointset &S1, const Pointset &S2, int i1, int i2)
  * \return the distance between point \a i1 in \a S1 and point 
  *         \a i2 in \a S2.
  */
-inline double dot_product (
-  const Pointset &S1, const Pointset &S2, 
-  size_t i1, size_t i2)
+inline double 
+dot_product ( const Pointset &S1, const Pointset &S2, size_t i1, size_t i2)
 {
-  size_t dim=S1.dim();
-  double ip=0.0;
-
-  for (size_t i=0; i<dim; ++i)
-  {
-    ip += S1(i1,i)*S2(i2,i);
-  }
-  return ip;
+  return S1[i1].dot_product(S2[i2]);
 }
 
 /**
@@ -466,10 +564,7 @@ inline void weighted_sum(
   if (S1.dim()!=S2.dim() || S2.dim()!=S3.dim())
     throw std::invalid_argument("Dimension mismatch");
   
-  for (size_t i=0; i<S1.dim(); ++i)
-  {
-    S3(i3,i) = w1*S1(i1,i) + w2*S2(i2,i);
-  }
+  S3[i3] = (S1[i1]*w1) + (S2[i2]*w2);
 }
 
 } // namespace srvf

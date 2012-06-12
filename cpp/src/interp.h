@@ -19,6 +19,7 @@
 #ifndef SRVF_INTERP_H
 #define SRVF_INTERP_H 1
 
+#include "point.h"
 #include "pointset.h"
 #include "matrix.h"
 
@@ -79,16 +80,16 @@ inline int lookup(const Pointset &table, double t)
 
   if (n>=2)
   {
-    if (t<table(0,0)) return 0;
-    else if (t>=table(n-1,0)) return n-1;
+    if (t<table[0][0]) return 0;
+    else if (t>=table[n-1][0]) return n-1;
     else
     {
       size_t i1=0, i3=n-2;
       size_t i2=(i1+i3)/2;
       while(i1<i3)
       {
-        if (t<table(i2,0)) i3=i2;
-        else if (t>=table(i2+1,0)) i1=i2+1;
+        if (t<table[i2][0]) i3=i2;
+        else if (t>=table[i2+1][0]) i1=i2+1;
         else break;
 
         i2=(i1+i3)/2;
@@ -178,7 +179,7 @@ inline void interp_linear (const std::vector<double> &samps,
     throw std::invalid_argument("params and samps must have same size");
 
   size_t idx=0;
-  if (params.npts()>1 && tv[0]>params(1,0))
+  if (params.npts()>1 && tv[0]>params[1][0])
   {
     idx=lookup(params, tv[0]);
   }
@@ -186,19 +187,19 @@ inline void interp_linear (const std::vector<double> &samps,
   for (size_t i=0; i<tv.size(); ++i)
   {
     double tvi=tv[i];
-    while (idx<params.npts()-1 && tvi>=params(idx+1,0)) 
+    while (idx<params.npts()-1 && tvi>=params[idx+1][0]) 
     {
       ++idx;
     }
-    if (tvi<params(idx,0))
+    if (tvi<params[idx][0])
     {
-      tvi=params(idx,0);
+      tvi=params[idx][0];
     }
 
     if (idx<params.npts()-1)
     {
-      double w1 = params(idx+1,0)-tvi;
-      double w2 = tvi-params(idx,0);
+      double w1 = params[idx+1][0]-tvi;
+      double w2 = tvi-params[idx][0];
       double w = w1+w2;
 
       if (w>1e-6)
@@ -229,8 +230,9 @@ inline void interp_linear (const std::vector<double> &samps,
  * \param tv parameters at which to interpolated.  Must be non-decreasing.
  * \param result [output] a \c Matrix to hold the result
  */
-inline void interp_const(const Pointset &samps, const std::vector<double> &params, 
-                         const std::vector<double> &tv, Pointset &result)
+inline void 
+interp_const(const Pointset &samps, const std::vector<double> &params, 
+             const std::vector<double> &tv, Pointset &result)
 {
   size_t idx=0;
   if (params.size()>1 && tv[0]>params[1])

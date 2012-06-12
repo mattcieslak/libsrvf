@@ -170,7 +170,7 @@ Plf optimal_reparam (const Srvf &Q1, const Srvf &Q2)
     size_t i2 = path.top() / npts1;
     path.pop();
     params[i] = Q1.params()[i1];
-    samps(i,0) = Q2.params()[i2];
+    samps[i][0] = Q2.params()[i2];
   }
 
   return Plf(samps, params);

@@ -47,7 +47,7 @@ Srvf plf_to_srvf(const Plf &F)
     {
       for (size_t j=0; j<dF.dim(); ++j)
       {
-        dF(i,j)=0.0;
+        dF[i][j]=0.0;
       }
     }
   }
@@ -62,7 +62,7 @@ Plf srvf_to_plf(const Srvf &Q)
 
   for (size_t i=0; i<Q.dim(); ++i)
   {
-    samps(0,i) = 0.0;
+    samps[0][i] = 0.0;
   }
   
   for (size_t i=1; i<samps.npts(); ++i)

@@ -113,6 +113,14 @@ public:
   virtual void render(Renderer &r);
 };
 
+
+class FunctionPlot : public Plot
+{ 
+public:
+
+  virtual void render(Renderer &r);
+};
+
 } // namespace srvf
 
 #endif // SRVF_PLOT_H

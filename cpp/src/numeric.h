@@ -16,33 +16,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#ifndef SRVF_UTIL_H
-#define SRVF_UTIL_H 1
+#ifndef SRVF_NUMERIC_H
+#define SRVF_NUMERIC_H 1
 
-#include <vector>
-#include "pointset.h"
-#include "matrix.h"
+#include <cmath>
+
 
 namespace srvf
 {
 
-namespace util
+namespace numeric
 {
 
-std::vector<double> 
-linspace(double a, double b, size_t n);
+/**
+ * Floating point comparison test.
+ *
+ * Reference:
+ * http://www.cygnus-software.com/papers/comparingfloats/comparingfloats.htm
+ */
+inline bool almost_equal(double a, double b, 
+                         double abs_thresh=1e-6, double rel_thresh=1e-3)
+{
+  double abs_diff = fabs(a - b);
+  if (abs_diff <= abs_thresh) return true;
 
-std::vector<double> 
-random_vector(size_t len, double first=0.0, int dir=0);
+  double amag = fabs(a);
+  double bmag = fabs(b);
+  double largest = (amag > bmag ? amag : bmag);
 
-std::vector<double> 
-unique (std::vector<double> v1, std::vector<double> v2, double thresh=1e-6);
+  return (abs_diff <= rel_thresh * largest);
+}
 
-Pointset diff(const Pointset &X);
-Pointset diff(const Pointset &X, const std::vector<double> &tv);
-
-} // namespace srvf::util
+} // namespace numeric
 
 } // namespace srvf
 
-#endif // SRVF_UTIL_H
+#endif // SRVF_NUMERIC_H

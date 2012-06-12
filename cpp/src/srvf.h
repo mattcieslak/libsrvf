@@ -91,32 +91,6 @@ public:
     params_[1]=b;
   }
 
-  /**
-   * Copy constructor.
-   *
-   * Creates a new \c Srvf which is a deep copy of \a Q.
-   *
-   * \param Q reference to an existing \c Srvf
-   */
-  Srvf(const Srvf &Q)
-   : samps_(Q.samps_), params_(Q.params_)
-  { }
-
-  /**
-   * Assignment operator.
-   *
-   * Sets the current \c Srvf to a deep copy of \a Q.
-   *
-   * \param Q reference to an existing \c Srvf, to be deep copied
-   * \return a reference to the current \c Srvf
-   */
-  Srvf &operator= (const Srvf &Q)
-  {
-    samps_  = Q.samps_;   // deep copy
-    params_ = Q.params_;  // deep copy
-    return *this;
-  }
-
   void evaluate(double t, Pointset &result) const;
   void evaluate(const std::vector<double> &tv, Pointset &result) const;
 

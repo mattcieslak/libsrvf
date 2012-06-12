@@ -115,6 +115,13 @@ FltkGlPlotWindow::handle(int event)
     case fltk::UNFOCUS :
       return 1;  // we want keyboard events
     case fltk::KEY:
+      switch(fltk::event_key())
+      {
+        case fltk::EscapeKey:
+        case 'q':
+          this->destroy();
+          break;
+      }
       return 1;
     case fltk::SHORTCUT:
       return 0;

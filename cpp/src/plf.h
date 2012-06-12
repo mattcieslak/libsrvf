@@ -76,17 +76,16 @@ public:
   { }
 
   /**
-   * Assignment operator.
-   *
-   * Sets the current \c Plf to a deep copy of \a F.
-   * \param F an existing \c Plf
-   * \return a reference to the current \c Plf
+   * Returns a new 1-D \c Plf which represents the identity function on 
+   * the interval \f$ [a,b] \f$.
    */
-  Plf &operator= (const Plf &F)
+  Plf(double a, double b)
+   : samps_(1,2), params_(2)
   {
-    samps_ = F.samps_;    // deep copy
-    params_ = F.params_;  // deep copy
-    return *this;
+    samps_[0][0] = a;
+    samps_[1][0] = b;
+    params_[0] = a;
+    params_[1] = b;
   }
 
   /** Returns the sample points. */
@@ -115,13 +114,13 @@ public:
   void preimages(const std::vector<double> &tv, 
                  std::vector<double> &result) const;
 
-  Pointset evaluate(double t) const;
+  Point evaluate(double t) const;
   Pointset evaluate(const std::vector<double> &tv) const;
   std::vector<double> preimages(const std::vector<double> &tv) const;
   double arc_length() const;
-  std::vector<double> centroid() const;
+  Point centroid() const;
 
-  void translate(const std::vector<double> &v);
+  void translate(const Point &v);
   void rotate(const Matrix &R);
   void scale(double s);
 

@@ -116,7 +116,7 @@ double Plf::arc_length() const
 /**
  * Computes the centroid of this \c Plf.
  */
-std::vector<double> Plf::centroid() const
+Point Plf::centroid() const
 {
   return samps_.centroid();
 }
@@ -138,11 +138,8 @@ void Plf::scale_to_unit_arc_length()
  */
 void Plf::translate_to_origin()
 {
-  std::vector<double> ctr = centroid();
-  for (size_t i=0; i<ctr.size(); ++i)
-  {
-    ctr[i] *= -1;
-  }
+  Point ctr = centroid();
+  ctr *= -1.0;
   translate(ctr);
 }
 
@@ -154,12 +151,12 @@ void Plf::translate_to_origin()
  *
  * \param v the vector by which to translate
  */
-void Plf::translate(const std::vector<double> &v)
+void Plf::translate(const Point &P)
 {
-  if (v.size() != dim())
-    throw std::invalid_argument("v has incorrect length");
+  if (P.dim() != dim())
+    throw std::invalid_argument("P has incorrect dimension");
 
-  samps_.translate(v);
+  samps_.translate(P);
 }
 
 /**

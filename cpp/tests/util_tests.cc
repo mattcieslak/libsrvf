@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(diff_test1)
   {
     for (size_t j=0; j<dX.dim(); ++j)
     {
-      BOOST_CHECK_CLOSE(dX(i,j),0.0,1e-9);
+      BOOST_CHECK_CLOSE(dX[i][j],0.0,1e-9);
     }
   }
 }
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(diff_test2)
   {
     for (size_t j=0; j<dim; ++j)
     {
-      X(i,j)=(double)(i+j);
+      X[i][j]=(double)(i+j);
     }
   }
   srvf::Pointset dX=srvf::util::diff(X,tv);
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(diff_test2)
   {
     for (size_t j=0; j<dX.dim(); ++j)
     {
-      BOOST_CHECK_CLOSE(dX(i,j),10.0,1e-6);
+      BOOST_CHECK_CLOSE(dX[i][j],10.0,1e-6);
     }
   }
 }

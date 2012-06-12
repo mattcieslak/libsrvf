@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(interp_const_test1)
   srvf::interp::interp_const(samps,params,tv,result);
   for (size_t i=0; i<ntv; ++i)
   {
-    BOOST_CHECK_CLOSE(result(i,0),exp_data[i],1e-9);
+    BOOST_CHECK_CLOSE(result[i][0],exp_data[i],1e-9);
   }
 }
 

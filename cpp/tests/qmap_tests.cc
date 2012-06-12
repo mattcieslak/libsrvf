@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(plf_to_srvf_test1)
   // Check samples
   for (int i=0; i<3; ++i)
   {
-    BOOST_CHECK_CLOSE(Q.samps()(i,0),exp_vals[i],1e-9);
+    BOOST_CHECK_CLOSE(Q.samps()[i][0],exp_vals[i],1e-9);
   }
 }
 
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(plf_to_srvf_test2)
   {
     for (size_t j=0; j<2; ++j)
     {
-      BOOST_CHECK_CLOSE(Q.samps()(i,j),exp_vals[j*4+i],1e-4);
+      BOOST_CHECK_CLOSE(Q.samps()[i][j],exp_vals[j*4+i],1e-4);
     }
   }
 }
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(srvf_to_plf_test1)
   {
     for (size_t j=0; j<F.samps().npts(); ++j)
     {
-      BOOST_CHECK_SMALL(F.samps()(j,i) - exp_data[5*i+j], 1e-3);
+      BOOST_CHECK_SMALL(F.samps()[j][i] - exp_data[5*i+j], 1e-3);
     }
   }
 }

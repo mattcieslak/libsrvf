@@ -118,7 +118,7 @@ double l2_norm(const Srvf &Q)
     double nqi=0.0;
     for (size_t j=0; j<Q.dim(); ++j)
     {
-      double x=Q.samps()(i,j);
+      double x=Q.samps()[i][j];
       nqi += x*x;
     }
     double dt = Q.params()[i+1]-Q.params()[i];
@@ -166,7 +166,7 @@ double l2_product(const Srvf &Q1, const Srvf &Q2)
     double ipi=0.0;
     for (size_t j=0; j<dim; ++j)
     {
-      ipi += Q1.samps()(i1,j)*Q2.samps()(i2,j);
+      ipi += Q1.samps()[i1][j]*Q2.samps()[i2][j];
     }
 
     double tnext1=Q1.params()[i1+1];
@@ -229,7 +229,7 @@ double l2_distance(const Srvf &Q1, const Srvf &Q2)
     double ipi=0.0;
     for (size_t j=0; j<dim; ++j)
     {
-      double dqi = Q1.samps()(i1,j)-Q2.samps()(i2,j);
+      double dqi = Q1.samps()[i1][j]-Q2.samps()[i2][j];
       ipi += dqi*dqi;
     }
 
@@ -409,8 +409,8 @@ Srvf gamma_action(const Srvf &Q, const Plf &gamma)
   if (gamma.dim() != 1)
   { throw std::invalid_argument("gamma must be 1-dimensional"); }
 
-  if ((gamma.samps()(0,0) < Q.domain_lb()-1e-6) ||
-      (gamma.samps()(gamma.ncp()-1,0) > Q.domain_ub()+1e-6))
+  if ((gamma.samps()[0][0] < Q.domain_lb()-1e-6) ||
+      (gamma.samps()[gamma.ncp()-1][0] > Q.domain_ub()+1e-6))
   { throw std::invalid_argument(
       "Range of gamma must be contained in domain of Q"); }
 
@@ -429,7 +429,7 @@ Srvf gamma_action(const Srvf &Q, const Plf &gamma)
     
     for (size_t j=0; j<dim; ++j)
     {
-      samps(i,j) *= rgdi;
+      samps[i][j] *= rgdi;
     }
   }
 
@@ -467,14 +467,14 @@ Srvf constant_speed_param(const Srvf &Q)
 
     if (fabs(cur_pi) < 1e-5) continue;
 
-    if (have_nonzero && Q.samps().nonnegative_scalar_multiples(i,last_nonzero))
+    if (have_nonzero && Q.samps().on_same_ray(i,last_nonzero))
     {
       partial_integrals[partial_integrals.size()-1] += cur_pi;
     }
     else
     {
       // Add new sample point and scale it to the correct norm
-      Qres.samps().push(Q.samps()(i));
+      Qres.samps().push_back(Q.samps()[i]);
       Qres.samps().scale(Qres.samps().npts()-1, v / vi);
       partial_integrals.push_back(cur_pi);
     }

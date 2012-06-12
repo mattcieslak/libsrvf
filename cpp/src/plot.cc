@@ -94,22 +94,23 @@ void SuperimposedPlot::render(Renderer &r)
     {
       for (size_t j=0; j<plfs_[i].ncp(); ++j)
       {
-        r.vertex(plfs_[i].samps()(j,0), 
-                 plfs_[i].samps()(j,1));
+        r.vertex(plfs_[i].samps()[j][0], 
+                 plfs_[i].samps()[j][1]);
       }
     }
     else if (plfs_[i].dim()>=3)
     {
       for (size_t j=0; j<plfs_[i].ncp(); ++j)
       {
-        r.vertex(plfs_[i].samps()(j,0), 
-                 plfs_[i].samps()(j,1), 
-                 plfs_[i].samps()(j,2));
+        r.vertex(plfs_[i].samps()[j][0], 
+                 plfs_[i].samps()[j][1], 
+                 plfs_[i].samps()[j][2]);
       }
     }
     r.end();
   }
 }
+
 
 ////////////////////////////////////////////////////////////////////////////
 // GeodesicPlot
@@ -118,6 +119,25 @@ void SuperimposedPlot::render(Renderer &r)
 void GeodesicPlot::render(Renderer &r)
 {
   
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// FunctionPlot
+////////////////////////////////////////////////////////////////////////////
+
+void FunctionPlot::render(Renderer &r)
+{
+  for (size_t i=0; i<plfs_.size(); ++i)
+  {
+    r.set_color(colors_[i]);
+    r.begin(LINES);
+    for (size_t j=0; j<plfs_[i].ncp(); ++j)
+    {
+      r.vertex(plfs_[i].params()[j], plfs_[i].samps()[j][0]);
+    }
+    r.end();
+  }
 }
 
 } // namespace srvf

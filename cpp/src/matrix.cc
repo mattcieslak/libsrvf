@@ -509,6 +509,39 @@ Matrix product(const Matrix &A, const Matrix &B)
   return R;
 }
 
+
+/**
+ * Returns the product of \a A and \a v.
+ */
+Point product(const Matrix &A, const Point &v)
+{
+  if (A.cols() != v.dim()) throw std::invalid_argument("size mismatch");
+
+  Point res(A.rows(), 0.0);
+  for (size_t i=0; i<A.rows(); ++i)
+    for (size_t j=0; j<A.cols(); ++j)
+      res[i] += A(i,j) * v[j];
+
+  return res;
+}
+
+
+/**
+ * Returns the product of \a v and \a A.
+ */
+Point product(const Point &v, const Matrix &A)
+{
+  if (A.rows() != v.dim()) throw std::invalid_argument("size mismatch");
+
+  Point res(A.cols(), 0.0);
+  for (size_t i=0; i<A.cols(); ++i)
+    for (size_t j=0; j<A.rows(); ++j)
+      res[i] += v[j] * A(j,i);
+
+  return res;
+}
+
+
 /**
  * Returns a new \c Matrix representing the transpose of the given \c Matrix.
  *

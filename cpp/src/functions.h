@@ -23,6 +23,7 @@
 #include "plf.h"
 
 #include <vector>
+#include <map>
 
 
 namespace srvf
@@ -33,6 +34,10 @@ namespace functions
 
 /**
  * Returns reparametrizations which optimally register \a Q1 and \a Q2.
+ *
+ * \a Q1 and \a Q2 MUST be 1-D, constant-speed SRVFs in order for this 
+ * function to work properly.  To get a constant-speed SRVF from an SRVF 
+ * with arbitrary parametrization, use \c Srvf::constant_speed_param().
  *
  * Unlike \c srvf::opencurves::optimal_reparam(), which uses the older 
  * dynamic programming algorithm, this function implements the new 
@@ -58,7 +63,32 @@ std::vector<Plf> optimal_reparam(const Srvf &Q1, const Srvf &Q2);
 Srvf karcher_mean(const std::vector<Srvf> &Qs, 
                   double tol=1e-3, size_t max_iters=0);
 
+
+typedef std::pair<size_t,size_t> match_vertex_t;
+
+/**
+ * Don't use this class -- it's just here to give the unit tests 
+ * access to internal routines, etc.
+ */
+class TestAccess
+{
+public:
   
+  static double edge_variation(const Srvf &Q, size_t i1, size_t i2);
+  static double edge_score(const Srvf &Q1, const Srvf &Q2, 
+    size_t sc, size_t sr, size_t tc, size_t tr);
+  static void calculate_scores(const Srvf &Q1, const Srvf &Q2, 
+    std::map<match_vertex_t,double> &score, 
+    std::map<match_vertex_t,match_vertex_t> &pred);
+  static void build_gamma_segment(const Srvf &Q1, const Srvf &Q2, 
+    size_t sc, size_t sr, size_t tc, size_t tr, 
+    std::vector<double> &G1samps, std::vector<double> &G2samps);
+
+private:
+  
+  TestAccess(){ }  // no instances for you!
+};
+
 } // namespace srvf::functions
 
 } // namespace srvf
