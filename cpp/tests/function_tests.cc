@@ -15,10 +15,18 @@ using srvf::functions::match_vertex_t;
 #include <fltk/run.h>
 
 #include <vector>
+#include <deque>
 #include <iostream>
 #include <iterator>
 #include <time.h>
 #include <cstdlib>
+
+
+#define MY_CHECK_CLOSE(a,b) \
+ BOOST_CHECK_EQUAL(srvf::numeric::almost_equal((a),(b)), true)
+
+#define MY_REQUIRE_CLOSE(a,b) \
+ BOOST_REQUIRE_EQUAL(srvf::numeric::almost_equal((a),(b)), true)
 
 
 BOOST_AUTO_TEST_SUITE(functions_tests)
@@ -119,6 +127,39 @@ BOOST_AUTO_TEST_CASE(calculate_scores_test1)
 }
 
 
+BOOST_AUTO_TEST_CASE(segment_translate_test1)
+{
+  double samps1_data[]={ 1.0, -1.0, 1.0, -1.0 };
+  double samps2_data[]={ 1.0, -1.0, 1.0, -1.0, 1.0 };
+  size_t nsamps1 = sizeof(samps1_data) / sizeof(double);
+  size_t nsamps2 = sizeof(samps2_data) / sizeof(double);
+  srvf::Srvf Q1(srvf::Pointset(1,nsamps1,samps1_data));
+  srvf::Srvf Q2(srvf::Pointset(1,nsamps2,samps2_data));
+
+  std::deque<match_vertex_t> path;
+  path.push_back(match_vertex_t(0,0));
+  path.push_back(match_vertex_t(3,1));
+  path.push_back(match_vertex_t(4,4));
+
+  // Cases for translation from Q1 to Q2
+  size_t segs12[] = { 0, 0, 0, 0, 0, 0,
+                      1, 1, 1, 1 };
+  double ts12[]= { 0.0, 0.125, 0.25, 0.5, 0.625, 0.75, 
+                   0.75, 10.0/12.0, 11.0/12.0, 1.0 };
+  double exps12[] = { 0.0, 0.05, 0.1, 0.1, 0.15, 0.2, 
+                      0.2, 1.0/3.0, 2.0/3.0, 0.8 };
+  size_t ncases12 = sizeof(segs12) / sizeof(size_t);
+
+  for (size_t i=0; i<ncases12; ++i)
+  {
+    double s = srvf::functions::TestAccess::segment_translate(
+      Q1, Q2, path[segs12[i]].first, path[segs12[i]].second, 
+      path[segs12[i]+1].first, path[segs12[i]+1].second, ts12[i]);
+    MY_CHECK_CLOSE(s, exps12[i]);
+  }
+}
+
+
 BOOST_AUTO_TEST_CASE(match_test1)
 {
   unsigned int seed = (unsigned int)time(NULL);
@@ -171,10 +212,14 @@ BOOST_AUTO_TEST_CASE(match_test1)
             << srvf::sphere_distance(Q1r, Q2r) << std::endl;
 
   //std::cout << "G1:  ";
-  //for (size_t i=0; i<Gv[0].samps().npts(); std::cout << Gv[0].samps()(i++,0) << " ");
+  //for (size_t i=0; i<Gv[0].samps().npts(); std::cout << Gv[0].samps()[i++][0] << " ");
+  //std::cout << std::endl;
+  //for (size_t i=0; i<Gv[0].params().size(); std::cout << Gv[0].params()[i++] << " ");
   //std::cout << std::endl;
   //std::cout << "G2:  ";
-  //for (size_t i=0; i<Gv[1].samps().npts(); std::cout << Gv[1].samps()(i++,0) << " ");
+  //for (size_t i=0; i<Gv[1].samps().npts(); std::cout << Gv[1].samps()[i++][0] << " ");
+  //std::cout << std::endl;
+  //for (size_t i=0; i<Gv[1].params().size(); std::cout << Gv[1].params()[i++] << " ");
   //std::cout << std::endl;
 
   srvf::FltkGlPlotWindow plotwin(600, 300, 
@@ -182,6 +227,113 @@ BOOST_AUTO_TEST_CASE(match_test1)
   srvf::FunctionPlot plot;
   plot.insert(F1r,srvf::Color(0.0,0.0,1.0));
   plot.insert(F2r,srvf::Color(1.0,0.0,0.0));
+  plotwin.add_plot(&plot);
+  plotwin.show();
+  fltk::run();
+}
+
+BOOST_AUTO_TEST_CASE(groupwise_optimal_reparam_test1)
+{
+  double Msamps_data[] = { 1.0, -1.0, 1.0 };
+  double Q1samps_data[] = { 1.0, -1.0 };
+  double Q2samps_data[] = { -1.0, 1.0 };
+  double Q3samps_data[] = { -1.0, 1.0 };
+  double Mparams_data[] = { 0.0, 1.0/3.0, 2.0/3.0, 1.0 };
+  double Q1params_data[] = { 0.0, 5.0/6.0, 1.0 };
+  double Q2params_data[] = { 0.0, 1.0/6.0, 1.0 };
+  double Q3params_data[] = { 0.0, 3.0/4.0, 1.0 };
+  size_t Mncp = sizeof(Mparams_data) / sizeof(double);
+  size_t Q1ncp = sizeof(Q1params_data) / sizeof(double);
+  size_t Q2ncp = sizeof(Q2params_data) / sizeof(double);
+  size_t Q3ncp = sizeof(Q3params_data) / sizeof(double);
+  double Eexp[] = { 0.0, 0.0, 1.0/3.0, 2.0/3.0, 1.0, 1.0 };
+  double G1exp[] = { 0.0, 0.0, 5.0/12.0, 5.0/12.0, 5.0/6.0, 1.0 };
+  double G2exp[] = { 0.0, 1.0/6.0, 7/12.0, 7/12.0, 1.0, 1.0 };
+  double G3exp[] = { 0.0, 0.0, 0.0, 3.0/4.0, 1.0, 1.0 };
+  size_t gamma_ncp = sizeof(Eexp) / sizeof(double);
+
+  std::vector<std::deque<srvf::functions::match_vertex_t> > paths(3);
+  paths[0].push_back(srvf::functions::match_vertex_t(0,0));
+  paths[0].push_back(srvf::functions::match_vertex_t(3,1));
+  paths[1].push_back(srvf::functions::match_vertex_t(Mncp,Q2ncp));
+  paths[1].push_back(srvf::functions::match_vertex_t(0,1));
+  paths[1].push_back(srvf::functions::match_vertex_t(3,2));
+  paths[2].push_back(srvf::functions::match_vertex_t(Mncp,Q3ncp));
+  paths[2].push_back(srvf::functions::match_vertex_t(1,0));
+  paths[2].push_back(srvf::functions::match_vertex_t(2,1));
+  paths[2].push_back(srvf::functions::match_vertex_t(3,2));
+
+  srvf::Srvf Mu(
+    srvf::Pointset(1,Mncp-1,Msamps_data), 
+    std::vector<double>(&(Mparams_data[0]), &(Mparams_data[Mncp])) );
+
+  std::vector<srvf::Srvf> Qs;
+  Qs.push_back( srvf::Srvf(
+    srvf::Pointset(1,Q1ncp-1,Q1samps_data), 
+    std::vector<double>(&(Q1params_data[0]), &(Q1params_data[Q1ncp]))) );
+  Qs.push_back( srvf::Srvf(
+    srvf::Pointset(1,Q2ncp-1,Q2samps_data), 
+    std::vector<double>(&(Q2params_data[0]), &(Q2params_data[Q2ncp]))) );
+  Qs.push_back( srvf::Srvf(
+    srvf::Pointset(1,Q3ncp-1,Q3samps_data), 
+    std::vector<double>(&(Q3params_data[0]), &(Q3params_data[Q3ncp]))) );
+
+  std::vector<srvf::Plf> GE = 
+    srvf::functions::groupwise_build_gammas(Mu, Qs, paths);
+
+  for (size_t i=0; i<4; ++i)
+  { BOOST_REQUIRE_EQUAL(GE[i].ncp(), gamma_ncp); }
+
+  for (size_t i=0; i<gamma_ncp; ++i)
+  {
+    MY_CHECK_CLOSE(GE[0].samps()[i][0], G1exp[i]);
+    MY_CHECK_CLOSE(GE[1].samps()[i][0], G2exp[i]);
+    MY_CHECK_CLOSE(GE[2].samps()[i][0], G3exp[i]);
+    MY_CHECK_CLOSE(GE[3].samps()[i][0], Eexp[i]);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(karcher_mean_test1)
+{
+  double Q1samps_data[] = { 1.0, -1.0 };
+  double Q2samps_data[] = { -1.0, 1.0 };
+  double Q3samps_data[] = { -1.0, 1.0 };
+  double Q1params_data[] = { 0.0, 5.0/6.0, 1.0 };
+  double Q2params_data[] = { 0.0, 1.0/6.0, 1.0 };
+  double Q3params_data[] = { 0.0, 3.0/4.0, 1.0 };
+  size_t Q1ncp = sizeof(Q1params_data) / sizeof(double);
+  size_t Q2ncp = sizeof(Q2params_data) / sizeof(double);
+  size_t Q3ncp = sizeof(Q3params_data) / sizeof(double);
+
+  std::vector<srvf::Srvf> Qs;
+  Qs.push_back( srvf::Srvf(
+    srvf::Pointset(1,Q1ncp-1,Q1samps_data), 
+    std::vector<double>(&(Q1params_data[0]), &(Q1params_data[Q1ncp]))) );
+  Qs.push_back( srvf::Srvf(
+    srvf::Pointset(1,Q2ncp-1,Q2samps_data), 
+    std::vector<double>(&(Q2params_data[0]), &(Q2params_data[Q2ncp]))) );
+  Qs.push_back( srvf::Srvf(
+    srvf::Pointset(1,Q3ncp-1,Q3samps_data), 
+    std::vector<double>(&(Q3params_data[0]), &(Q3params_data[Q3ncp]))) );
+
+  srvf::Srvf Mu = srvf::functions::karcher_mean(Qs, 0.00001, 100);
+  std::vector<srvf::Plf> GE=srvf::functions::groupwise_optimal_reparam(Mu,Qs);
+
+  Mu = gamma_action(Mu, GE.back());
+  for (size_t i=0; i<Qs.size(); ++i)
+  {
+    Qs[i] = gamma_action(Qs[i], GE[i]);
+  }
+
+  srvf::FltkGlPlotWindow plotwin(600, 300, "karcher_mean_test1");
+  srvf::FunctionPlot plot;
+
+  for (size_t i=0; i<Qs.size(); ++i)
+  {
+    plot.insert(srvf::srvf_to_plf(Qs[i]),srvf::Color(0.0,0.0,1.0));
+  }
+  plot.insert(srvf::srvf_to_plf(Mu),srvf::Color(1.0,0.0,0.0));
+
   plotwin.add_plot(&plot);
   plotwin.show();
   fltk::run();

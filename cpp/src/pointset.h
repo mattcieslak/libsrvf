@@ -180,6 +180,9 @@ public:
   /** Returns the number of points in the set. */
   inline size_t npts() const { return data_.size(); }
 
+  /** Indicates whether or not this Pointset contains any points. */
+  inline bool empty() const { return (dim() > 0 && npts() > 0); }
+
   /** Returns a reference to the specified point. */
   inline Point &operator[] (size_t idx)
   {
@@ -188,10 +191,38 @@ public:
   }
 
   /** Returns a \c const reference to the specified point. */
-  const inline Point &operator[] (size_t idx) const
+  inline const Point &operator[] (size_t idx) const
   {
     if (idx >= npts()) throw std::out_of_range("Point index out of range.");
     return data_[idx];
+  }
+
+  /** Returns a reference to the first point in the set. */
+  inline Point &front()
+  {
+    if (empty()) throw std::out_of_range("front() called on empty Pointset.");
+    return data_[0];
+  }
+
+  /** Returns a \c const reference to the first point in the set. */
+  inline const Point &front() const
+  {
+    if (empty()) throw std::out_of_range("front() called on empty Pointset.");
+    return data_[0];
+  }
+
+  /** Returns a reference to the last point in the set. */
+  inline Point &back()
+  {
+    if (empty()) throw std::out_of_range("back() called on empty Pointset.");
+    return data_[npts()-1];
+  }
+
+  /** Returns a \c const reference to the last point in the set. */
+  inline const Point &back() const
+  {
+    if (empty()) throw std::out_of_range("back() called on empty Pointset.");
+    return data_[npts()-1];
   }
 
   /** Append a new point to the end of this pointset. */

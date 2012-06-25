@@ -23,6 +23,7 @@
 #include "plf.h"
 
 #include <vector>
+#include <deque>
 #include <map>
 
 
@@ -32,9 +33,13 @@ namespace srvf
 namespace functions
 {
 
+typedef std::pair<size_t,size_t> match_vertex_t;
+
+
 /**
  * Returns reparametrizations which optimally register \a Q1 and \a Q2.
  *
+ * IMPORTANT:
  * \a Q1 and \a Q2 MUST be 1-D, constant-speed SRVFs in order for this 
  * function to work properly.  To get a constant-speed SRVF from an SRVF 
  * with arbitrary parametrization, use \c Srvf::constant_speed_param().
@@ -55,16 +60,55 @@ std::vector<Plf> optimal_reparam(const Srvf &Q1, const Srvf &Q2);
 
 
 /**
+ * Builds the piecewise-linear reparametrizations which realize the optimal 
+ * matching between \a Q1 and \a Q2 determined by \a path.
+ */
+std::vector<Plf> build_gammas(const Srvf&Q1, const Srvf &Q2, 
+  const std::deque<match_vertex_t> &path);
+
+
+/**
+ * Find reparametrizations for the SRVFs in \a Mu and \a Qs which optimally 
+ * match each function in \a Qs to \a Mu.
+ *
+ * IMPORTANT: \a Mu and all SRVFs in \a Qs MUST be 1-D, constant-speed SRVFs 
+ * in order for this function to work properly.  To get a constant-speed 
+ * SRVF from an SRVF with arbitrary parametrization, use 
+ * \c Srvf::constant_speed_param().
+ *
+ * This function is mainly used as a step in the algorithm for computing 
+ * Karcher means.  In particular, it is called by 
+ * \c srvf::functions::karcher_mean().
+ *
+ * \param Mu the SRVF to which all functions will be matched
+ * \param Qs contains the SRVFs which will be matched to \a Mu
+ * \return a \c vector of \c Plf's representing the reparametrizations.  The 
+ * first \c Qs.size() elements are to be applied to the elements of \a Qs, in 
+ * the same order.  The last element is to be applied to \a Mu.
+ */
+std::vector<Plf> 
+groupwise_optimal_reparam(const Srvf &Mu, const std::vector<Srvf> &Qs);
+
+
+/**
+ * Builds the piecewise-linear reparametrizations which realize the 
+ * simultaneous optimal matchings between \a Mu and each SRVF in \a Qs, 
+ * determined by the matching paths in \a paths.
+ */
+std::vector<Plf> groupwise_build_gammas(
+  const Srvf &Mu, const std::vector<Srvf> & Qs, 
+  const std::vector<std::deque<match_vertex_t> > &paths);
+
+
+/**
  * Computes the Karcher mean of a collecton of 1-D SRVFs.
  *
  * Unlike \c srvf::opencurves::karcher_mean(), this function uses the 
- * new 1-D function matching algorithm.
+ * new 1-D function matching algorithms.
  */
 Srvf karcher_mean(const std::vector<Srvf> &Qs, 
                   double tol=1e-3, size_t max_iters=0);
 
-
-typedef std::pair<size_t,size_t> match_vertex_t;
 
 /**
  * Don't use this class -- it's just here to give the unit tests 
@@ -83,6 +127,8 @@ public:
   static void build_gamma_segment(const Srvf &Q1, const Srvf &Q2, 
     size_t sc, size_t sr, size_t tc, size_t tr, 
     std::vector<double> &G1samps, std::vector<double> &G2samps);
+  static double segment_translate(const Srvf &Q1, const Srvf &Q2, 
+    size_t cs, size_t rs, size_t ct, size_t rt, double t);
 
 private:
   

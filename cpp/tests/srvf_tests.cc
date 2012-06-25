@@ -21,6 +21,28 @@ BOOST_AUTO_TEST_CASE(ctor_test1)
   BOOST_CHECK_EQUAL(samps[0][1], 0.25);
 }
 
+BOOST_AUTO_TEST_CASE(ctor_test2)
+{
+  double samps_data[] = 
+  {
+    1.2, -0.5, 0.98, 100.01, -98.03, 
+    0.0,  3.8, -0.5, -55.33, 100.00
+  };
+  double params_data[] = {0.0, 0.1, 0.12, 0.65, 0.8, 1.0};
+  size_t ncp=sizeof(params_data)/sizeof(double);
+  srvf::Pointset samps(2,ncp-1,samps_data,srvf::Pointset::POINT_PER_COLUMN);
+  std::vector<double> params(&params_data[0],&params_data[ncp]);
+
+  srvf::Srvf Q(samps,params);
+  srvf::Srvf Qc1(Q);
+  srvf::Srvf Qc2 = Q;
+
+  BOOST_CHECK_EQUAL(Qc1.dim(), Q.dim());
+  BOOST_CHECK_EQUAL(Qc1.ncp(), Q.ncp());
+  BOOST_CHECK_EQUAL(Qc2.dim(), Q.dim());
+  BOOST_CHECK_EQUAL(Qc2.ncp(), Q.ncp());
+}
+
 BOOST_AUTO_TEST_CASE(evaluate_test1)
 {
   double samps_data[] = 
