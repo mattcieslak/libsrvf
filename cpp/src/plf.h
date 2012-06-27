@@ -119,6 +119,7 @@ public:
   std::vector<double> preimages(const std::vector<double> &tv) const;
   double arc_length() const;
   Point centroid() const;
+  std::vector<Point> bounding_box() const;
 
   void translate(const Point &v);
   void rotate(const Matrix &R);

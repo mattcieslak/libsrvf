@@ -122,6 +122,33 @@ Point Plf::centroid() const
 }
 
 /**
+ * Computes the bounding box for this \c Plf.
+ * 
+ * Returns a \c vector containing two points.  The first has all of its 
+ * coordinates set to the minimum value reached by the function, and the 
+ * second has all of its coordinates set to the maximum value reached.
+ */
+std::vector<Point> Plf::bounding_box() const
+{
+  std::vector<Point> res;
+  res.push_back(Point(dim(), 1e9));
+  res.push_back(Point(dim(), -1e9));
+
+  for (std::vector<Point>::const_iterator iter=samps().begin_points(); 
+       iter != samps().end_points(); 
+       ++iter)
+  {
+    for (size_t i=0; i<dim(); ++i)
+    {
+      res[0][i] = std::min(res[0][i], (*iter)[i]);
+      res[1][i] = std::max(res[1][i], (*iter)[i]);
+    }
+  }
+
+  return res;
+}
+
+/**
  * Scale this \c Plf to unit arc length.
  */
 void Plf::scale_to_unit_arc_length()

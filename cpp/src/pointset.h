@@ -513,9 +513,25 @@ public:
   }
 
   /**
+   * Returns an iterator to iterate over the points in this \c Pointset.
+   */
+  std::vector<Point>::const_iterator begin_points() const
+  {
+    return data_.begin();
+  }
+
+  /**
    * Returns a past-the-end value for the points iterator.
    */
   std::vector<Point>::iterator end_points()
+  {
+    return data_.end();
+  }
+
+  /**
+   * Returns a past-the-end value for the points iterator.
+   */
+  std::vector<Point>::const_iterator end_points() const
   {
     return data_.end();
   }

@@ -19,6 +19,7 @@
 #ifndef SRVF_RENDER_H
 #define SRVF_RENDER_H 1
 
+#include <cstdlib>
 
 namespace srvf
 {
@@ -51,6 +52,20 @@ class Renderer
 {
 public:
 
+  virtual size_t device_width() = 0;
+  virtual void device_width(size_t w) = 0;
+
+  virtual size_t device_height() = 0;
+  virtual void device_height(size_t h) = 0;
+
+  virtual void viewport(double x, double y, double w, double h) = 0;
+  virtual void ortho(double left, double right, 
+                       double bottom, double top, 
+                       double near, double far) = 0;
+  virtual void frustum(double left, double right, 
+                       double bottom, double top, 
+                       double near, double far) = 0;
+
   virtual void begin(DrawingMode mode) = 0;
   virtual void vertex(double x, double y) = 0;
   virtual void vertex(double x, double y, double z) = 0;
@@ -80,6 +95,20 @@ public:
   
   OpenGlRenderer();
 
+  virtual size_t device_width(){ return dev_width_; }
+  virtual void device_width(size_t w){ dev_width_ = w; }
+
+  virtual size_t device_height(){ return dev_height_; }
+  virtual void device_height(size_t h){ dev_height_ = h; }
+
+  virtual void viewport(double x, double y, double w, double h);
+  virtual void ortho(double left, double right, 
+                       double bottom, double top, 
+                       double near, double far);
+  virtual void frustum(double left, double right, 
+                       double bottom, double top, 
+                       double near, double far);
+
   virtual void begin(DrawingMode mode);
   virtual void vertex(double x, double y);
   virtual void vertex(double x, double y, double z);
@@ -98,6 +127,8 @@ public:
 private:
   DrawingMode mode_;
   double thickness_;
+  size_t dev_width_;
+  size_t dev_height_;
 };
 
 

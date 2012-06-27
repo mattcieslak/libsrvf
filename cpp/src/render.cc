@@ -42,6 +42,31 @@ OpenGlRenderer::OpenGlRenderer()
 {
 }
 
+void OpenGlRenderer::viewport(double x, double y, double w, double h)
+{
+  glViewport(x, y, w, h);
+}
+
+void OpenGlRenderer::ortho(double left, double right, 
+           double bottom, double top, 
+           double near, double far)
+{
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(left, right, bottom, top, near, far);
+  glMatrixMode(GL_MODELVIEW);
+}
+
+void OpenGlRenderer::frustum(double left, double right, 
+             double bottom, double top, 
+             double near, double far)
+{
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glFrustum(left, right, bottom, top, near, far);
+  glMatrixMode(GL_MODELVIEW);
+}
+
 void 
 OpenGlRenderer::begin(DrawingMode mode)
 {

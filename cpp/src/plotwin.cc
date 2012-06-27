@@ -47,27 +47,31 @@ FltkGlPlotWindow::FltkGlPlotWindow(int w, int h, int x, int y, const char *l)
 void 
 FltkGlPlotWindow::draw()
 {
-  if (!valid())
-  {
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glViewport(0, 0, (GLsizei)w(), (GLsizei)h());
-    double r = ((double)h()) / ((double)w());
-    glOrtho(-1.0, 1.0, -r, r, 0.1, 10.0);
-    glMatrixMode(GL_MODELVIEW);
-  }
+  //if (!valid())
+  //{
+  //  glMatrixMode(GL_PROJECTION);
+  //  glLoadIdentity();
+  //  glViewport(0, 0, (GLsizei)w(), (GLsizei)h());
+  //  double r = ((double)h()) / ((double)w());
+  //  glOrtho(-1.0, 1.0, -r, r, 0.1, 10.0);
+  //  glMatrixMode(GL_MODELVIEW);
+  //}
 
+  renderer_.device_width(w());
+  renderer_.device_height(h());
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  glTranslatef(camera_x_, -camera_y_, -1.0);
-  glScalef(camera_z_, camera_z_, camera_z_);
+  //glTranslatef(camera_x_, -camera_y_, -1.0);
+  //glScalef(camera_z_, camera_z_, camera_z_);
 
   glClearColor(0.0, 0.0, 0.0, 1.0);
   glClear(GL_COLOR_BUFFER_BIT);
 
   for (size_t i=0; i<plots_.size(); ++i)
   {
+    glPushMatrix();
     plots_[i]->render(renderer_);
+    glPopMatrix();
   }
 }
 

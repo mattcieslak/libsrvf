@@ -28,6 +28,10 @@ namespace srvf
 
 /**
  * Abstract base for plot classes.
+ *
+ * A \c Plot object is responsible for managing a collection of \c Plf 
+ * and \c Srvf instances, and for defining the geometry of all of 
+ * these functions.  \c Plot objects do not handle viewing.
  */
 class Plot
 { 
@@ -114,11 +118,43 @@ public:
 };
 
 
+/**
+ * A specialized plot for 1-D functions.
+ */
 class FunctionPlot : public Plot
 { 
 public:
 
+  virtual void 
+  insert(const Plf &F, Color c, double thickness=1.0, DrawingMode mode=LINES)
+  {
+    plfs_.push_back(F);
+    colors_.push_back(c);
+    thicknesses_.push_back(thickness);
+    modes_.push_back(mode);
+
+    std::vector<Point> bbox = F.bounding_box();
+    x_min = std::min(x_min, F.params().front());
+    x_max = std::max(x_max, F.params().back());
+    y_min = std::min(y_min, bbox[0][0]);
+    y_max = std::max(y_max, bbox[1][0]);
+  }
+
+  virtual void 
+  insert(const Srvf &Q, Color c, double thickness=1.0, DrawingMode mode=LINES)
+  {
+    srvfs_.push_back(Q);
+    colors_.push_back(c);
+    thicknesses_.push_back(thickness);
+    modes_.push_back(mode);
+  }
+
   virtual void render(Renderer &r);
+
+private:
+  
+  double x_min, x_max;
+  double y_min, y_max;
 };
 
 } // namespace srvf

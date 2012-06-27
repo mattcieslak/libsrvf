@@ -128,6 +128,12 @@ void GeodesicPlot::render(Renderer &r)
 
 void FunctionPlot::render(Renderer &r)
 {
+  // Set up the rendering context
+  double dev_width = (double)r.device_width();
+  double dev_height = (double)r.device_height();
+  r.viewport(2, 2, dev_width-2, dev_height-2);
+  r.ortho(x_min, x_max, y_min, y_max, -1.0, 1.0);
+
   for (size_t i=0; i<plfs_.size(); ++i)
   {
     r.set_color(colors_[i]);
@@ -138,6 +144,18 @@ void FunctionPlot::render(Renderer &r)
     }
     r.end();
   }
+
+  // Draw some lame axes
+  r.set_color(Color(1.0,1.0,1.0));
+  r.set_thickness(1.0);
+  r.begin(LINES);
+  r.vertex(x_min, 0.0);
+  r.vertex(x_max, 0.0);
+  r.end();
+  r.begin(LINES);
+  r.vertex(0.0, y_min);
+  r.vertex(0.0, y_max);
+  r.end();
 }
 
 } // namespace srvf

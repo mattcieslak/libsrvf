@@ -410,7 +410,7 @@ Srvf gamma_action(const Srvf &Q, const Plf &gamma)
   { throw std::invalid_argument("gamma must be 1-dimensional"); }
 
   if ((gamma.samps()[0][0] < Q.domain_lb()-1e-6) ||
-      (gamma.samps()[gamma.ncp()-1][0] > Q.domain_ub()+1e-6))
+      (gamma.samps()[gamma.ncp()-1][0] > Q.domain_ub()+1e-4))
   { throw std::invalid_argument(
       "Range of gamma must be contained in domain of Q"); }
 
