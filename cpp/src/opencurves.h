@@ -32,7 +32,9 @@ namespace opencurves
 
 Srvf karcher_mean(const std::vector<Srvf> &Qs, 
                   double tol=1e-3, 
-                  size_t max_iters=0);
+                  size_t max_iters=0, 
+                  bool optimize_rots=true, 
+                  bool optimize_reparams=true);
 
 Srvf shooting_vector(const Srvf &Q1, const Srvf &Q2);
 

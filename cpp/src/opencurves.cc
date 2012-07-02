@@ -38,7 +38,8 @@ namespace opencurves
  * Computes the Karcher mean of a collection of points on the unit 
  * sphere in \f$ L^2(I,R^n) \f$.
  */
-Srvf karcher_mean(const std::vector<Srvf> &Qs, double tol, size_t max_iters)
+Srvf karcher_mean(const std::vector<Srvf> &Qs, double tol, size_t max_iters, 
+                  bool optimize_rots, bool optimize_reparams)
 {
   // Corner case:  if Qs is empty, return an empty Srvf
   if (Qs.empty())
@@ -48,7 +49,7 @@ Srvf karcher_mean(const std::vector<Srvf> &Qs, double tol, size_t max_iters)
   }
 
   double radius = srvf::l2_norm(Qs[0]);
-  double stepsize = 1.0;
+  double stepsize = 0.25;
 
   // Initialize mean to one of the Qs.  This is arbitrary, and not necessarily 
   // the best solution.  But (hopefully) good enough.
@@ -65,22 +66,48 @@ Srvf karcher_mean(const std::vector<Srvf> &Qs, double tol, size_t max_iters)
     #pragma omp for schedule (static) nowait
     for (size_t i=0; i<Qs.size(); ++i)
     {
-      Srvf Qsi(Qs[i]);  // mutable local copy
+      Srvf Svi;
 
-      // Rotate
-      Matrix Ri = optimal_rotation(Mu, Qsi);
-      Qsi.rotate(Ri);
+      if (optimize_rots && optimize_reparams)
+      {
+        Srvf Qsi(Qs[i]);  // mutable local copy
 
-      // Reparametrize
-      Plf Gi = optimal_reparam(Mu, Qsi);
-      Srvf Qsir = gamma_action(Qsi, Gi);
+        // Rotate
+        Matrix Ri = optimal_rotation(Mu, Qsi);
+        Qsi.rotate(Ri);
 
-      // And rotate again
-      Ri = optimal_rotation(Mu, Qsir);
-      Qsir.rotate(Ri);
+        // Reparametrize
+        Plf Gi = optimal_reparam(Mu, Qsi);
+        Srvf Qsir = gamma_action(Qsi, Gi);
 
-      // Compute current shooting vector
-      Srvf Svi = shooting_vector(Mu, Qsir);
+        // And rotate again
+        Ri = optimal_rotation(Mu, Qsir);
+        Qsir.rotate(Ri);
+
+        // Compute current shooting vector
+        Svi = shooting_vector(Mu, Qsir);
+      }
+      else if (optimize_rots)
+      {
+        Srvf Qsi(Qs[i]);  // mutable local copy
+
+        Matrix Ri = optimal_rotation(Mu, Qsi);
+        Qsi.rotate(Ri);
+        Svi = shooting_vector(Mu, Qsi);
+      } 
+      else if (optimize_reparams)
+      {
+        Srvf Qsi(Qs[i]);  // mutable local copy
+
+        Plf Gi = optimal_reparam(Mu, Qsi);
+        Srvf Qsir = gamma_action(Qsi, Gi);
+        Svi = shooting_vector(Mu, Qsir);
+      }
+      else
+      {
+        Svi = shooting_vector(Mu, Qs[i]);
+      }
+
       #pragma omp critical
       update_dir = srvf::linear_combination(update_dir, Svi, 1.0, 1.0);
     }
@@ -98,9 +125,8 @@ Srvf karcher_mean(const std::vector<Srvf> &Qs, double tol, size_t max_iters)
     else
     {
       // Update mean estimate and keep going
-      double w1 = cos(stepsize*udr);
-      double w2 = sin(stepsize*udr) * radius / udr;
-      Mu = srvf::linear_combination(Mu, update_dir, w1, w2);
+      Mu = srvf::linear_combination(Mu, update_dir, 1.0, stepsize);
+      Mu.scale(radius / l2_norm(Mu));
     }
   }
 
@@ -135,11 +161,7 @@ Srvf shooting_vector(const Srvf &Q1, const Srvf &Q2)
   double theta = acos(cos_theta);
 
   // Shooting vector
-  Srvf Qdiff = srvf::linear_combination(Q1, Q2, -1.0, 1.0);
-  double ip = srvf::l2_product(Q1, Qdiff);
-  Srvf Qdiff_proj(Q1);
-  Qdiff_proj.scale(ip / radius2);
-  Srvf sv = srvf::linear_combination(Qdiff, Qdiff_proj, 1.0, -1.0);
+  Srvf sv = srvf::linear_combination(Q1, Q2, -cos_theta, 1.0);
 
   // Scale shooting vector to have length equal to great-circle distance
   double norm_sv = srvf::l2_norm(sv);

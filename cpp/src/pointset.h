@@ -60,6 +60,13 @@ public:
   Pointset() { }
 
   /**
+   * Creates a pointset containing \a n copies of the given point \c p.
+   */
+  Pointset(size_t n, Point p)
+   : data_(n, p)
+  { }
+
+  /**
    * Creates a new \c Pointset with the given size.
    *
    * The points will be uninitialized
@@ -181,7 +188,7 @@ public:
   inline size_t npts() const { return data_.size(); }
 
   /** Indicates whether or not this Pointset contains any points. */
-  inline bool empty() const { return (dim() > 0 && npts() > 0); }
+  inline bool empty() const { return (dim() == 0 || npts() == 0); }
 
   /** Returns a reference to the specified point. */
   inline Point &operator[] (size_t idx)

@@ -91,8 +91,8 @@ public:
     params_[1]=b;
   }
 
-  void evaluate(double t, Pointset &result) const;
-  void evaluate(const std::vector<double> &tv, Pointset &result) const;
+  Pointset evaluate(double t) const;
+  Pointset evaluate(const std::vector<double> &tv) const;
 
   /** Returns a reference to the samples. */
   Pointset &samps() { return samps_; }

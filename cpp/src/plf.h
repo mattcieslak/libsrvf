@@ -36,9 +36,6 @@ class Plf
 {
 public:
   
-  /** Default constructor. */
-  Plf() { }
-
   /**
    * Creates a new \c Plf with the given sample points.
    *
@@ -47,7 +44,7 @@ public:
    * \param samples
    */
   Plf(const Pointset &samples)
-    : samps_(samples), params_()
+    : samps_(samples)
   {
     params_=srvf::util::linspace(0.0,1.0,samples.npts());
   }
@@ -66,26 +63,28 @@ public:
   }
 
   /**
-   * Copy constructor.
-   *
-   * Creates a deep copy of \a F
-   * \param F an existing \c Plf
+   * Returns a new \c Plf which is constant on the given interval.
    */
-  Plf(const Plf &F)
-    : samps_(F.samps_), params_(F.params_)
-  { }
+  static Plf create_constant(double a, double b, const Point &p)
+  { 
+    Plf res(Pointset(2,p), std::vector<double>(2));
+    res.params_[0]=a; 
+    res.params_[1]=b; 
+    return res;
+  }
 
   /**
    * Returns a new 1-D \c Plf which represents the identity function on 
    * the interval \f$ [a,b] \f$.
    */
-  Plf(double a, double b)
-   : samps_(1,2), params_(2)
+  static Plf create_identity(double a, double b)
   {
-    samps_[0][0] = a;
-    samps_[1][0] = b;
-    params_[0] = a;
-    params_[1] = b;
+    Plf res(Pointset(1,2), std::vector<double>(2));
+    res.samps_[0][0] = a;
+    res.samps_[1][0] = b;
+    res.params_[0] = a;
+    res.params_[1] = b;
+    return res;
   }
 
   /** Returns the sample points. */
@@ -109,14 +108,10 @@ public:
   /** Does this \c Plf represent the empty map? */
   bool is_empty() const { return (samps_.npts() == 0); }
  
-  void evaluate(double t, Pointset &result) const;
-  void evaluate(const std::vector<double> &tv, Pointset &result) const;
-  void preimages(const std::vector<double> &tv, 
-                 std::vector<double> &result) const;
-
-  Point evaluate(double t) const;
+  Pointset evaluate(double t) const;
   Pointset evaluate(const std::vector<double> &tv) const;
   std::vector<double> preimages(const std::vector<double> &tv) const;
+
   double arc_length() const;
   Point centroid() const;
   std::vector<Point> bounding_box() const;
@@ -132,6 +127,8 @@ public:
                                 double w1, double w2);
   friend Plf composition(const Plf &F1, const Plf &F2);
   friend Plf inverse(const Plf &F);
+  friend Plf constant_speed_param(const Plf &F);
+  friend Plf constant_speed_reparam(const Plf &F, double lb, double ub);
 
 private:
   Pointset samps_;
@@ -141,6 +138,8 @@ private:
 Plf linear_combination(const Plf &F1, const Plf &F2, double w1, double w2);
 Plf composition(const Plf &F1, const Plf &F2);
 Plf inverse(const Plf &F);
+Plf constant_speed_param(const Plf &F);
+Plf constant_speed_reparam(const Plf &F, double lb, double ub);
 
 } // namespace srvf
 

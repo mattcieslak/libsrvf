@@ -83,11 +83,8 @@ static void build_A_(const Srvf &Q1, const Srvf &Q2, gsl_matrix *A)
   size_t dim = Q1.dim();
   size_t npts = tv.size();
 
-  Pointset Q1vals(dim, npts);
-  Pointset Q2vals(dim, npts);
-
-  Q1.evaluate(tv, Q1vals);
-  Q2.evaluate(tv, Q2vals);
+  Pointset Q1vals = Q1.evaluate(tv);
+  Pointset Q2vals = Q2.evaluate(tv);
 
   gsl_matrix_set_zero(A);
   for (size_t i=0; i<npts-1; ++i)

@@ -15,8 +15,9 @@ BOOST_AUTO_TEST_CASE(ctor_test1)
   BOOST_CHECK_EQUAL(z1.domain_lb(), 0.0);
   BOOST_CHECK_EQUAL(z1.domain_ub(), 1.0);
 
-  srvf::Pointset samps(2,1);
-  z1.evaluate(0.5, samps);
+  srvf::Pointset samps = z1.evaluate(0.5);
+  BOOST_REQUIRE_EQUAL(samps.dim(), z1.dim());
+  BOOST_REQUIRE_EQUAL(samps.npts(), 1);
   BOOST_CHECK_EQUAL(samps[0][0], 0.25);
   BOOST_CHECK_EQUAL(samps[0][1], 0.25);
 }
@@ -67,10 +68,11 @@ BOOST_AUTO_TEST_CASE(evaluate_test1)
   srvf::Pointset samps(2,ncp-1,samps_data,srvf::Pointset::POINT_PER_COLUMN);
   std::vector<double> params(&params_data[0],&params_data[ncp]);
   std::vector<double> tv(&tv_data[0],&tv_data[ntv]);
-  srvf::Pointset result(2,ntv);
 
   srvf::Srvf Q(samps,params);
-  Q.evaluate(tv,result);
+  srvf::Pointset result = Q.evaluate(tv);
+  BOOST_REQUIRE_EQUAL(result.dim(), Q.dim());
+  BOOST_REQUIRE_EQUAL(result.npts(), tv.size());
   for (size_t i=0; i<result.npts(); ++i)
   {
     for (size_t j=0; j<result.dim(); ++j)

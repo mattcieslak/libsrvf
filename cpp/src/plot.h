@@ -44,27 +44,30 @@ public:
   insert(const Plf &F, Color c, double thickness=1.0, DrawingMode mode=LINES)
   {
     plfs_.push_back(F);
-    colors_.push_back(c);
-    thicknesses_.push_back(thickness);
-    modes_.push_back(mode);
+    plf_colors_.push_back(c);
+    plf_thicknesses_.push_back(thickness);
+    plf_modes_.push_back(mode);
   }
 
   virtual void 
   insert(const Srvf &Q, Color c, double thickness=1.0, DrawingMode mode=LINES)
   {
     srvfs_.push_back(Q);
-    colors_.push_back(c);
-    thicknesses_.push_back(thickness);
-    modes_.push_back(mode);
+    srvf_colors_.push_back(c);
+    srvf_thicknesses_.push_back(thickness);
+    srvf_modes_.push_back(mode);
   }
 
 protected:
   
   std::vector<Plf> plfs_;
   std::vector<Srvf> srvfs_;
-  std::vector<Color> colors_;
-  std::vector<double> thicknesses_;
-  std::vector<DrawingMode> modes_;
+  std::vector<Color> plf_colors_;
+  std::vector<Color> srvf_colors_;
+  std::vector<double> plf_thicknesses_;
+  std::vector<double> srvf_thicknesses_;
+  std::vector<DrawingMode> plf_modes_;
+  std::vector<DrawingMode> srvf_modes_;
 };
 
 
@@ -129,9 +132,9 @@ public:
   insert(const Plf &F, Color c, double thickness=1.0, DrawingMode mode=LINES)
   {
     plfs_.push_back(F);
-    colors_.push_back(c);
-    thicknesses_.push_back(thickness);
-    modes_.push_back(mode);
+    plf_colors_.push_back(c);
+    plf_thicknesses_.push_back(thickness);
+    plf_modes_.push_back(mode);
 
     std::vector<Point> bbox = F.bounding_box();
     x_min = std::min(x_min, F.params().front());
@@ -144,9 +147,9 @@ public:
   insert(const Srvf &Q, Color c, double thickness=1.0, DrawingMode mode=LINES)
   {
     srvfs_.push_back(Q);
-    colors_.push_back(c);
-    thicknesses_.push_back(thickness);
-    modes_.push_back(mode);
+    srvf_colors_.push_back(c);
+    srvf_thicknesses_.push_back(thickness);
+    srvf_modes_.push_back(mode);
   }
 
   virtual void render(Renderer &r);
@@ -156,6 +159,7 @@ private:
   double x_min, x_max;
   double y_min, y_max;
 };
+
 
 } // namespace srvf
 

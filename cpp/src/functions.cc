@@ -20,6 +20,7 @@
 
 #include "srvf.h"
 #include "plf.h"
+#include "plothelper.h"
 
 #include <vector>
 #include <deque>
@@ -599,6 +600,7 @@ Srvf karcher_mean(const std::vector<Srvf> &Qs, double tol, size_t max_iters)
       Qsl.push_back(constant_speed_param(Qs[i]));
     }
 
+
     // Reparametrize to optimally register Mu to each of the Qsl[i]
     std::vector<Plf> GE = groupwise_optimal_reparam(Mu, Qsl);
     for (size_t i=0; i<Qsl.size(); ++i)
@@ -640,7 +642,7 @@ Srvf karcher_mean(const std::vector<Srvf> &Qs, double tol, size_t max_iters)
     }
 
     // Update
-    Mu = linear_combination(Mu, NGrad, 1.0, 0.5);
+    Mu = linear_combination(Mu, NGrad, 1.0, 0.25);
     Mu.scale( Qnorm / l2_norm(Mu) );
   }
 

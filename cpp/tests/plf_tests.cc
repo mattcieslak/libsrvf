@@ -1,7 +1,11 @@
 #include <boost/test/unit_test.hpp>
 
+#include <fltk/run.h>
+
 #include "plf.h"
 #include "pointset.h"
+#include "plot.h"
+#include "plotwin.h"
 #include "matrix.h"
 #include "util.h"
 
@@ -13,13 +17,15 @@ BOOST_AUTO_TEST_CASE(evaluate_test1)
   srvf::Pointset samps(1,2,samps_data);
   srvf::Plf F(samps);
   std::vector<double> tv=srvf::util::linspace(0.0,1.0,5);
-  srvf::Pointset Ftv1(1,5);
-  srvf::Pointset Ftv2(1,1);
   double expdata[]={0.0, 0.25, 0.5, 0.75, 1.0};
-  F.evaluate(tv,Ftv1);
+  srvf::Pointset Ftv1 = F.evaluate(tv);
+  BOOST_REQUIRE_EQUAL(Ftv1.dim(), F.dim());
+  BOOST_REQUIRE_EQUAL(Ftv1.npts(), tv.size());
   for (size_t i=0; i<5; ++i)
   {
-    F.evaluate(tv[i],Ftv2);
+    srvf::Pointset Ftv2 = F.evaluate(tv[i]);
+    BOOST_REQUIRE_EQUAL(Ftv2.dim(), F.dim());
+    BOOST_REQUIRE_EQUAL(Ftv2.npts(), 1);
     BOOST_CHECK_EQUAL(Ftv1[i][0],expdata[i]);
     BOOST_CHECK_EQUAL(Ftv2[0][0],expdata[i]);
   }
@@ -38,8 +44,9 @@ BOOST_AUTO_TEST_CASE(evaluate_test2)
     }
   }
   srvf::Plf F(X,uv);
-  srvf::Pointset res(3,999);
-  F.evaluate(uvl,res);
+  srvf::Pointset res = F.evaluate(uvl);
+  BOOST_REQUIRE_EQUAL(res.dim(), F.dim());
+  BOOST_REQUIRE_EQUAL(res.npts(), uvl.size());
   for (size_t i=0; i<3; ++i)
   {
     for (size_t j=0; j<999; ++j)
@@ -55,9 +62,8 @@ BOOST_AUTO_TEST_CASE(preimages_test1)
   std::vector<double> samps_data=srvf::util::linspace(0.0,1.0,2);
   std::vector<double> uv=srvf::util::linspace(0.0,1.0,13);
   srvf::Pointset samps(1,2,samps_data);
-  std::vector<double> Fiuv(uv.size());
   srvf::Plf F(samps);
-  F.preimages(uv,Fiuv);
+  std::vector<double> Fiuv = F.preimages(uv);
   for (size_t i=0; i<uv.size(); ++i)
   {
     BOOST_CHECK_CLOSE(uv[i],Fiuv[i],1e-5);
@@ -69,10 +75,9 @@ BOOST_AUTO_TEST_CASE(preimages_test2)
   double samps_data[]={0.0, 0.5, 0.5, 1.0};
   srvf::Pointset samps(1,4,samps_data);
   std::vector<double> tv=srvf::util::linspace(0.0,1.0,5);
-  std::vector<double> Fitv(tv.size());
   double exp_data[]={0.0, 1.0/6.0, 2.0/3.0, 5.0/6.0, 1.0};
   srvf::Plf F(samps);
-  F.preimages(tv,Fitv);
+  std::vector<double> Fitv = F.preimages(tv);
   for (size_t i=0; i<tv.size(); ++i)
   {
     BOOST_CHECK_CLOSE(exp_data[i],Fitv[i],1e-5);
@@ -211,5 +216,26 @@ BOOST_AUTO_TEST_CASE(inverse_test1)
   }
 }
 
+BOOST_AUTO_TEST_CASE(constant_speed_reparam_test1)
+{
+  double samps_data[] = { 0.0, 0.1, 1.0, 0.0, 0.1, 0.0 };
+  double params_data[] = { 0.0, 0.6, 0.7, 0.8, 1.0 };
+  size_t npts = sizeof(params_data) / sizeof(double);
+  srvf::Pointset samps(1, npts, samps_data);
+  std::vector<double> params(&(params_data[0]), &(params_data[npts]));
+  srvf::Plf F(samps, params);
+  srvf::Plf G = constant_speed_reparam(F, 0.0, 1.0);
+  srvf::Plf Fn = composition(F, G);
+
+  srvf::FunctionPlot plot;
+  plot.insert(F, srvf::Color(0.0,0.0,1.0));
+  plot.insert(Fn, srvf::Color(0.0,1.0,0.0));
+  plot.insert(G, srvf::Color(1.0,0.0,0.0));
+  srvf::FltkGlPlotWindow plotwin(800,400,
+    "constant_speed_reparam_test1: F(blue), Fn(green), and G(red)");
+  plotwin.add_plot(static_cast<srvf::Plot*>(&plot));
+  plotwin.show();
+  fltk::run();
+}
 
 BOOST_AUTO_TEST_SUITE_END()

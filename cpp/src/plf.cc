@@ -40,10 +40,9 @@ namespace srvf
  * \param t the parameter value
  * \param result a \c Pointset to receive the result
  */
-void Plf::evaluate(double t, Pointset &result) const
+Pointset Plf::evaluate(double t) const
 {
-  std::vector<double> tv(1,t);
-  evaluate(tv,result);
+  return srvf::interp::interp_linear(samps(),params(),std::vector<double>(1,t));
 }
 
 /**
@@ -59,9 +58,9 @@ void Plf::evaluate(double t, Pointset &result) const
  * \param tv the parameter values at which the function will be evaluated
  * \param result a \c Pointset to receive the result
  */
-void Plf::evaluate(const std::vector<double> &tv, Pointset &result) const
+Pointset Plf::evaluate(const std::vector<double> &tv) const
 {
-  srvf::interp::interp_linear(samps(),params(),tv,result);
+  return srvf::interp::interp_linear(samps(),params(),tv);
 }
 
 /**
@@ -82,17 +81,16 @@ void Plf::evaluate(const std::vector<double> &tv, Pointset &result) const
  * \param tv the numbers whose preimages will be found
  * \param result a \c Sequence to receive the result
  */
-void Plf::preimages(const std::vector<double> &tv, 
-                    std::vector<double> &result) const
+std::vector<double> Plf::preimages(const std::vector<double> &tv) const
 {
   if (dim()>1)
     throw std::logic_error("preimages() only supported for 1-D functions");
   
-  // Do nothing if this PLF is the empty map, or if tv is empty
-  if (ncp()==0) return;
-  if (tv.size()==0) return;
+  // Return an empty vector if this PLF is the empty map, or if tv is empty
+  if (ncp()==0) return std::vector<double>(0);
+  if (tv.size()==0) return std::vector<double>(0);
 
-  srvf::interp::interp_linear(params(), samps(), tv, result);
+  return srvf::interp::interp_linear(params(), samps(), tv);
 }
 
 /**
@@ -228,12 +226,10 @@ Plf linear_combination(const Plf &F1, const Plf &F2,
   size_t dim=F1.dim();
 
   std::vector<double> new_params=srvf::util::unique(F1.params(), F2.params());
-  Pointset F1vals(dim,new_params.size());
-  Pointset F2vals(dim,new_params.size());
   Pointset new_samps(dim,new_params.size());
 
-  F1.evaluate(new_params,F1vals);
-  F2.evaluate(new_params,F2vals);
+  Pointset F1vals = F1.evaluate(new_params);
+  Pointset F2vals = F2.evaluate(new_params);
 
   for (size_t i=0; i<new_samps.npts(); ++i)
   {
@@ -257,16 +253,13 @@ Plf composition(const Plf &F1, const Plf &F2)
   if (F2.dim()!=1)
     throw std::invalid_argument("F2 must be 1-dimensional");
   
-  std::vector<double> T1pi(F1.ncp());
-  F2.preimages(F1.params(),T1pi);
+  std::vector<double> T1pi = F2.preimages(F1.params());
   std::vector<double> T=srvf::util::unique(F2.params(),T1pi);
 
-  Pointset F2T(1,T.size());
-  F2.evaluate(T,F2T);
+  Pointset F2T = F2.evaluate(T);
   std::vector<double> F2Tv=F2T.to_vector();
 
-  Pointset F12T(F1.dim(),T.size());
-  F1.evaluate(F2Tv,F12T);
+  Pointset F12T = F1.evaluate(F2Tv);
 
   return Plf(F12T,T);
 }
@@ -285,6 +278,36 @@ Plf composition(const Plf &F1, const Plf &F2)
 Plf inverse(const Plf &F)
 {
   return Plf(Pointset(1,F.ncp(),F.params()), F.samps().to_vector());
+}
+
+/**
+ * Returns a \c Plf which is a constant-speed reparametrization of \a F.
+ */
+Plf constant_speed_param(const Plf &F)
+{
+  throw std::logic_error("not implemented");
+}
+
+/**
+ * Returns a reparametrization which transforms \a F into a constant-speed 
+ * function on the interval \c [lb,ub].
+ */
+Plf constant_speed_reparam(const Plf &F, double lb, double ub)
+{
+  double L = F.arc_length();
+  double mulfac = (ub-lb) / L;
+
+  Pointset samps(1,1,F.params()[0]);
+  std::vector<double> params(1,lb);
+
+  for (size_t i=1; i<F.ncp(); ++i)
+  {
+    samps.push_back(Point(1,F.params()[i]));
+    double dF = F.samps().distance(i-1,i);
+    params.push_back(params.back() + dF*mulfac);
+  }
+
+  return Plf(samps, params);
 }
 
 } // namespace srvf

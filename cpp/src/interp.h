@@ -114,13 +114,15 @@ inline int lookup(const Pointset &table, double t)
  * \param samps a \c Matrix containing the sample points, one point per column
  * \param params the parameter values corresponding to \a samps
  * \param tv parameters at which to interpolated.  Must be non-decreasing.
- * \param result [output] a \c Matrix to hold the result
+ * \return a \c Pointset containing the values at the specified abscissae
  */
-inline void interp_linear(const Pointset &samps, 
-                          const std::vector<double> &params, 
-                          const std::vector<double> &tv, 
-                          Pointset &result)
+inline Pointset 
+interp_linear(const Pointset &samps, 
+              const std::vector<double> &params, 
+              const std::vector<double> &tv)
 {
+  Pointset result(samps.dim(),tv.size());
+
   size_t idx=0;
   if (params.size()>1 && tv[0]>params[1])
   {
@@ -163,20 +165,24 @@ inline void interp_linear(const Pointset &samps,
       weighted_sum(samps,samps,idx,idx,1.0,0.0,result,i);
     }
   }
+
+  return result;
 }
 
 /**
  * Linear interpolation for \c Plf::preimages().
  */
-inline void interp_linear (const std::vector<double> &samps, 
-                           const Pointset &params, 
-                           const std::vector<double> &tv, 
-                           std::vector<double> &result)
+inline std::vector<double> 
+interp_linear (const std::vector<double> &samps, 
+               const Pointset &params, 
+               const std::vector<double> &tv)
 {
   if (params.dim() != 1)
     throw std::invalid_argument("params must be a 1-D pointset");
   if (params.npts() != samps.size())
     throw std::invalid_argument("params and samps must have same size");
+
+  std::vector<double> result(tv.size());
 
   size_t idx=0;
   if (params.npts()>1 && tv[0]>params[1][0])
@@ -220,6 +226,8 @@ inline void interp_linear (const std::vector<double> &samps,
       result[i] = samps[idx];
     }
   }
+
+  return result;
 }
 
 /**
@@ -230,10 +238,12 @@ inline void interp_linear (const std::vector<double> &samps,
  * \param tv parameters at which to interpolated.  Must be non-decreasing.
  * \param result [output] a \c Matrix to hold the result
  */
-inline void 
+inline Pointset 
 interp_const(const Pointset &samps, const std::vector<double> &params, 
-             const std::vector<double> &tv, Pointset &result)
+             const std::vector<double> &tv)
 {
+  Pointset result(samps.dim(), tv.size());
+
   size_t idx=0;
   if (params.size()>1 && tv[0]>params[1])
   {
@@ -257,6 +267,8 @@ interp_const(const Pointset &samps, const std::vector<double> &params,
     }
     weighted_sum(samps,samps,idx,idx,1.0,0.0,result,i);
   }
+
+  return result;
 }
 
 } // namespace srvf::interp

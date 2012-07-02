@@ -38,9 +38,10 @@ BOOST_AUTO_TEST_CASE(interp_const_test1)
   srvf::Pointset samps(1,4,samps_data);
   std::vector<double> params=srvf::util::linspace(0.0,1.0,5);
   std::vector<double> tv(&tv_data[0],&tv_data[ntv]);
-  srvf::Pointset result(1,ntv);
 
-  srvf::interp::interp_const(samps,params,tv,result);
+  srvf::Pointset result = srvf::interp::interp_const(samps,params,tv);
+  BOOST_REQUIRE_EQUAL(result.dim(), samps.dim());
+  BOOST_REQUIRE_EQUAL(result.npts(), tv.size());
   for (size_t i=0; i<ntv; ++i)
   {
     BOOST_CHECK_CLOSE(result[i][0],exp_data[i],1e-9);

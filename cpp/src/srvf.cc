@@ -31,17 +31,12 @@ namespace srvf
 /**
  * Evaluate this \c Srvf at a single point.
  *
- * The result will be stored in \a result, which must have at least 
- * \c this->dim() rows.
- *
  * \param t the parameter value at which the function will be evaluated
- * \param result a \c Matrix with at least \c this->dim() rows, which 
- *   will receive the result.
+ * \return a \c Pointset containing the function value at \a t
  */
-void Srvf::evaluate(double t, Pointset &result) const
+Pointset Srvf::evaluate(double t) const
 {
-  std::vector<double> tv(1, t);
-  evaluate(tv, result);
+  return srvf::interp::interp_const(samps(),params(),std::vector<double>(1,t));
 }
 
 /**
@@ -55,9 +50,9 @@ void Srvf::evaluate(double t, Pointset &result) const
  * \param tv the parameter values at which the function will be evaluated
  * \param result receives result
  */
-void Srvf::evaluate(const std::vector<double> &tv, Pointset &result) const
+Pointset Srvf::evaluate(const std::vector<double> &tv) const
 {
-  srvf::interp::interp_const(samps(), params(), tv, result);
+  return srvf::interp::interp_const(samps(), params(), tv);
 }
 
 /**
@@ -343,15 +338,13 @@ Srvf linear_combination(const Srvf &Q1, const Srvf &Q2,
     size_t ncp=params.size();
 
     // Evaluate Q1 and Q2 at the midpoint of each interval
-    Pointset samps1(dim, ncp-1);
-    Pointset samps2(dim, ncp-1);
     std::vector<double> tv(ncp-1);
     for (size_t i=0; i<ncp-1; ++i)
     {
       tv[i] = 0.5*(params[i] + params[i+1]);
     }
-    Q1.evaluate(tv, samps1);
-    Q2.evaluate(tv, samps2);
+    Pointset samps1 = Q1.evaluate(tv);
+    Pointset samps2 = Q2.evaluate(tv);
 
     // New samps is linear combination of samps1 and samps2
     Pointset samps(dim, ncp-1);
@@ -385,8 +378,7 @@ Srvf refinement(const Srvf &Q, const std::vector<double> &new_params)
   {
     tv[i] = 0.5*(params[i]+params[i+1]);
   }
-  Pointset samps(Q.dim(),tv.size());
-  Q.evaluate(tv,samps);
+  Pointset samps = Q.evaluate(tv);
 
   return Srvf(samps,params);
 }
@@ -414,8 +406,7 @@ Srvf gamma_action(const Srvf &Q, const Plf &gamma)
   { throw std::invalid_argument(
       "Range of gamma must be contained in domain of Q"); }
 
-  std::vector<double> xparams(Q.ncp());
-  gamma.preimages(Q.params(),xparams);
+  std::vector<double> xparams = gamma.preimages(Q.params());
   std::vector<double> params = srvf::util::unique(gamma.params(),xparams);
   Srvf Qr = refinement(Q,gamma.samps().to_vector());
   Pointset samps(Qr.samps());

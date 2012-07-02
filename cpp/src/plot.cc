@@ -34,9 +34,9 @@ void MontagePlot::insert(
   DrawingMode mode)
 {
   plfs_.push_back(F);
-  colors_.push_back(c);
-  thicknesses_.push_back(thickness);
-  modes_.push_back(mode);
+  plf_colors_.push_back(c);
+  plf_thicknesses_.push_back(thickness);
+  plf_modes_.push_back(mode);
 }
 
 void MontagePlot::insert(
@@ -46,9 +46,9 @@ void MontagePlot::insert(
   DrawingMode mode)
 {
   srvfs_.push_back(Q);
-  colors_.push_back(c);
-  thicknesses_.push_back(thickness);
-  modes_.push_back(mode);
+  srvf_colors_.push_back(c);
+  srvf_thicknesses_.push_back(thickness);
+  srvf_modes_.push_back(mode);
 }
 
 void MontagePlot::render(Renderer &r)
@@ -66,9 +66,9 @@ void SuperimposedPlot::insert(
   DrawingMode mode)
 {
   plfs_.push_back(F);
-  colors_.push_back(c);
-  thicknesses_.push_back(thickness);
-  modes_.push_back(mode);
+  plf_colors_.push_back(c);
+  plf_thicknesses_.push_back(thickness);
+  plf_modes_.push_back(mode);
 }
 
 void SuperimposedPlot::insert(
@@ -78,17 +78,17 @@ void SuperimposedPlot::insert(
   DrawingMode mode)
 {
   srvfs_.push_back(Q);
-  colors_.push_back(c);
-  thicknesses_.push_back(thickness);
-  modes_.push_back(mode);
+  srvf_colors_.push_back(c);
+  srvf_thicknesses_.push_back(thickness);
+  srvf_modes_.push_back(mode);
 }
 
 void SuperimposedPlot::render(Renderer &r)
 {
   for (size_t i=0; i<plfs_.size(); ++i)
   {
-    r.begin(modes_[i]);
-    r.set_color(colors_[i]);
+    r.begin(plf_modes_[i]);
+    r.set_color(plf_colors_[i]);
 
     if (plfs_[i].dim()==2)
     {
@@ -134,15 +134,29 @@ void FunctionPlot::render(Renderer &r)
   r.viewport(2, 2, dev_width-2, dev_height-2);
   r.ortho(x_min, x_max, y_min, y_max, -1.0, 1.0);
 
+  // Draw the Plf's
   for (size_t i=0; i<plfs_.size(); ++i)
   {
-    r.set_color(colors_[i]);
+    r.set_color(plf_colors_[i]);
     r.begin(LINES);
     for (size_t j=0; j<plfs_[i].ncp(); ++j)
     {
       r.vertex(plfs_[i].params()[j], plfs_[i].samps()[j][0]);
     }
     r.end();
+  }
+
+  // Draw the Srvf's
+  for (size_t i=0; i<srvfs_.size(); ++i)
+  {
+    r.set_color(srvf_colors_[i]);
+    for (size_t j=1; j<srvfs_[i].ncp(); ++j)
+    {
+      r.begin(LINES);
+      r.vertex(srvfs_[i].params()[j-1], srvfs_[i].samps()[j-1][0]);
+      r.vertex(srvfs_[i].params()[j], srvfs_[i].samps()[j-1][0]);
+      r.end();
+    }
   }
 
   // Draw some lame axes
