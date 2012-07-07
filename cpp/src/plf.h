@@ -35,6 +35,13 @@ namespace srvf {
 class Plf
 {
 public:
+
+  /**
+   * Creates an empty \c Plf.
+   */
+  Plf()
+   : samps_(), params_(0)
+  { }
   
   /**
    * Creates a new \c Plf with the given sample points.

@@ -21,6 +21,7 @@
 
 #include <cmath>
 #include <vector>
+#include <deque>
 #include <iterator>
 #include <algorithm>
 #include <stdexcept>
@@ -38,6 +39,8 @@ class Pointset
 {
 public:
 
+  typedef std::vector<Point>::iterator iterator;
+  typedef std::vector<Point>::const_iterator const_iterator;
   typedef Point value_type;
   typedef Point* pointer;
   typedef const Point* const_pointer;
@@ -57,7 +60,9 @@ public:
   /**
    * Creates an empty pointset.
    */
-  Pointset() { }
+  Pointset() 
+   : data_(0) 
+  { }
 
   /**
    * Creates a pointset containing \a n copies of the given point \c p.
@@ -69,7 +74,7 @@ public:
   /**
    * Creates a new \c Pointset with the given size.
    *
-   * The points will be uninitialized
+   * The points will be initialized to zero.
    *
    * \param dim the dimension of the ambient space
    * \param npts the number of points
@@ -119,9 +124,9 @@ public:
   /** 
    * Creates a new \c Pointset initialized from the given \c vector.
    *
-   * \param data
-   * \param dim the dimension of the points.  Must divide \c data.size().
-   *        Default is \c dim=1.
+   * \param dim the dimension of the points
+   * \param npts the number of points
+   * \param data must have size equal to \c dim*npts
    * \param packing POINT_PER_ROW if each point is stored contiguously 
    *        in \a data, POINT_PER_COLUMN if each component is stored 
    *        contiguously.  Default is \c packing=POINT_PER_ROW.
@@ -131,9 +136,12 @@ public:
             PackingMethod packing=POINT_PER_ROW)
    : data_(npts, Point(dim))
   {
-    if (dim==0 || npts==0) return;
-    if (npts != data.size()/dim)
+    if (npts*dim != data.size())
       throw std::invalid_argument("data.size() != dim*npts");
+    if (data.empty()){
+      data_.clear(); 
+      return;
+    }
     
     if (packing==POINT_PER_ROW)
     {
@@ -164,7 +172,10 @@ public:
             PackingMethod packing=POINT_PER_ROW)
    : data_(npts, Point(dim))
   {
-    if (dim==0 || npts==0) return;
+    if (dim==0 || npts==0){
+      data_.clear();
+      return;
+    }
     if (!data) throw std::invalid_argument("data is NULL");
 
     if (packing==POINT_PER_ROW)
@@ -193,15 +204,49 @@ public:
   /** Returns a reference to the specified point. */
   inline Point &operator[] (size_t idx)
   {
+    // std::vector doesn't check for out of range
     if (idx >= npts()) throw std::out_of_range("Point index out of range.");
     return data_[idx];
   }
 
-  /** Returns a \c const reference to the specified point. */
+  /** Returns a reference to the specified point. */
   inline const Point &operator[] (size_t idx) const
   {
+    // std::vector doesn't check for out of range
     if (idx >= npts()) throw std::out_of_range("Point index out of range.");
     return data_[idx];
+  }
+
+  /**
+   * Returns an iterator positioned at the beginning of this \c Pointset.
+   */
+  iterator begin()
+  {
+    return data_.begin();
+  }
+
+  /**
+   * Returns a const iterator positioned at the beginning of this \c Pointset.
+   */
+  const_iterator begin() const
+  {
+    return data_.begin();
+  }
+
+  /**
+   * Returns an iterator positioned past the end of this \c Pointset.
+   */
+  iterator end()
+  {
+    return data_.end();
+  }
+
+  /**
+   * Returns a const iterator positioned past the end of this \c Pointset.
+   */
+  const_iterator end() const
+  {
+    return data_.end();
   }
 
   /** Returns a reference to the first point in the set. */
@@ -222,27 +267,27 @@ public:
   inline Point &back()
   {
     if (empty()) throw std::out_of_range("back() called on empty Pointset.");
-    return data_[npts()-1];
+    return data_.back();
   }
 
   /** Returns a \c const reference to the last point in the set. */
   inline const Point &back() const
   {
     if (empty()) throw std::out_of_range("back() called on empty Pointset.");
-    return data_[npts()-1];
+    return data_.back();
   }
 
   /** Append a new point to the end of this pointset. */
   inline void push_back(const Point &P)
   {
-    if (dim()>0 && P.dim() != dim())
+    if (!empty() && P.dim() != dim())
       throw std::invalid_argument("New point has wrong dimension.");
 
     data_.push_back(P);
   }
 
   /** Remove the last point from this pointset. */
-  inline void pop()
+  inline void pop_back()
   {
     if (!data_.empty()) data_.pop_back();
   }
@@ -403,7 +448,7 @@ public:
    * Apply a scaling to a single point in this \c Pointset.
    *
    * \param idx the index of the point to be scaled
-   * \parm sf the scale factor
+   * \param sf the scale factor
    */
   void scale (size_t idx, double sf)
   {
@@ -423,141 +468,6 @@ public:
       data_[i] *= sf;
   }
 
-
-  /**
-   * An iterator that iterates over a single component of this \c Pointset.
-   */
-  class component_iterator
-   : public std::iterator<std::random_access_iterator_tag, double>
-  {
-    friend class Pointset;
-
-  public:
-
-    bool operator== (const component_iterator &A) const
-    { 
-      return ( ((S_) == (A.S_)) && (point_idx_ == A.point_idx_) && 
-               (comp_idx_ == A.comp_idx_) ); 
-    }
-    bool operator!= (const component_iterator &A) const
-    { return !( (*this) == A ); }
-
-    bool operator< (const component_iterator &A) const
-    { return (((S_) == (A.S_)) && (point_idx_ < A.point_idx_)
-      && (comp_idx_ == A.comp_idx_)); }
-    bool operator<= (const component_iterator &A) const
-    { return (((S_) == (A.S_)) && (point_idx_ <= A.point_idx_)
-      && (comp_idx_ == A.comp_idx_)); }
-
-    bool operator> (const component_iterator &A) const
-    { return (((S_) == (A.S_)) && (point_idx_ > A.point_idx_)
-      && (comp_idx_ == A.comp_idx_)); }
-    bool operator>= (const component_iterator &A) const
-    { return (((S_) == (A.S_)) && (point_idx_ >= A.point_idx_)
-      && (comp_idx_ == A.comp_idx_)); }
-
-    component_iterator &operator++ ()
-    { point_idx_ = std::min( point_idx_ + 1, (ptrdiff_t)S_->npts() ); }
-    component_iterator operator++ (int)
-    { 
-      component_iterator tmp(*this); 
-      point_idx_ = std::min( point_idx_ + 1, (ptrdiff_t)S_->npts() ); 
-      return tmp;
-    }
-
-    component_iterator &operator-- ()
-    { point_idx_ = std::max(point_idx_-1, -1); return *this; }
-    component_iterator operator-- (int)
-    { component_iterator tmp(*this);  
-      point_idx_ = std::max(point_idx_-1, -1);  return tmp; }
-
-    component_iterator operator+ (ptrdiff_t n) const
-    { return component_iterator(
-        S_, comp_idx_, std::min(point_idx_+n, (ptrdiff_t)S_->npts())); }
-    component_iterator &operator+= (ptrdiff_t n)
-    { point_idx_ = std::min(point_idx_+n, (ptrdiff_t)S_->npts());  
-      return *this; }
-
-    component_iterator operator- (ptrdiff_t n) const
-    { return component_iterator(
-        S_, comp_idx_, std::max(point_idx_-n, -1)); }
-    component_iterator &operator-= (ptrdiff_t n)
-    { point_idx_ = std::max(point_idx_-n, -1); return *this; }
-
-    ptrdiff_t operator- (const component_iterator &A)
-    { return (point_idx_ - A.point_idx_); }
-
-    double& operator* ()
-    {
-      // Bounds checking done in Pointset, exceptions propagate to caller
-      return (*S_)[point_idx_][comp_idx_];
-    }
-
-    double& operator[] (ptrdiff_t n)
-    {
-      // Bounds checking done in Pointset, exceptions propagate to caller
-      return (*S_)[point_idx_+n][comp_idx_];
-    }
-
-  private:
-    
-    component_iterator(Pointset *S, ptrdiff_t comp_idx, ptrdiff_t point_idx)
-     : S_(S), comp_idx_(comp_idx), point_idx_(point_idx)
-    { }
-
-    Pointset *S_;
-    ptrdiff_t comp_idx_;
-    ptrdiff_t point_idx_;
-  };
-
-
-  /**
-   * Returns an iterator to iterate over the points in this \c Pointset.
-   */
-  std::vector<Point>::iterator begin_points()
-  {
-    return data_.begin();
-  }
-
-  /**
-   * Returns an iterator to iterate over the points in this \c Pointset.
-   */
-  std::vector<Point>::const_iterator begin_points() const
-  {
-    return data_.begin();
-  }
-
-  /**
-   * Returns a past-the-end value for the points iterator.
-   */
-  std::vector<Point>::iterator end_points()
-  {
-    return data_.end();
-  }
-
-  /**
-   * Returns a past-the-end value for the points iterator.
-   */
-  std::vector<Point>::const_iterator end_points() const
-  {
-    return data_.end();
-  }
-
-  /**
-   * Returns an iterator for a single component of this \c Pointset.
-   */
-  component_iterator begin_component(size_t comp_idx)
-  {
-    return component_iterator(this, comp_idx, 0);
-  }
-
-  /**
-   * Returns a past-the-end iterator for the specified component.
-   */
-  component_iterator end_component(size_t comp_idx)
-  {
-    return component_iterator(this, comp_idx, npts());
-  }
 
 private:
   

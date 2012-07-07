@@ -16,29 +16,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#ifndef SRVF_FILEIO_H
-#define SRVF_FILEIO_H 1
+#ifndef PLOTHELPER_H
+#define PLOTHELPER_H 1
 
-#include <vector>
-#include <istream>
-#include <ostream>
-#include "matrix.h"
+#include "plf.h"
+#include "srvf.h"
+
+#include <fltk/run.h>
+
 
 namespace srvf
 {
-namespace io
-{
 
-std::vector<Matrix> load_csv (std::istream &is, 
-                              char fieldsep=' ',
-                              char linesep='\n');
+/**
+ * High-level convenience routine for plotting a vector of 1-D Plf's.
+ */
+void plot_1d_plfs(const std::vector<Plf> &v, 
+  size_t x=0, size_t y=0, size_t w=800, size_t h=400, 
+  const char *title="-");
 
-void save_csv (std::ostream &os, 
-               const std::vector<Matrix> &data,
-               char fieldsep=' ',
-               char linesep='\n'); 
+/**
+ * High-level convenience routine for plotting a vector of 1-D Srvf's.
+ */
+void plot_1d_srvfs(const std::vector<Srvf> &v, 
+  size_t x=0, size_t y=0, size_t w=800, size_t h=400, 
+  const char *title="-");
 
-} // namespace srvf::io
+
 } // namespace srvf
 
-#endif // SRVF_FILEIO_H
+#endif // PLOTHELPER_H

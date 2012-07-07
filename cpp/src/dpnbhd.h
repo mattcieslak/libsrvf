@@ -16,29 +16,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#ifndef SRVF_FILEIO_H
-#define SRVF_FILEIO_H 1
+#ifndef DPNBHD_H
+#define DPNBHD_H 1
 
-#include <vector>
-#include <istream>
-#include <ostream>
-#include "matrix.h"
+#include <cstdlib>
 
 namespace srvf
 {
-namespace io
-{
 
-std::vector<Matrix> load_csv (std::istream &is, 
-                              char fieldsep=' ',
-                              char linesep='\n');
+#ifndef DP_NBHD_DIM
+#define DP_NBHD_DIM 7 
+#endif
 
-void save_csv (std::ostream &os, 
-               const std::vector<Matrix> &data,
-               char fieldsep=' ',
-               char linesep='\n'); 
+#if DP_NBHD_DIM == 17
+#define DP_NBHD_SIZE 191
+extern size_t dp_nbhd[DP_NBHD_SIZE][2];
+#elif DP_NBHD_DIM == 12
+#define DP_NBHD_SIZE 91
+extern size_t dp_nbhd[DP_NBHD_SIZE][2];
+#elif DP_NBHD_DIM == 10
+#define DP_NBHD_SIZE 63
+extern size_t dp_nbhd[DP_NBHD_SIZE][2];
+#elif DP_NBHD_DIM == 7
+#define DP_NBHD_SIZE 35
+extern size_t dp_nbhd[DP_NBHD_SIZE][2];
+#else // DP_NBHD_DIM = 6 (default)
+#define DP_NBHD_SIZE 23
+extern size_t dp_nbhd[DP_NBHD_SIZE][2];
+#endif
 
-} // namespace srvf::io
 } // namespace srvf
 
-#endif // SRVF_FILEIO_H
+#endif // DPNBHD_H

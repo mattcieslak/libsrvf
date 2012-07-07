@@ -132,8 +132,8 @@ std::vector<Point> Plf::bounding_box() const
   res.push_back(Point(dim(), 1e9));
   res.push_back(Point(dim(), -1e9));
 
-  for (std::vector<Point>::const_iterator iter=samps().begin_points(); 
-       iter != samps().end_points(); 
+  for (Pointset::const_iterator iter=samps().begin(); 
+       iter != samps().end(); 
        ++iter)
   {
     for (size_t i=0; i<dim(); ++i)

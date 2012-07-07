@@ -20,7 +20,6 @@
 
 #include "srvf.h"
 #include "plf.h"
-#include "plothelper.h"
 
 #include <vector>
 #include <deque>

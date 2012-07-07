@@ -46,7 +46,12 @@ class Srvf
 {
 public:
 
-  Srvf() { }
+  /**
+   * Creates an empty \c Srvf.
+   */
+  Srvf() 
+   : samps_(), params_(0)
+  { }
 
   /**
    * Creates a new \c Srvf with the specified values.

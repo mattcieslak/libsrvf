@@ -1,45 +1,21 @@
-AC_INIT([libsrvf], [0.0.0+], [drobinso@math.fsu.edu])
+AC_INIT([libsrvf], [0.1], [drobinso@math.fsu.edu])
+AC_CONFIG_SRCDIR([src/matrix.cc])
+AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_SRCDIR([src/matrix.h])
+AC_CONFIG_AUX_DIR([.])
+
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
-AC_CONFIG_SRCDIR([src/matrix.h])
-AC_CONFIG_HEADERS([config.h])
-
 AC_PROG_CXX
-AC_PROG_RANLIB
+LT_INIT
 
 # Check for GSL
 AC_CHECK_LIB([gsl],[gsl_matrix_alloc])
-
-# Check for OpenGL
-AC_CHECK_LIB([GL],[glBegin])
-AC_CHECK_LIB([GLU],[gluLookAt])
-
-# Check for FLTK
-AC_LANG(C++)
-saved_LDFLAGS="$LDFLAGS"
-LDFLAGS="$LDFLAGS -lfltk2"
-AC_LINK_IFELSE(
-  [AC_LANG_PROGRAM([#include <fltk/Widget.h>],[fltk::Widget w(0,0,0,0,"")])],dnl
-  [LIBS="-lfltk2 -lfltk2_gl $LIBS"]dnl
-  AC_DEFINE([HAVE_FLTK],[],[FLTK]),dnl
-  [AC_MSG_WARN([FLTK not found])])dnl
-LDFLAGS="$saved_LDFLAGS"
-
-# Check for Boost
-AC_LANG(C++)
-saved_LDFLAGS="$LDFLAGS"
-LDFLAGS="$LDFLAGS -lboost_unit_test_framework"
-AC_LINK_IFELSE(
-  [AC_LANG_PROGRAM([#include <boost/test/unit_test.hpp>],[])],dnl
-  [LIBS="-lboost_unit_test_framework $LIBS"]dnl
-  AC_DEFINE([HAVE_LIBBOOST_UNIT_TEST_FRAMEWORK],[],[Boost unit test]),dnl
-  [AC_MSG_WARN([Boost unit testing libraries not found])])dnl
-LDFLAGS="$saved_LDFLAGS"
 
 # Check for OpenMP
 AC_LANG(C++)
 AC_OPENMP
 CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
 
-AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
