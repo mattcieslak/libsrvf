@@ -1,0 +1,7 @@
+ACLOCAL_AMFLAGS=-I m4
+
+if COND_UNIT_TESTS
+MAYBE_TESTS = tests
+endif
+
+SUBDIRS = src $(MAYBE_TESTS)

@@ -20,7 +20,18 @@
 #define PARTIAL_MATCH_H 1
 
 #include "paretoset.h"
+
 #include <srvf.h>
+
+#include <vector>
+#include <limits>
+
+
+namespace srvf
+{
+
+namespace partial_match
+{
 
 /**
  * Returns the set of Pareto-optimal partial matches between two curves.
@@ -46,5 +57,65 @@ ParetoSet find_matches (
   bool do_rots=true, size_t grid_width=0, size_t grid_height=0, 
   size_t nbuckets=0, double bucket_thresh=0.01 );
 
+
+
+/**
+ * Represents the matching graph.
+ */
+class MatchingGraph
+{
+public:
+
+  MatchingGraph(size_t grid_width, size_t grid_height)
+   : grid_width_(grid_width), grid_height_(grid_height), 
+     nvertices_(grid_width*grid_height), 
+     weights_(grid_width*grid_height,std::numeric_limits<double>::max())
+  { }
+
+  inline double&
+  operator()(size_t cs, size_t rs, size_t ct, size_t rt)
+  {
+    return weights_[nvertices_*(grid_width_*rt+ct) + (grid_width_*rs+cs)];
+  }
+
+  inline const double&
+  operator()(size_t cs, size_t rs, size_t ct, size_t rt) const
+  {
+    return weights_[nvertices_*(grid_width_*rt+ct) + (grid_width_*rs+cs)];
+  }
+
+  inline size_t width() const
+  { return grid_width_; }
+
+  inline size_t height() const
+  { return grid_height_; }
+
+  inline size_t nvertices() const 
+  { return nvertices_; }
+  
+private:
+  
+  size_t grid_width_;
+  size_t grid_height_;
+  size_t nvertices_;
+  std::vector<double> weights_;
+};
+
+double edge_weight (
+  const srvf::Srvf &Q1, const srvf::Srvf &Q2, 
+  const std::vector<double> &tv1, const std::vector<double> &tv2, 
+  size_t tv1_i1, size_t tv1_i2, 
+  size_t tv2_i1, size_t tv2_i2, 
+  size_t Q1_idx_start, size_t Q2_idx_start );
+
+MatchingGraph calculate_edge_weights (
+  const srvf::Srvf &Q1, const srvf::Srvf &Q2, 
+  const std::vector<double> &tv1, const std::vector<double> &tv2 );
+
+void calculate_match_scores (MatchingGraph &G);
+
+} // namespace partial_match
+
+} // namespace srvf
 
 #endif // PARTIAL_MATCH_H

@@ -100,7 +100,7 @@ int main( int argc, char **argv ){
   srvf::Srvf Q1 = srvf::plf_to_srvf(F1);
   srvf::Srvf Q2 = srvf::plf_to_srvf(F2);
 
-  ParetoSet S = find_matches(Q1, Q2);
+  ParetoSet S = srvf::partial_match::find_matches(Q1, Q2);
 
   std::ofstream ofs(output_filename);
   S.save_csv(ofs);

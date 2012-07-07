@@ -23,52 +23,22 @@
 #include <srvf.h>
 #include <dpnbhd.h>
 
+#include <cstdlib>
 #include <cmath>
 #include <vector>
 #include <map>
-#include <limits>
 
-
-/**
- * Represents the matching graph.
- */
-class MatchingGraph
+namespace srvf
 {
-public:
 
-  MatchingGraph(size_t grid_width, size_t grid_height)
-   : grid_width_(grid_width), grid_height_(grid_height), 
-     nvertices_(grid_width*grid_height), 
-     weights_(grid_width*grid_height,std::numeric_limits<double>::max())
-  { }
-
-  inline double &operator()(size_t cs, size_t rs, size_t ct, size_t rt)
-  {
-    return weights_[nvertices_*(grid_width_*rt+ct) + (grid_width_*rs+cs)];
-  }
-
-  inline size_t width() const
-  { return grid_width_; }
-
-  inline size_t height() const
-  { return grid_height_; }
-
-  inline size_t nvertices() const 
-  { return nvertices_; }
-  
-private:
-  
-  size_t grid_width_;
-  size_t grid_height_;
-  size_t nvertices_;
-  std::vector<double> weights_;
-};
+namespace partial_match
+{
 
 
 /**
- * Returns the weight of an edge in the matching graph.
+ * Computes the weight of an edge in the matching graph.
  */
-static double edge_weight_ (
+double edge_weight (
   const srvf::Srvf &Q1, const srvf::Srvf &Q2, 
   const std::vector<double> &tv1, const std::vector<double> &tv2, 
   size_t tv1_i1, size_t tv1_i2, 
@@ -84,7 +54,7 @@ static double edge_weight_ (
   size_t Q1_idx = Q1_idx_start;
   size_t Q2_idx = Q2_idx_start;
   double t1 = a;
-  double t2 = b;
+  double t2 = c;
   double result = 0.0;
 
   while (t1 < (b-1e-5) && t2 < (d-1e-5))
@@ -133,7 +103,7 @@ static double edge_weight_ (
  * Build a map that sends each index \c i of \a tv to the index of the 
  * parameter subinterval of \a Q which contains \c tv[i].
  *
- * These maps are used in \c calculate_edge_weights_().
+ * These maps are used in \c calculate_edge_weights().
  */
 static std::map<size_t,size_t> build_tv_idx_to_Q_idx_map_ (
   const std::vector<double> &tv, const srvf::Srvf &Q )
@@ -154,7 +124,7 @@ static std::map<size_t,size_t> build_tv_idx_to_Q_idx_map_ (
 /**
  * Calculates the weights of all edges in the matching graph.
  */
-static MatchingGraph calculate_edge_weights_ (
+MatchingGraph calculate_edge_weights (
   const srvf::Srvf &Q1, const srvf::Srvf &Q2, 
   const std::vector<double> &tv1, const std::vector<double> &tv2 )
 {
@@ -174,7 +144,7 @@ static MatchingGraph calculate_edge_weights_ (
         size_t cs = ct - srvf::dp_nbhd[i][0];
         size_t rs = rt - srvf::dp_nbhd[i][1];
         if (cs < tv1.size() && rs < tv2.size())
-          result(cs, rs, ct, rt) = edge_weight_ (
+          result(cs, rs, ct, rt) = edge_weight (
             Q1, Q2, tv1, tv2, 
             cs, ct, rs, rt, 
             tv1_idx_to_Q1_idx[cs], 
@@ -191,7 +161,7 @@ static MatchingGraph calculate_edge_weights_ (
  * Use the Floyd-Warshall algorithm to solve the all-pairs-shortest 
  * path problem in \a G.
  */
-static void calculate_match_scores_ (MatchingGraph &G)
+void calculate_match_scores (MatchingGraph &G)
 {
   for (size_t cm=1; cm+1<G.width(); ++cm)
   {
@@ -247,8 +217,8 @@ ParetoSet find_matches (
     nbuckets = max_chunks - min_chunks + 1;
   }
 
-  MatchingGraph G = calculate_edge_weights_(Q1, Q2, tv1, tv2);
-  calculate_match_scores_(G);
+  MatchingGraph G = calculate_edge_weights(Q1, Q2, tv1, tv2);
+  calculate_match_scores(G);
 
   ParetoSet S(nbuckets, bucket_thresh);
   for (size_t ct=1; ct<grid_width; ++ct)
@@ -273,3 +243,7 @@ ParetoSet find_matches (
   return S;
 }
 
+
+} // namespace partial_match
+
+} // namespace srvf

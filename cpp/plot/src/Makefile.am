@@ -1,5 +1,5 @@
-AM_CPPFLAGS=-I$(top_srcdir)/../src
-AM_LDFLAGS=-L$(top_srcdir)/../src
+AM_CPPFLAGS=-I$(top_srcdir)/../srvf/src
+AM_LDFLAGS=-L$(top_srcdir)/../srvf/src $(FLTK_LDFLAGS)
 LIBS+=-lsrvf
 
 lib_LTLIBRARIES=libsrvf-plot.la

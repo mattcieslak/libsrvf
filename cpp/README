@@ -1,0 +1,70 @@
+libsrvf 
+
+I. Project layout and organization
+------------------------------------------------------------------------------
+
+The libsrvf package is made up of a main package providing core functionality, 
+and several subpackages providing additional functionality.  Each package 
+resides in its own directory and will be built into a separate library.  
+While the main package is required for anything to work, the other packages 
+are optional and can be built independently of each other.
+
+The main package provides everything in the top-level srvf namespace.  
+Each subpackage implements a nested namespace under the top-level srvf 
+namespace.
+
+Here are brief descriptions of the packages.
+
+0. The main package
+Directory: ./
+Library:   libsrvf
+Namespace: srvf
+The main package provides the core classes and algorithms for the library.  
+
+1. Partial matching
+Directory: pmatch/
+Library:   libsrvf-pmatch
+Namespace: srvf::pmatch
+Implementation of partial matching in the SRVF framework.
+
+2. Functional analysis
+Directory: fa/
+Library:   libsrvf-fa
+Namespace: srvf::fa
+Specialized algorithms for 1-D functions.  Includes pairwise matching as well 
+as groupwise matching and Karcher mean.
+
+3. Plotting
+Directory: plot/
+Library:   libsrvf-plot
+Namespace: srvf::plot
+Very basic plotting support.  Requires FLTK and OpenGL.
+
+4. File I/O
+Directory: fileio/
+Library:   libsrvf-io
+Namespace: srvf::io
+Basic support for loading and saving srvf::Matrix objects to and from 
+.csv files.
+
+
+II. Required third-party libraries
+------------------------------------------------------------------------------
+You need to have GSL (the GNU scientific library) installed in order for 
+anything to work.
+
+If you want the optional plotting features enabled, then you also need 
+FLTK and OpenGL.
+
+If you want to run the unit tests, then you need the Boost libraries.
+
+
+III. Building the library
+------------------------------------------------------------------------------
+Building the library should be straightforward:
+
+shell_prompt$  ./configure [your configure options here]
+shell_prompt$  make
+shell_prompt$  make install
+
+
