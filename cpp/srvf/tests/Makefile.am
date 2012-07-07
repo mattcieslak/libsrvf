@@ -1,4 +1,4 @@
-bin_PROGRAMS=test
+check_PROGRAMS=test
 AM_CPPFLAGS=-I$(top_srcdir)/src -I$(top_srcdir)/../plot/src
 AM_LDFLAGS=-L$(top_srcdir)/src/.libs -L$(top_srcdir)/../plot/src/.libs
 LIBS+=-lsrvf -lsrvf-plot -lboost_test_exec_monitor -lgomp

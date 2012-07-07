@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
+#include "util.h"
 
 #include <cstdlib>
 #include <time.h>
 #include <algorithm>
 #include <stdexcept>
 
-#include "util.h"
 
 namespace srvf
 {

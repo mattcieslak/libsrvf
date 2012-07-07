@@ -16,14 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
+#include "rotate.h"
+#include "matrix.h"
+#include "srvf.h"
+#include "exceptions.h"
+
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_blas.h>
 
-#include "matrix.h"
-#include "srvf.h"
-#include "rotate.h"
-#include "exceptions.h"
 
 namespace srvf
 {

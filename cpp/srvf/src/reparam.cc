@@ -16,17 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#include <limits>
-#include <cmath>
-#include <vector>
-#include <stack>
-
-#include "dpnbhd.h"
 #include "reparam.h"
+#include "dpnbhd.h"
 #include "plf.h"
 #include "srvf.h"
 #include "pointset.h"
 #include "matrix.h"
+
+#include <limits>
+#include <cmath>
+#include <vector>
+#include <stack>
 
 
 namespace srvf

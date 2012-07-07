@@ -1,1 +1,1 @@
-SUBDIRS=srvf plot pmatch
+SUBDIRS=plot srvf pmatch

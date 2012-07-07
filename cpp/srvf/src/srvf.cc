@@ -16,14 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#include <cmath>
-#include <stdexcept>
-
 #include "srvf.h"
 #include "plf.h"
 #include "matrix.h"
 #include "interp.h"
 #include "util.h"
+
+#include <cmath>
+#include <stdexcept>
+
 
 namespace srvf
 {

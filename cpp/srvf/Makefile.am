@@ -4,4 +4,4 @@ if COND_UNIT_TESTS
 MAYBE_TESTS = tests
 endif
 
-SUBDIRS=src $(MAYBE_TESTS)
+SUBDIRS = src $(MAYBE_TESTS)

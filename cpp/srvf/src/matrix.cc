@@ -16,11 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
+#include "matrix.h"
+
 #include <vector>
 #include <cstring>
 #include <stdexcept>
 
-#include "matrix.h"
 
 static const size_t SIZE_MAX_ = (size_t)-1;
 

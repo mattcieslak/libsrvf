@@ -25,14 +25,14 @@ AC_CHECK_FUNCS([sqrt])
 
 # If unit tests enabled, enable recursion into tests subdirectory, 
 # and also check for Boost.
-enable_pmatch_unit_tests=no
-AC_ARG_ENABLE([pmatch-unit-tests],
-  [AS_HELP_STRING([--enable-pmatch-unit-tests],
-    [Enable unit tests for partial matching package])],
-  [enable_pmatch_unit_tests="yes"], [])
+enable_unit_tests=no
+AC_ARG_ENABLE([unit-tests],
+  [AS_HELP_STRING([--enable-unit-tests],
+    [Enable unit tests])],
+  [enable_unit_tests="yes"], [])
 
-AM_CONDITIONAL([COND_PMATCH_UNIT_TESTS],
-  [test "$enable_pmatch_unit_tests" = "yes"])
+AM_CONDITIONAL([COND_UNIT_TESTS],
+  [test "$enable_unit_tests" = "yes"])
 
 if test "$enable_pmatch_tests" = "yes"; then
   AC_LANG(C++)
