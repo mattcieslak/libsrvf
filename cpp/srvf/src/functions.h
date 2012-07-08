@@ -22,6 +22,8 @@
 #include "srvf.h"
 #include "plf.h"
 
+#include <cstddef>
+#include <utility>
 #include <vector>
 #include <deque>
 #include <map>
@@ -96,7 +98,7 @@ groupwise_optimal_reparam(const Srvf &Mu, const std::vector<Srvf> &Qs);
  * determined by the matching paths in \a paths.
  */
 std::vector<Plf> groupwise_build_gammas(
-  const Srvf &Mu, const std::vector<Srvf> & Qs, 
+  const Srvf &Mu, const std::vector<Srvf> &Qs, 
   const std::vector<std::deque<match_vertex_t> > &paths);
 
 
@@ -132,7 +134,7 @@ public:
 
 private:
   
-  TestAccess(){ }  // no instances for you!
+  TestAccess(){ }  // no instances
 };
 
 } // namespace srvf::functions

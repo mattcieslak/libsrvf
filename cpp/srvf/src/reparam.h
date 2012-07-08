@@ -19,10 +19,12 @@
 #ifndef SRVF_REPARAM_H
 #define SRVF_REPARAM_H 1
 
-#include <vector>
-
 #include "plf.h"
 #include "srvf.h"
+
+#include <cstddef>
+#include <vector>
+
 
 namespace srvf
 {

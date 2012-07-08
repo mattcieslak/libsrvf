@@ -26,17 +26,33 @@ AC_TYPE_SIZE_T
 #  [AC_MSG_WARN([FLTK not found])])dnl
 #LDFLAGS="$saved_LDFLAGS"
 
-fltk2_config_prog=fltk2-config
-AC_ARG_WITH([fltk2-config],
-  [AS_HELP_STRING([--with-fltk2-config=PATH],
-    [Path to the fltk2-config program (optional)])],
-  [fltk2_config_prog="$withval"],
+fltk_config_prog=fltk-config
+AC_ARG_WITH([fltk-config],
+  [AS_HELP_STRING([--with-fltk-config=PATH],
+    [Path to the fltk-config program (optional)])],
+  [fltk_config_prog="$withval"],
   [])
-FLTK_CFLAGS="`$fltk2_config_prog --use-gl --cflags`"
-FLTK_LDFLAGS="`$fltk2_config_prog --use-gl --ldflags`"
 
-AC_SUBST(FLTK_CFLAGS)
-AC_SUBST(FLTK_LDFLAGS)
+plot_enabled="no"
+AC_ARG_ENABLE([plot],
+  [AS_HELP_STRING([--enable-plot],
+    [Enable plotting (requires FLTK and OpenGL)])],
+  [if test "$enableval" = "yes"; then plot_enabled="yes"; fi],
+  [])
+
+if test "$plot_enabled"="yes"; then
+  AC_CHECK_PROG([fltk_config_prog_found],"$fltk_config_prog",[yes],[no])
+  if test "$fltk_config_prog_found" = "yes"; then
+    FLTK_CFLAGS="`$fltk_config_prog --use-gl --cflags`"
+    FLTK_LDFLAGS="`$fltk_config_prog --use-gl --ldflags`"
+    AC_SUBST(FLTK_CFLAGS)
+    AC_SUBST(FLTK_LDFLAGS)
+  else
+    AC_MSG_ERROR([cannot find $fltk_config_prog])
+  fi
+else
+  AC_MSG_ERROR([pass --enable-plot to configure to enable plotting])
+fi
 
 # Check for OpenGL
 AC_CHECK_LIB([GL],[glBegin])

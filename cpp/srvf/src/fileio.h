@@ -19,10 +19,12 @@
 #ifndef SRVF_FILEIO_H
 #define SRVF_FILEIO_H 1
 
+#include "matrix.h"
+
 #include <vector>
 #include <istream>
 #include <ostream>
-#include "matrix.h"
+
 
 namespace srvf
 {

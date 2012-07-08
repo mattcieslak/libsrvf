@@ -17,13 +17,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 #include "rotate.h"
-#include "matrix.h"
-#include "srvf.h"
+#include "util.h"
 #include "exceptions.h"
 
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_blas.h>
+
+#include <cstddef>
+#include <cmath>
+#include <stdexcept>
 
 
 namespace srvf
@@ -35,7 +38,7 @@ static int sgndet_(gsl_matrix *A)
 {
   int signum;
   int status=0;
-  int res;
+  int res=0;
 
   gsl_matrix *LU = gsl_matrix_alloc(A->size1, A->size2);
   gsl_permutation *perm = gsl_permutation_alloc(A->size1);

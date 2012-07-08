@@ -19,6 +19,7 @@
 #ifndef HEAP_H
 #define HEAP_H 1
 
+#include <cstddef>
 #include <vector>
 #include <iostream>
 #include <stdexcept>
@@ -310,6 +311,8 @@ private:
       if (!exists_(res) || data_[c] < data_[res]) res = c;
     if (exists_(c=right_child_(i)))
       if (!exists_(res) || data_[c] < data_[res]) res = c;
+
+    return res;
   }
 
   /**
@@ -324,6 +327,8 @@ private:
       if (!exists_(res) || data_[res] < data_[c]) res = c;
     if (exists_(c=right_child_(i)))
       if (!exists_(res) || data_[res] < data_[c]) res = c;
+
+    return res;
   }
 
   /**

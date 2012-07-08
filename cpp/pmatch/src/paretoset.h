@@ -30,6 +30,11 @@
 
 #define DEFAULT_BUCKET_THRESH 0.05
 
+namespace srvf
+{
+
+namespace pmatch
+{
 
 /**
  * Represents a partial match between two curves.
@@ -201,5 +206,8 @@ private:
   std::vector<srvf::MinMaxHeap<PartialMatch> > buckets_;
   double thresh_;
 };
+
+} // namespace pmatch
+} // namespace srvf
 
 #endif // PARETOSET_H

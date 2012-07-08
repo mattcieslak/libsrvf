@@ -17,13 +17,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 #include "plf.h"
-#include "pointset.h"
-#include "util.h"
 #include "interp.h"
 
 #include <cmath>
-#include <vector>
-#include <stdexcept>
+#include <algorithm>
 
 
 namespace srvf

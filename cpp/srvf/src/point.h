@@ -19,13 +19,14 @@
 #ifndef SRVF_POINT_H
 #define SRVF_POINT_H 1
 
+#include "numeric.h"
+
+#include <cstddef>
 #include <cmath>
 #include <vector>
 #include <iterator>
-#include <algorithm>
 #include <stdexcept>
 
-#include "numeric.h"
 
 namespace srvf
 {

@@ -19,14 +19,17 @@
 #ifndef SRVF_SRVF_H
 #define SRVF_SRVF_H 1
 
+#include "pointset.h"
+#include "util.h"
+
+#include <vector>
+#include <cstddef>
 #include <stdexcept>
 
-#include "pointset.h"
-#include "matrix.h"
-#include "util.h"
 
 namespace srvf {
 
+class Matrix;
 class Plf;
 
 /**

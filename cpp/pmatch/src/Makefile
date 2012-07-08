@@ -16,6 +16,7 @@
 
 
 
+
 pkgdatadir = $(datadir)/libsrvf-pmatch
 pkgincludedir = $(includedir)/libsrvf-pmatch
 pkglibdir = $(libdir)/libsrvf-pmatch
@@ -35,7 +36,8 @@ POST_UNINSTALL = :
 build_triplet = i686-pc-linux-gnu
 host_triplet = i686-pc-linux-gnu
 subdir = src
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srvf_include_HEADERS)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
@@ -68,11 +70,14 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(libdir)"
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(srvf_includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libsrvf_pmatch_la_LIBADD =
 am_libsrvf_pmatch_la_OBJECTS = partialmatch.lo
 libsrvf_pmatch_la_OBJECTS = $(am_libsrvf_pmatch_la_OBJECTS)
+libsrvf_pmatch_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(libsrvf_pmatch_la_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I. -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -88,6 +93,7 @@ CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libsrvf_pmatch_la_SOURCES)
 DIST_SOURCES = $(libsrvf_pmatch_la_SOURCES)
+HEADERS = $(srvf_include_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -106,7 +112,7 @@ CPPFLAGS =
 CXX = g++
 CXXCPP = g++ -E
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -O2 -g -pg
+CXXFLAGS = -O2
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -198,7 +204,7 @@ mandir = ${datarootdir}/man
 mkdir_p = /bin/mkdir -p
 oldincludedir = /usr/include
 pdfdir = ${docdir}
-prefix = /home/yevgeni
+prefix = /usr/local
 program_transform_name = s,x,x,
 psdir = ${docdir}
 sbindir = ${exec_prefix}/sbin
@@ -212,7 +218,9 @@ top_srcdir = ..
 AM_CPPFLAGS = -I$(top_srcdir)/../srvf/src
 AM_LDFLAGS = -L$(top_srcdir)/../srvf/src/.libs
 lib_LTLIBRARIES = libsrvf-pmatch.la
+libsrvf_pmatch_la_LDFLAGS = -static
 srvf_includedir = $(includedir)/srvf
+srvf_include_HEADERS = paretoset.h partialmatch.h
 libsrvf_pmatch_la_SOURCES = partialmatch.cc
 all: all-am
 
@@ -280,7 +288,7 @@ clean-libLTLIBRARIES:
 	  rm -f "$${dir}/so_locations"; \
 	done
 libsrvf-pmatch.la: $(libsrvf_pmatch_la_OBJECTS) $(libsrvf_pmatch_la_DEPENDENCIES) 
-	$(CXXLINK) -rpath $(libdir) $(libsrvf_pmatch_la_OBJECTS) $(libsrvf_pmatch_la_LIBADD) $(LIBS)
+	$(libsrvf_pmatch_la_LINK) -rpath $(libdir) $(libsrvf_pmatch_la_OBJECTS) $(libsrvf_pmatch_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -316,6 +324,26 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
+install-srvf_includeHEADERS: $(srvf_include_HEADERS)
+	@$(NORMAL_INSTALL)
+	test -z "$(srvf_includedir)" || $(MKDIR_P) "$(DESTDIR)$(srvf_includedir)"
+	@list='$(srvf_include_HEADERS)'; test -n "$(srvf_includedir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(srvf_includedir)'"; \
+	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(srvf_includedir)" || exit $$?; \
+	done
+
+uninstall-srvf_includeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(srvf_include_HEADERS)'; test -n "$(srvf_includedir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(srvf_includedir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(srvf_includedir)" && rm -f $$files
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -401,9 +429,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES)
+all-am: Makefile $(LTLIBRARIES) $(HEADERS)
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(srvf_includedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -454,7 +482,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-srvf_includeHEADERS
 
 install-dvi: install-dvi-am
 
@@ -500,7 +528,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-libLTLIBRARIES
+uninstall-am: uninstall-libLTLIBRARIES uninstall-srvf_includeHEADERS
 
 .MAKE: install-am install-strip
 
@@ -512,11 +540,12 @@ uninstall-am: uninstall-libLTLIBRARIES
 	install-dvi-am install-exec install-exec-am install-html \
 	install-html-am install-info install-info-am \
 	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-libLTLIBRARIES
+	install-ps install-ps-am install-srvf_includeHEADERS \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags uninstall uninstall-am \
+	uninstall-libLTLIBRARIES uninstall-srvf_includeHEADERS
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

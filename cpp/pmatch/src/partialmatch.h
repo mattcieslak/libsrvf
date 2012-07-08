@@ -30,7 +30,7 @@
 namespace srvf
 {
 
-namespace partial_match
+namespace pmatch
 {
 
 /**
@@ -67,10 +67,13 @@ class MatchingGraph
 public:
 
   MatchingGraph(size_t grid_width, size_t grid_height)
-   : grid_width_(grid_width), grid_height_(grid_height), 
-     nvertices_(grid_width*grid_height), 
-     weights_(grid_width*grid_height,std::numeric_limits<double>::max())
-  { }
+   : grid_width_(grid_width), grid_height_(grid_height)
+  { 
+    nvertices_ = grid_width * grid_height;
+    //weights_ = std::vector<double> (
+    // nvertices_*nvertices_, std::numeric_limits<double>::max() );
+    weights_ = std::vector<double> (nvertices_*nvertices_, 1e6);
+  }
 
   inline double&
   operator()(size_t cs, size_t rs, size_t ct, size_t rt)
@@ -114,8 +117,7 @@ MatchingGraph calculate_edge_weights (
 
 void calculate_match_scores (MatchingGraph &G);
 
-} // namespace partial_match
-
+} // namespace pmatch
 } // namespace srvf
 
 #endif // PARTIAL_MATCH_H

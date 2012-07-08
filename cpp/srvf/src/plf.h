@@ -19,12 +19,14 @@
 #ifndef SRVF_PLF_H
 #define SRVF_PLF_H 1
 
-#include <stdexcept>
-#include <vector>
-
 #include "pointset.h"
 #include "matrix.h"
 #include "util.h"
+
+#include <cstddef>
+#include <stdexcept>
+#include <vector>
+
 
 namespace srvf {
 
@@ -114,6 +116,14 @@ public:
 
   /** Does this \c Plf represent the empty map? */
   bool is_empty() const { return (samps_.npts() == 0); }
+
+  /** Returns the left endpoint of the domain interval. */
+  double domain_lb() const 
+  { return (params_.size()>0 ? params_[0] : 0.0); };
+
+  /** Returns the right endpoint of the domain interval. */
+  double domain_ub() const 
+  { return (params_.size()>0 ? params_[params_.size()-1] : 0.0); };
  
   Pointset evaluate(double t) const;
   Pointset evaluate(const std::vector<double> &tv) const;

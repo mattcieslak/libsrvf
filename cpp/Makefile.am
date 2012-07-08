@@ -1,1 +1,9 @@
-SUBDIRS=plot srvf pmatch
+if COND_PLOT
+MAYBE_PLOT=plot
+endif
+
+if COND_PMATCH
+MAYBE_PMATCH=pmatch
+endif
+
+SUBDIRS=srvf $(MAYBE_PLOT) $(MAYBE_PMATCH)

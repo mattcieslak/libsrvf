@@ -20,7 +20,7 @@
 #define SRVF_PLOTWIN_H 1
 
 #include <vector>
-#include <fltk/GlWindow.h>
+#include <FL/Fl_Gl_Window.H>
 
 #include "render.h"
 #include "plot.h"
@@ -32,7 +32,7 @@ namespace srvf
 /**
  * A basic plotting window based on FLTK GlWindow.
  */
-class FltkGlPlotWindow : public fltk::GlWindow
+class FltkGlPlotWindow : public Fl_Gl_Window
 {
 public:
   

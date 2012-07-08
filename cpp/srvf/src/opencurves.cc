@@ -18,13 +18,10 @@
  */
 #include "opencurves.h"
 #include "plf.h"
-#include "srvf.h"
 #include "rotate.h"
 #include "reparam.h"
 
-#include <vector>
 #include <cmath>
-
 #include <iostream>
 
 

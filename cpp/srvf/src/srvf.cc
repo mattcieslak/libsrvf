@@ -20,10 +20,8 @@
 #include "plf.h"
 #include "matrix.h"
 #include "interp.h"
-#include "util.h"
 
 #include <cmath>
-#include <stdexcept>
 
 
 namespace srvf
@@ -443,7 +441,6 @@ Srvf constant_speed_param(const Srvf &Q)
   }
 
   double v = Qnorm / int_width;
-  double v2 = v*v;
 
   // Initialize result to empty SRVF
   Srvf Qres;

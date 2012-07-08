@@ -17,11 +17,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 #include "qmap.h"
-#include "util.h"
-#include "plf.h"
-#include "srvf.h"
 #include "pointset.h"
+#include "util.h"
 
+#include <cstddef>
 #include <cmath>
 
 

@@ -47,6 +47,8 @@ public:
     plf_colors_.push_back(c);
     plf_thicknesses_.push_back(thickness);
     plf_modes_.push_back(mode);
+    plf_intervals_.push_back (
+      std::pair<double,double>(F.domain_lb(), F.domain_ub()) );
   }
 
   virtual void 
@@ -58,6 +60,26 @@ public:
     srvf_modes_.push_back(mode);
   }
 
+  virtual void set_plf_color(size_t idx, Color c)
+  { plf_colors_[idx] = c; }
+  virtual Color get_plf_color(size_t idx)
+  { return plf_colors_[idx]; }
+
+  virtual void set_plf_thickness(size_t idx, double v)
+  { plf_thicknesses_[idx] = v; }
+  virtual double get_plf_thickness(size_t idx)
+  { return plf_thicknesses_[idx]; }
+
+  virtual void set_plf_mode(size_t idx, DrawingMode m)
+  { plf_modes_[idx] = m; }
+  virtual DrawingMode get_plf_mode(size_t idx)
+  { return plf_modes_[idx]; }
+
+  virtual void set_plf_interval(size_t idx, std::pair<double,double> ivl)
+  { plf_intervals_[idx] = ivl; }
+  virtual std::pair<double,double> get_plf_interval(size_t idx)
+  { return plf_intervals_[idx]; }
+
 protected:
   
   std::vector<Plf> plfs_;
@@ -68,6 +90,7 @@ protected:
   std::vector<double> srvf_thicknesses_;
   std::vector<DrawingMode> plf_modes_;
   std::vector<DrawingMode> srvf_modes_;
+  std::vector<std::pair<double,double> > plf_intervals_;
 };
 
 
@@ -102,6 +125,10 @@ private:
 class SuperimposedPlot : public Plot
 { 
 public:
+
+  SuperimposedPlot()
+   : bball_rad_(1.0)
+  { }
   
   virtual void 
   insert(const Plf &F, Color c, double thickness=1.0, DrawingMode mode=LINES);
@@ -110,6 +137,10 @@ public:
   insert(const Srvf &Q, Color c, double thickness=1.0, DrawingMode mode=LINES);
 
   virtual void render(Renderer &r);
+
+private:
+
+  double bball_rad_;
 };
 
 

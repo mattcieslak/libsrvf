@@ -12,7 +12,7 @@
 #include "render.h"
 #include "plotwin.h"
 
-#include <fltk/run.h>
+#include <FL/Fl.h>
 
 
 BOOST_AUTO_TEST_SUITE(opencurves_tests)
@@ -46,6 +46,7 @@ BOOST_AUTO_TEST_CASE(shooting_vector_test1)
 BOOST_AUTO_TEST_CASE(karcher_mean_test1)
 {
   std::ifstream ifs("data/rna.csv");
+  BOOST_REQUIRE_EQUAL(ifs.good(), true);
   std::vector<srvf::Matrix> samps_data = srvf::io::load_csv(ifs);
   std::vector<srvf::Srvf> Qs;
   std::vector<srvf::Plf> Fs;
@@ -73,7 +74,7 @@ BOOST_AUTO_TEST_CASE(karcher_mean_test1)
       "Karcher Mean of Serveral RNA Molecules");
   win.add_plot(&plot);
   win.show();
-  fltk::run();
+  Fl::run();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

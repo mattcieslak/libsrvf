@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
-#include <fltk/run.h>
+#include <FL/Fl.H>
 #include <vector>
 
 #include "plot.h"
@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE(function_plot_test1)
   srvf::FltkGlPlotWindow plotwin(800, 400, "plot_tests/function_plot_test1");
   plotwin.add_plot(static_cast<srvf::Plot*>(&plot));
   plotwin.show();
-  fltk::run();
+  Fl::run();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

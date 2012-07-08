@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
-#include <fltk/run.h>
+#include <FL/Fl.H>
 
 #include "plf.h"
 #include "pointset.h"
@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE(constant_speed_reparam_test1)
     "constant_speed_reparam_test1: F(blue), Fn(green), and G(red)");
   plotwin.add_plot(static_cast<srvf::Plot*>(&plot));
   plotwin.show();
-  fltk::run();
+  Fl::run();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

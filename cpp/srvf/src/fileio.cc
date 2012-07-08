@@ -20,11 +20,13 @@
 #include "matrix.h"
 #include "exceptions.h"
 
+#include <cstddef>
 #include <string>
 #include <sstream>
 #include <fstream>
 #include <vector>
 #include <iomanip>
+
 
 namespace srvf
 {

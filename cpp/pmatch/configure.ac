@@ -23,14 +23,6 @@ AC_TYPE_SIZE_T
 AC_CHECK_FUNCS([sqrt])
 
 
-# If unit tests enabled, enable recursion into tests subdirectory, 
-# and also check for Boost.
-enable_unit_tests=no
-AC_ARG_ENABLE([unit-tests],
-  [AS_HELP_STRING([--enable-unit-tests],
-    [Enable unit tests])],
-  [enable_unit_tests="yes"], [])
-
 AM_CONDITIONAL([COND_UNIT_TESTS],
   [test "$enable_unit_tests" = "yes"])
 

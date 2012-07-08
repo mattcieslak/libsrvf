@@ -18,12 +18,16 @@
  */
 #include "partialmatch.h"
 #include "paretoset.h"
+#include "matchview.h"
+#include "ui.h"
 
 #include <matrix.h>
 #include <plf.h>
 #include <srvf.h>
 #include <qmap.h>
 #include <fileio.h>
+
+#include <FL/Fl.H>
 
 #include <iostream>
 #include <fstream>
@@ -91,20 +95,43 @@ int main( int argc, char **argv ){
   ifs1.close();
   ifs2.close();
 
-  srvf::Pointset F1samps(F1data[0]);
-  srvf::Pointset F2samps(F2data[0]);
+  srvf::Pointset F1samps(F1data[0], srvf::Pointset::POINT_PER_COLUMN);
+  srvf::Pointset F2samps(F2data[0], srvf::Pointset::POINT_PER_COLUMN);
 
   srvf::Plf F1(F1samps);
   srvf::Plf F2(F2samps);
 
+  double L1 = F1.arc_length();
+  double L2 = F2.arc_length();
+  double L = std::min(L1, L2);
+  F1.scale( 1.0 / L );
+  F2.scale( 1.0 / L );
+
   srvf::Srvf Q1 = srvf::plf_to_srvf(F1);
   srvf::Srvf Q2 = srvf::plf_to_srvf(F2);
 
-  ParetoSet S = srvf::partial_match::find_matches(Q1, Q2);
+  srvf::pmatch::ParetoSet S = srvf::pmatch::find_matches (
+    Q1, Q2, false, grid_width, grid_height);
 
   std::ofstream ofs(output_filename);
   S.save_csv(ofs);
   ofs.close();
+
+  srvf::SuperimposedPlot plot;
+  plot.insert(F1, srvf::Color(0.0, 0.0, 1.0));
+  plot.insert(F2, srvf::Color(1.0, 0.0, 0.0));
+
+  UserInterface ui;
+
+  Fl_Window *win = ui.make_window();
+  ui.match_view->set_plot(plot);
+  ui.match_view->set_matches(S);
+  ui.slider_match_length->range(0.0, (double)(S.nbuckets()-1));
+  ui.slider_match_length->step(1.0);
+  ui.slider_match_length->value(1.0);
+
+  win->show();
+  Fl::run();
 
   return 0;
 }

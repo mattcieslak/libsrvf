@@ -23,6 +23,10 @@
 #include "pointset.h"
 #include "matrix.h"
 
+#include <cstddef>
+#include <vector>
+
+
 namespace srvf
 {
 

@@ -3,7 +3,7 @@
 #include "plot.h"
 #include "plotwin.h"
 
-#include <fltk/run.h>
+#include <FL/Fl.H>
 
 #include "plothelper.h"
 
@@ -24,7 +24,7 @@ void plot_1d_plfs(const std::vector<Plf> &v,
   srvf::FltkGlPlotWindow plotwin(x, y, w, h, title);
   plotwin.add_plot(&plot);
   plotwin.show();
-  fltk::run();
+  Fl::run();
 }
 
 /**
@@ -41,7 +41,7 @@ void plot_1d_srvfs(const std::vector<Srvf> &v,
   srvf::FltkGlPlotWindow plotwin(x, y, w, h, title);
   plotwin.add_plot(&plot);
   plotwin.show();
-  fltk::run();
+  Fl::run();
 }
 
 } // namespace srvf

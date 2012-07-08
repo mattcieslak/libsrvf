@@ -5,7 +5,6 @@
 #include <qmap.h>
 #include <numeric.h>
 #include <partialmatch.h>
-using namespace srvf::partial_match;
 
 #define MY_CHECK_CLOSE(a,b) \
  BOOST_CHECK_EQUAL(srvf::numeric::almost_equal((a),(b)), true)
@@ -40,10 +39,10 @@ BOOST_AUTO_TEST_CASE(edge_weight_test1)
   std::vector<double> tv1(&tv1_data[0], &tv1_data[4]);
   std::vector<double> tv2(&tv2_data[0], &tv2_data[4]);
   
-  MatchingGraph G = 
-    srvf::partial_match::calculate_edge_weights(Q1, Q2, tv1, tv2);
+  srvf::pmatch::MatchingGraph G = 
+    srvf::pmatch::calculate_edge_weights(Q1, Q2, tv1, tv2);
 
-  MatchingGraph Gexp(4,3);
+  srvf::pmatch::MatchingGraph Gexp(4,3);
   Gexp(0,0,1,1) = 1.513747151;
   Gexp(1,1,3,2) = 1.262891712;
 

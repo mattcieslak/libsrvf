@@ -18,14 +18,11 @@
  */
 #include "reparam.h"
 #include "dpnbhd.h"
-#include "plf.h"
-#include "srvf.h"
 #include "pointset.h"
 #include "matrix.h"
 
 #include <limits>
 #include <cmath>
-#include <vector>
 #include <stack>
 
 

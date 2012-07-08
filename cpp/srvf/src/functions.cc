@@ -21,11 +21,7 @@
 #include "srvf.h"
 #include "plf.h"
 
-#include <vector>
-#include <deque>
-#include <utility>
 #include <stack>
-#include <map>
 #include <algorithm>
 #include <iterator>
 #include <iostream>

@@ -12,7 +12,7 @@ using srvf::functions::match_vertex_t;
 #include "util.h"
 #include "render.h"
 #include "plotwin.h"
-#include <fltk/run.h>
+#include <FL/Fl.H>
 
 #include <vector>
 #include <deque>
@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_CASE(match_test1)
   plot.insert(F2r,srvf::Color(1.0,0.0,0.0));
   plotwin.add_plot(&plot);
   plotwin.show();
-  fltk::run();
+  Fl::run();
 }
 
 BOOST_AUTO_TEST_CASE(groupwise_optimal_reparam_test1)
@@ -336,7 +336,7 @@ BOOST_AUTO_TEST_CASE(karcher_mean_test1)
 
   plotwin.add_plot(&plot);
   plotwin.show();
-  fltk::run();
+  Fl::run();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

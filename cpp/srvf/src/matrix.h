@@ -19,10 +19,11 @@
 #ifndef SRVF_MATRIX_H
 #define SRVF_MATRIX_H 1
 
-#include <vector>
-#include <cmath>
-
 #include "point.h"
+
+#include <cstddef>
+#include <cmath>
+#include <vector>
 
 
 namespace srvf

@@ -2,7 +2,7 @@
 #include <vector>
 #include <fstream>
 
-#include <fltk/run.h>
+#include <FL/Fl.h>
 #include "plotwin.h"
 #include "plf.h"
 #include "srvf.h"
@@ -17,8 +17,12 @@ BOOST_AUTO_TEST_CASE(superimposed_test1)
 {
   std::ifstream is1("data/horse-1.csv");
   std::ifstream is2("data/horse-2.csv");
-  std::vector<srvf::Matrix> samps1_data = srvf::io::load_csv(is1);
-  std::vector<srvf::Matrix> samps2_data = srvf::io::load_csv(is2);
+
+  BOOST_REQUIRE_EQUAL(is1.good(), true);
+  BOOST_REQUIRE_EQUAL(is2.good(), true);
+
+  std::vector<srvf::Matrix> samps1_data = srvf::io::load_csv(is1,' ');
+  std::vector<srvf::Matrix> samps2_data = srvf::io::load_csv(is2,' ');
   srvf::Pointset samps1(samps1_data[0],srvf::Pointset::POINT_PER_COLUMN);
   srvf::Pointset samps2(samps2_data[0],srvf::Pointset::POINT_PER_COLUMN);
 
@@ -46,7 +50,7 @@ BOOST_AUTO_TEST_CASE(superimposed_test1)
   srvf::FltkGlPlotWindow win(400, 400, "SuperimposedPlot Test 1");
   win.add_plot(&plot1);
   win.show();
-  fltk::run();
+  Fl::run();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

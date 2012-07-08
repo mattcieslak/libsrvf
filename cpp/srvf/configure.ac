@@ -22,20 +22,38 @@ AC_TYPE_SIZE_T
 AC_CHECK_FUNCS([sqrt])
 
 # Check for GSL
-AC_CHECK_LIB([gsl],[gsl_matrix_alloc])
+AC_CHECK_LIB([gsl],[gsl_matrix_alloc],[],[AC_MSG_ERROR([gsl not found])])
 
 # Check for OpenMP
 AC_LANG(C++)
 AC_OPENMP
 CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
 
-# Enable unit tests?
-enable_unit_tests=no
-AC_ARG_ENABLE([unit-tests],
-  [AS_HELP_STRING([--enable-unit-tests],
-    [Enable unit tests])],
-  [enable_unit_tests="yes"], [])
-AM_CONDITIONAL([COND_UNIT_TESTS],[test "$enable_unit_tests" = "yes"])
+fltk_config_prog="fltk-config"
+AC_ARG_WITH([fltk-config],
+  [AS_HELP_STRING([--with-fltk-config=PATH],
+    [Path to the fltk-config program])],
+  [fltk_config_prog="$withval"],
+  [])
+
+plot_enabled="no"
+AC_ARG_ENABLE([plot],
+  [AS_HELP_STRING([--enable-plot],
+    [Enable plotting (requires FLTK and OpenGL)])],
+  [if test "$enableval" = "yes"; then plot_enabled="yes"; fi],
+  [])
+
+if test "$plot_enabled" = yes; then :
+  AC_CHECK_PROG([fltk_config_prog_found],"$fltk_config_prog",[yes],[no])
+  if test "$fltk_config_prog_found" = "yes"; then
+    FLTK_CFLAGS="`$fltk_config_prog --use-gl --cflags`"
+    FLTK_LDFLAGS="`$fltk_config_prog --use-gl --ldflags`"
+    AC_SUBST(FLTK_CFLAGS)
+    AC_SUBST(FLTK_LDFLAGS)
+  else
+    AC_MSG_ERROR([cannot find $fltk_config_prog])
+  fi
+fi
 
 AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile])
 AC_OUTPUT

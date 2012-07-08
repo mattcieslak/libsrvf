@@ -69,6 +69,15 @@ void SuperimposedPlot::insert(
   plf_colors_.push_back(c);
   plf_thicknesses_.push_back(thickness);
   plf_modes_.push_back(mode);
+  plf_intervals_.push_back(std::pair<double,double>( 
+    F.domain_lb(), F.domain_ub()) );
+
+  std::vector<Point> bbox = F.bounding_box();
+  for (size_t i=0; i<F.dim(); ++i)
+  {
+    bball_rad_ = std::max(bball_rad_, fabs(bbox[0][i]));
+    bball_rad_ = std::max(bball_rad_, fabs(bbox[1][i]));
+  }
 }
 
 void SuperimposedPlot::insert(
@@ -85,28 +94,83 @@ void SuperimposedPlot::insert(
 
 void SuperimposedPlot::render(Renderer &r)
 {
+  double dev_width = (double)r.device_width();
+  double dev_height = (double)r.device_height();
+  double asp_rat = dev_height / dev_width;
+  r.viewport(2, 2, dev_width-2, dev_height-2);
+  r.ortho(-bball_rad_, bball_rad_, 
+          -bball_rad_*asp_rat, bball_rad_*asp_rat, 
+          -bball_rad_, bball_rad_);
+
   for (size_t i=0; i<plfs_.size(); ++i)
   {
     r.begin(plf_modes_[i]);
     r.set_color(plf_colors_[i]);
 
-    if (plfs_[i].dim()==2)
+    double dom_lb = plf_intervals_[i].first;
+    double dom_ub = plf_intervals_[i].second;
+
+    for (size_t j=0; j<plfs_[i].ncp(); ++j)
     {
-      for (size_t j=0; j<plfs_[i].ncp(); ++j)
+      double t1 = plfs_[i].params()[j];
+
+      if (j+1 == plfs_[i].ncp())
       {
-        r.vertex(plfs_[i].samps()[j][0], 
-                 plfs_[i].samps()[j][1]);
+        // Last point.  Output it if it lies in the restricted domain.
+        if (t1 < dom_ub + 1e-5)
+        {
+          double x = (plfs_[i].dim() > 0 ? plfs_[i].samps()[j][0] : 0.0);
+          double y = (plfs_[i].dim() > 1 ? plfs_[i].samps()[j][1] : 0.0);
+          double z = (plfs_[i].dim() > 2 ? plfs_[i].samps()[j][2] : 0.0);
+          r.vertex(x, y, z);
+        }
+      }
+      else
+      {
+        // Not the last point.  Several cases to handle here.
+        double t2 = plfs_[i].params()[j+1];
+
+        if (t1 < dom_lb && t2 > dom_lb + 1e-5)
+        {
+          // ith point is outside (left of) the restricted domain, but the 
+          // following point is inside.  Output a linear combination 
+          // of the two.
+          double dt = t2-t1;
+          double w1 = (t2 - dom_lb) / dt;
+          double w2 = (dom_lb - t1) / dt;
+
+          Point p = (plfs_[i].samps()[j] * w1) + (plfs_[i].samps()[j+1] * w2);
+          double x = (p.dim() > 0 ? p[0] : 0.0);
+          double y = (p.dim() > 1 ? p[1] : 0.0);
+          double z = (p.dim() > 2 ? p[2] : 0.0);
+          r.vertex(x, y, z);
+        }
+        else if (t1 > dom_lb - 1e-5 && t1 < dom_ub + 1e-5)
+        {
+          // ith point is in the restricted domain, so output it.
+          double x = (plfs_[i].dim() > 0 ? plfs_[i].samps()[j][0] : 0.0);
+          double y = (plfs_[i].dim() > 1 ? plfs_[i].samps()[j][1] : 0.0);
+          double z = (plfs_[i].dim() > 2 ? plfs_[i].samps()[j][2] : 0.0);
+          r.vertex(x, y, z);
+
+          if (t2 > dom_ub)
+          {
+            // ith point is in the restricted domain, but the following 
+            // point is not.  Output linear combination of the two.
+            double dt = t2-t1;
+            double w1 = (t2 - dom_ub) / dt;
+            double w2 = (dom_ub - t1) / dt;
+
+            Point p = (plfs_[i].samps()[j] * w1) + (plfs_[i].samps()[j+1] * w2);
+            x = (p.dim() > 0 ? p[0] : 0.0);
+            y = (p.dim() > 1 ? p[1] : 0.0);
+            z = (p.dim() > 2 ? p[2] : 0.0);
+            r.vertex(x, y, z);
+          }
+        }
       }
     }
-    else if (plfs_[i].dim()>=3)
-    {
-      for (size_t j=0; j<plfs_[i].ncp(); ++j)
-      {
-        r.vertex(plfs_[i].samps()[j][0], 
-                 plfs_[i].samps()[j][1], 
-                 plfs_[i].samps()[j][2]);
-      }
-    }
+
     r.end();
   }
 }

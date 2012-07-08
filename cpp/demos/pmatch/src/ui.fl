@@ -1,0 +1,31 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0300 
+header_name {.h} 
+code_name {.cxx}
+class UserInterface {open
+} {
+  Function {make_window()} {open selected
+  } {
+    Fl_Window {} {
+      label {Partial Match} open
+      xywh {317 150 695 555} type Double resizable
+      code0 {\#include "matchview.h"}
+      class Fl_Window visible
+    } {
+      Fl_Pack {} {open
+        xywh {0 0 695 555}
+      } {
+        Fl_Box match_view {
+          xywh {5 3 685 494}
+          class MatchView
+        }
+        Fl_Slider slider_match_length {
+          label {Match Length}
+          callback {size_t idx=(size_t)round(o->value());
+match_view->set_match(idx,0);}
+          xywh {5 505 685 30} type {Horz Fill} box FLAT_BOX color 55 align 290 maximum 20 step 1 value 1 slider_size 1 resizable
+        }
+      }
+    }
+  }
+} 

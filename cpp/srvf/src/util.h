@@ -19,9 +19,12 @@
 #ifndef SRVF_UTIL_H
 #define SRVF_UTIL_H 1
 
-#include <vector>
 #include "pointset.h"
 #include "matrix.h"
+
+#include <cstddef>
+#include <vector>
+
 
 namespace srvf
 {

@@ -18,7 +18,6 @@
  */
 #include "matrix.h"
 
-#include <vector>
 #include <cstring>
 #include <stdexcept>
 

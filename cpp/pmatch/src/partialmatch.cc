@@ -31,7 +31,7 @@
 namespace srvf
 {
 
-namespace partial_match
+namespace pmatch
 {
 
 
@@ -56,6 +56,7 @@ double edge_weight (
   double t1 = a;
   double t2 = c;
   double result = 0.0;
+
 
   while (t1 < (b-1e-5) && t2 < (d-1e-5))
   {
@@ -110,12 +111,13 @@ static std::map<size_t,size_t> build_tv_idx_to_Q_idx_map_ (
 {
   std::map<size_t,size_t> result;
 
-  for (size_t tvi=0, Qi=0; tvi<tv.size(); ++tvi)
+  for (size_t tvi=0, Qi=0; tvi+1<tv.size(); ++tvi)
   {
     result[tvi] = Qi;
-    if (tvi+1 < tv.size() && tv[tvi+1] > (Q.params()[Qi]-1e-5))
-      Qi = std::min(Qi+1, Q.ncp()-1);
+    while (Qi+2 < Q.ncp() && tv[tvi+1] > (Q.params()[Qi+1]-1e-5))
+      ++Qi;
   }
+  result[tv.size()-1] = Q.ncp()-2;
 
   return result;
 }
@@ -143,12 +145,18 @@ MatchingGraph calculate_edge_weights (
       {
         size_t cs = ct - srvf::dp_nbhd[i][0];
         size_t rs = rt - srvf::dp_nbhd[i][1];
-        if (cs < tv1.size() && rs < tv2.size())
-          result(cs, rs, ct, rt) = edge_weight (
+        if (cs < tv1.size() && rs < tv2.size()){
+          double w = edge_weight (
             Q1, Q2, tv1, tv2, 
             cs, ct, rs, rt, 
             tv1_idx_to_Q1_idx[cs], 
             tv2_idx_to_Q2_idx[rs] );
+
+          if (w < 0.0)
+            w = 0.0;
+
+          result(cs, rs, ct, rt) = w;
+        }
       }
     }
   }
@@ -244,6 +252,5 @@ ParetoSet find_matches (
 }
 
 
-} // namespace partial_match
-
+} // namespace pmatch
 } // namespace srvf

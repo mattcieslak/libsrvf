@@ -19,7 +19,7 @@
 #ifndef DPNBHD_H
 #define DPNBHD_H 1
 
-#include <cstdlib>
+#include <cstddef>
 
 namespace srvf
 {

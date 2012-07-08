@@ -25,8 +25,6 @@
 #include <GL/glu.h>
 #include <GL/glut.h>
 
-#include <fltk/GlWindow.h>
-
 
 namespace srvf
 {

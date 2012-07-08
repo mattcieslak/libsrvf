@@ -19,6 +19,9 @@
 #ifndef SRVF_OPENCURVES_H
 #define SRVF_OPENCURVES_H 1
 
+#include "srvf.h"
+
+#include <cstddef>
 #include <vector>
 
 

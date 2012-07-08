@@ -22,7 +22,7 @@
 #include "plf.h"
 #include "srvf.h"
 
-#include <fltk/run.h>
+#include <FL/Fl.h>
 
 
 namespace srvf

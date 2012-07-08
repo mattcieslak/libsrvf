@@ -1,8 +1,9 @@
 #include <boost/test/unit_test.hpp>
 
-#include "rotate.h"
 #include "srvf.h"
+#include "rotate.h"
 #include "matrix.h"
+
 
 BOOST_AUTO_TEST_SUITE(rotate_tests)
 

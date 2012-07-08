@@ -19,15 +19,15 @@
 #ifndef SRVF_POINTSET_H
 #define SRVF_POINTSET_H 1
 
-#include <cmath>
-#include <vector>
-#include <deque>
-#include <iterator>
-#include <algorithm>
-#include <stdexcept>
-
 #include "point.h"
 #include "matrix.h"
+
+#include <cstddef>
+#include <cmath>
+#include <vector>
+#include <iterator>
+#include <stdexcept>
+
 
 namespace srvf
 {
@@ -422,7 +422,7 @@ public:
    * \param idx the index of the point to be rotated
    * \param R a rotation matrix
    */
-  void rotate (int idx, const Matrix &R)
+  void rotate (size_t idx, const Matrix &R)
   {
     if (idx >= npts()) throw std::out_of_range("idx out of range");
     if (R.cols() != dim()) throw std::invalid_argument("size mismatch: R");

@@ -9,26 +9,30 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_SUBDIRS([srvf])
 
 # Optional plotting support
+plot_enabled="no"
 AC_ARG_ENABLE(plot,
   [AS_HELP_STRING([--enable-plot],
-    [Enable plotting support (requires FLTK and OpenGL)])],
-  [if test "$enableval" = yes; then AC_CONFIG_SUBDIRS([plot]) fi],
+    [Enable plotting support (requires >= FLTK 1.1 and OpenGL)])],
+  [if test "$enableval" = yes; then 
+    AC_CONFIG_SUBDIRS([plot]) 
+    plot_enabled="yes"
+  fi],
   [])
+AM_CONDITIONAL([COND_PLOT],[test "$plot_enabled" = "yes"])
+
 
 # Optional partial matching algorithms
+pmatch_enabled="no"
 AC_ARG_ENABLE(pmatch,
   [AS_HELP_STRING([--enable-pmatch],
     [Enable partial matching algorithms])],
-  [if test "$enableval" = yes; then AC_CONFIG_SUBDIRS([pmatch]) fi],
+  [if test "$enableval" = yes; then 
+    AC_CONFIG_SUBDIRS([pmatch]) 
+    pmatch_enabled="yes"
+  fi],
   [])
+AM_CONDITIONAL([COND_PMATCH],[test "$pmatch_enabled" = "yes"])
 
-# Enable unit tests?
-enable_unit_tests=no
-AC_ARG_ENABLE([unit-tests],
-  [AS_HELP_STRING([--enable-unit-tests],
-    [Enable unit tests])],
-  [enable_unit_tests="yes"], [])
-AM_CONDITIONAL([COND_UNIT_TESTS],[test "$enable_unit_tests" = "yes"])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
