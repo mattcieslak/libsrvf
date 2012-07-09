@@ -73,7 +73,8 @@ am__base_list = \
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(srvf_includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libsrvf_pmatch_la_LIBADD =
-am_libsrvf_pmatch_la_OBJECTS = partialmatch.lo
+am_libsrvf_pmatch_la_OBJECTS = partialmatch.lo pmatch_util.lo \
+	rotselect.lo
 libsrvf_pmatch_la_OBJECTS = $(am_libsrvf_pmatch_la_OBJECTS)
 libsrvf_pmatch_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -112,7 +113,7 @@ CPPFLAGS =
 CXX = g++
 CXXCPP = g++ -E
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -O2
+CXXFLAGS = -g -O0 -Wall -Werror
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -204,7 +205,7 @@ mandir = ${datarootdir}/man
 mkdir_p = /bin/mkdir -p
 oldincludedir = /usr/include
 pdfdir = ${docdir}
-prefix = /usr/local
+prefix = /home/yevgeni
 program_transform_name = s,x,x,
 psdir = ${docdir}
 sbindir = ${exec_prefix}/sbin
@@ -221,7 +222,7 @@ lib_LTLIBRARIES = libsrvf-pmatch.la
 libsrvf_pmatch_la_LDFLAGS = -static
 srvf_includedir = $(includedir)/srvf
 srvf_include_HEADERS = paretoset.h partialmatch.h
-libsrvf_pmatch_la_SOURCES = partialmatch.cc
+libsrvf_pmatch_la_SOURCES = partialmatch.cc pmatch_util.cc rotselect.cc
 all: all-am
 
 .SUFFIXES:
@@ -297,6 +298,8 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ./$(DEPDIR)/partialmatch.Plo
+include ./$(DEPDIR)/pmatch_util.Plo
+include ./$(DEPDIR)/rotselect.Plo
 
 .cc.o:
 	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

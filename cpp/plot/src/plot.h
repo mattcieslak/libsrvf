@@ -60,6 +60,9 @@ public:
     srvf_modes_.push_back(mode);
   }
 
+  Plf &get_plf(size_t idx)
+  { return plfs_[idx]; }
+
   virtual void set_plf_color(size_t idx, Color c)
   { plf_colors_[idx] = c; }
   virtual Color get_plf_color(size_t idx)

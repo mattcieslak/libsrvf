@@ -279,10 +279,35 @@ Plf inverse(const Plf &F)
 
 /**
  * Returns a \c Plf which is a constant-speed reparametrization of \a F.
+ *
+ * The result will have the same domain as \a F.
  */
 Plf constant_speed_param(const Plf &F)
 {
-  throw std::logic_error("not implemented");
+  // Corner case:  < 2 control points
+  if (F.ncp() < 2) return F;
+
+  Plf result(F);
+  double L = 0.0;
+
+  result.params()[0] = 0.0;
+  for (size_t i=1; i<result.ncp(); ++i)
+  {
+    double dt = result.samps().distance(i-1, i);
+    result.params()[i] = result.params()[i-1] + dt;
+    L += dt;
+  }
+
+  if (L > 1e-6)
+  {
+    double sf = (F.domain_ub() - F.domain_lb()) / L;
+    for (size_t i=0; i<result.ncp(); ++i)
+    {
+      result.params()[i] = F.domain_lb() + sf * result.params()[i];
+    }
+  }
+
+  return result;
 }
 
 /**

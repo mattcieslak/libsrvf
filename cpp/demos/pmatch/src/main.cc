@@ -95,6 +95,19 @@ int main( int argc, char **argv ){
   ifs1.close();
   ifs2.close();
 
+  if (F1data.size() == 0)
+  {
+    std::cerr << "Failed to load matrix from " << argv[optind]
+              << "; exiting." << std::endl;
+    return -1;
+  }
+  if (F2data.size() == 0)
+  {
+    std::cerr << "Failed to load matrix from " << argv[optind+1]
+              << "; exiting." << std::endl;
+    return -1;
+  }
+
   srvf::Pointset F1samps(F1data[0], srvf::Pointset::POINT_PER_COLUMN);
   srvf::Pointset F2samps(F2data[0], srvf::Pointset::POINT_PER_COLUMN);
 
@@ -111,7 +124,7 @@ int main( int argc, char **argv ){
   srvf::Srvf Q2 = srvf::plf_to_srvf(F2);
 
   srvf::pmatch::ParetoSet S = srvf::pmatch::find_matches (
-    Q1, Q2, false, grid_width, grid_height);
+    Q1, Q2, do_rotations, grid_width, grid_height);
 
   std::ofstream ofs(output_filename);
   S.save_csv(ofs);
@@ -128,7 +141,8 @@ int main( int argc, char **argv ){
   ui.match_view->set_matches(S);
   ui.slider_match_length->range(0.0, (double)(S.nbuckets()-1));
   ui.slider_match_length->step(1.0);
-  ui.slider_match_length->value(1.0);
+  ui.slider_match_length->value((double)(S.nbuckets()-1));
+  ui.set_match();
 
   win->show();
   Fl::run();

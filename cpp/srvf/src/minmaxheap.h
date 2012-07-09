@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#ifndef HEAP_H
-#define HEAP_H 1
+#ifndef MINMAXHEAP_H
+#define MINMAXHEAP_H 1
 
 #include <cstddef>
 #include <vector>
@@ -517,4 +517,4 @@ private:
 
 } // namespace srvf
 
-#endif // HEAP_H
+#endif // MINMAXHEAP_H

@@ -2,17 +2,23 @@
 
 #include "ui.h"
 
-void UserInterface::cb_slider_match_length_i(Fl_Slider* o, void*) {
-  size_t idx=(size_t)round(o->value());
-match_view->set_match(idx,0);
+void UserInterface::cb_slider_match_length_i(Fl_Slider*, void*) {
+  set_bucket();
 }
 void UserInterface::cb_slider_match_length(Fl_Slider* o, void* v) {
-  ((UserInterface*)(o->parent()->parent()->user_data()))->cb_slider_match_length_i(o,v);
+  ((UserInterface*)(o->parent()->parent()->parent()->user_data()))->cb_slider_match_length_i(o,v);
+}
+
+void UserInterface::cb_slider_match_idx_i(Fl_Slider*, void*) {
+  set_match();
+}
+void UserInterface::cb_slider_match_idx(Fl_Slider* o, void* v) {
+  ((UserInterface*)(o->parent()->parent()->parent()->user_data()))->cb_slider_match_idx_i(o,v);
 }
 
 Fl_Window* UserInterface::make_window() {
   Fl_Window* w;
-  { Fl_Window* o = new Fl_Window(695, 555, "Partial Match");
+  { Fl_Window* o = new Fl_Window(835, 555, "Partial Match");
     w = o;
     o->box(FL_FLAT_BOX);
     o->color(FL_BACKGROUND_COLOR);
@@ -24,8 +30,8 @@ Fl_Window* UserInterface::make_window() {
     o->user_data((void*)(this));
     o->align(Fl_Align(FL_ALIGN_TOP));
     o->when(FL_WHEN_RELEASE);
-    { Fl_Pack* o = new Fl_Pack(0, 0, 695, 555);
-      { match_view = new MatchView(5, 3, 685, 494);
+    { Fl_Pack* o = new Fl_Pack(0, 0, 835, 555);
+      { match_view = new MatchView(5, 1, 825, 453);
         match_view->box(FL_NO_BOX);
         match_view->color(FL_BACKGROUND_COLOR);
         match_view->selection_color(FL_BACKGROUND_COLOR);
@@ -35,23 +41,58 @@ Fl_Window* UserInterface::make_window() {
         match_view->labelcolor(FL_FOREGROUND_COLOR);
         match_view->align(Fl_Align(FL_ALIGN_CENTER));
         match_view->when(FL_WHEN_RELEASE);
+        Fl_Group::current()->resizable(match_view);
       } // MatchView* match_view
-      { slider_match_length = new Fl_Slider(5, 505, 685, 30, "Match Length");
-        slider_match_length->type(3);
-        slider_match_length->box(FL_FLAT_BOX);
-        slider_match_length->color((Fl_Color)55);
-        slider_match_length->maximum(20);
-        slider_match_length->step(1);
-        slider_match_length->value(1);
-        slider_match_length->slider_size(1);
-        slider_match_length->callback((Fl_Callback*)cb_slider_match_length);
-        slider_match_length->align(Fl_Align(290));
-        Fl_Group::current()->resizable(slider_match_length);
-      } // Fl_Slider* slider_match_length
+      { Fl_Group* o = new Fl_Group(0, 455, 835, 100);
+        { slider_match_length = new Fl_Slider(0, 460, 650, 30, "Length Range");
+          slider_match_length->type(3);
+          slider_match_length->box(FL_FLAT_BOX);
+          slider_match_length->color((Fl_Color)55);
+          slider_match_length->maximum(20);
+          slider_match_length->step(1);
+          slider_match_length->value(1);
+          slider_match_length->slider_size(1);
+          slider_match_length->callback((Fl_Callback*)cb_slider_match_length);
+          slider_match_length->align(Fl_Align(290));
+        } // Fl_Slider* slider_match_length
+        { slider_match_idx = new Fl_Slider(0, 505, 650, 30, "Match");
+          slider_match_idx->type(1);
+          slider_match_idx->color((Fl_Color)55);
+          slider_match_idx->callback((Fl_Callback*)cb_slider_match_idx);
+        } // Fl_Slider* slider_match_idx
+        { text_match_length = new Fl_Output(705, 461, 120, 28, "length:");
+        } // Fl_Output* text_match_length
+        { text_shape_distance = new Fl_Output(710, 506, 115, 28, "distance");
+        } // Fl_Output* text_shape_distance
+        o->end();
+      } // Fl_Group* o
       o->end();
+      Fl_Group::current()->resizable(o);
     } // Fl_Pack* o
     o->end();
-    o->resizable(o);
   } // Fl_Window* o
   return w;
+}
+
+void UserInterface::set_bucket() {
+  size_t bucket_idx=(size_t)round(slider_match_length->value());
+  slider_match_idx->range(0.0, (double)(match_view->bucket_size(bucket_idx)-1));
+  slider_match_idx->step(1.0);
+  slider_match_idx->value(0.0);
+  set_match();
+}
+
+void UserInterface::set_match() {
+  size_t bucket_idx=(size_t)round(slider_match_length->value());
+  size_t match_idx=(size_t)round(slider_match_idx->value());
+    
+  match_view->set_match(bucket_idx, match_idx);
+  
+  std::ostringstream oss;
+  oss << match_view->match_dist(bucket_idx, match_idx);
+  text_shape_distance->value(oss.str().c_str());
+  oss.str("");
+  
+  oss << match_view->match_length(bucket_idx, match_idx);
+  text_match_length->value(oss.str().c_str());
 }

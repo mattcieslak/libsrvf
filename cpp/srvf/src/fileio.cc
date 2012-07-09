@@ -21,11 +21,23 @@
 #include "exceptions.h"
 
 #include <cstddef>
+#include <cctype>
 #include <string>
 #include <sstream>
 #include <fstream>
 #include <vector>
 #include <iomanip>
+
+
+// Returns the first non-space character in the line.  
+// If there are no non-space characters in the line, returns 0.
+static char first_nonspace_char_(const std::string &s)
+{
+  for (size_t i=0; i<s.size(); ++i)
+    if (!isspace(s[i])) return s[i];
+
+  return 0;
+}
 
 
 namespace srvf
@@ -35,6 +47,8 @@ namespace io
 
 /**
  * Load a collection of sample sets from a CSV file.
+ *
+ * Any line beginning with a non-numeric character is ignored.
  */
 std::vector<Matrix> load_csv (std::istream &is, char fieldsep, char linesep)
 {
@@ -46,7 +60,8 @@ std::vector<Matrix> load_csv (std::istream &is, char fieldsep, char linesep)
   size_t this_matrix_cols=0;
   while (std::getline(is, line, linesep))
   {
-    if (line.size() > 0)
+    char testchar = first_nonspace_char_(line);
+    if (testchar == '.' || testchar == '-' || isdigit(testchar))
     {
       size_t this_row_cols=0;
       double vi;

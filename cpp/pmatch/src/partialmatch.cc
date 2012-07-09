@@ -19,6 +19,8 @@
 
 #include "partialmatch.h"
 #include "paretoset.h"
+#include "rotselect.h"
+#include "pmatch_util.h"
 
 #include <srvf.h>
 #include <dpnbhd.h>
@@ -101,29 +103,6 @@ double edge_weight (
 
 
 /**
- * Build a map that sends each index \c i of \a tv to the index of the 
- * parameter subinterval of \a Q which contains \c tv[i].
- *
- * These maps are used in \c calculate_edge_weights().
- */
-static std::map<size_t,size_t> build_tv_idx_to_Q_idx_map_ (
-  const std::vector<double> &tv, const srvf::Srvf &Q )
-{
-  std::map<size_t,size_t> result;
-
-  for (size_t tvi=0, Qi=0; tvi+1<tv.size(); ++tvi)
-  {
-    result[tvi] = Qi;
-    while (Qi+2 < Q.ncp() && tv[tvi+1] > (Q.params()[Qi+1]-1e-5))
-      ++Qi;
-  }
-  result[tv.size()-1] = Q.ncp()-2;
-
-  return result;
-}
-  
-
-/**
  * Calculates the weights of all edges in the matching graph.
  */
 MatchingGraph calculate_edge_weights (
@@ -131,9 +110,9 @@ MatchingGraph calculate_edge_weights (
   const std::vector<double> &tv1, const std::vector<double> &tv2 )
 {
   std::map<size_t,size_t> tv1_idx_to_Q1_idx = 
-    build_tv_idx_to_Q_idx_map_(tv1,Q1);
+    build_tv_idx_to_Q_idx_map(tv1,Q1);
   std::map<size_t,size_t> tv2_idx_to_Q2_idx = 
-    build_tv_idx_to_Q_idx_map_(tv2,Q2);
+    build_tv_idx_to_Q_idx_map(tv2,Q2);
 
   MatchingGraph result(tv1.size(), tv2.size());
 
@@ -207,16 +186,19 @@ ParetoSet find_matches (
   std::vector<double> tv1;
   std::vector<double> tv2;
 
+  // Determine grid columns
   if (grid_width == 0)
     tv1 = Q1.params();
   else
     tv1 = srvf::util::linspace(Q1.domain_lb(), Q1.domain_ub(), grid_width);
 
+  // Determine grid rows
   if (grid_height == 0)
     tv2 = Q2.params();
   else
     tv2 = srvf::util::linspace(Q2.domain_lb(), Q2.domain_ub(), grid_height);
 
+  // Determine number of buckets in the Pareto set
   if (nbuckets == 0)
   {
     // Default: nbuckets = number of possible match lengths.
@@ -225,27 +207,72 @@ ParetoSet find_matches (
     nbuckets = max_chunks - min_chunks + 1;
   }
 
-  MatchingGraph G = calculate_edge_weights(Q1, Q2, tv1, tv2);
-  calculate_match_scores(G);
-
   ParetoSet S(nbuckets, bucket_thresh);
-  for (size_t ct=1; ct<grid_width; ++ct)
-  {
-  for (size_t rt=1; rt<grid_height; ++rt)
-  {
 
-    for (size_t cs=0; cs<ct; ++cs)
+  if (do_rots == false)
+  {
+    MatchingGraph G = calculate_edge_weights(Q1, Q2, tv1, tv2);
+    calculate_match_scores(G);
+
+    for (size_t ct=1; ct<grid_width; ++ct)
     {
-    for (size_t rs=0; rs<rt; ++rs)
+    for (size_t rt=1; rt<grid_height; ++rt)
     {
-      S.insert( PartialMatch( 
-        tv1[cs], tv1[ct], 
-        tv2[rs], tv2[rt],
-        G(cs, rs, ct, rt) ) );
+
+      for (size_t cs=0; cs<ct; ++cs)
+      {
+      for (size_t rs=0; rs<rt; ++rs)
+      {
+        double cur_dist = G(cs, rs, ct, rt);
+        if (cur_dist < 1e5)
+        {
+          S.insert( PartialMatch( 
+            tv1[cs], tv1[ct], 
+            tv2[rs], tv2[rt],
+            cur_dist ) );
+        }
+      }
+      }
+    
     }
     }
-  
   }
+  else
+  {
+    std::vector<Matrix> rotset = select_rotations(Q1, Q2, tv1, tv2);
+    std::cout << rotset.size() << " rotations" << std::endl;
+
+    for (size_t i=0; i<rotset.size(); ++i)
+    {
+      Srvf Q2r(Q2);
+      Q2r.rotate(rotset[i]);
+
+      MatchingGraph G = calculate_edge_weights(Q1, Q2r, tv1, tv2);
+      calculate_match_scores(G);
+
+      for (size_t ct=1; ct<grid_width; ++ct)
+      {
+      for (size_t rt=1; rt<grid_height; ++rt)
+      {
+
+        for (size_t cs=0; cs<ct; ++cs)
+        {
+        for (size_t rs=0; rs<rt; ++rs)
+        {
+          double cur_dist = G(cs, rs, ct, rt);
+          if (cur_dist < 1e5)
+          {
+            S.insert( PartialMatch( 
+              tv1[cs], tv1[ct], 
+              tv2[rs], tv2[rt],
+              cur_dist ) );
+          }
+        }
+        }
+      
+      }
+      }
+    }
   }
 
   return S;

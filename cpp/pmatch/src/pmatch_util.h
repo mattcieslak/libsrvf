@@ -16,22 +16,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#ifndef SRVF_ROTATE_H
-#define SRVF_ROTATE_H 1
+#ifndef PMATCH_UTIL_H
+#define PMATCH_UTIL_H 1
 
-#include "srvf.h"
-#include "matrix.h"
+#include <srvf.h>
+
+#include <vector>
+#include <map>
+#include <cstddef>
 
 
 namespace srvf
 {
+namespace pmatch
+{
 
-Matrix optimal_rotation (const Srvf &Q1, const Srvf &Q2);
 
-Matrix optimal_rotation(const Srvf &Q1, const Srvf &Q2, 
-  double a, double b, double c, double d, 
-  size_t Q1_start_idx=(size_t)(-1), size_t Q2_start_idx=(size_t)(-1) );
+/**
+ * Build a map that sends each index \c i of \a tv to the index of the 
+ * parameter subinterval of \a Q which contains \c tv[i].
+ *
+ * These maps are used in \c calculate_edge_weights().
+ */
+std::map<size_t,size_t> build_tv_idx_to_Q_idx_map (
+  const std::vector<double> &tv, const srvf::Srvf &Q );
+  
 
+} // namespace pmatch
 } // namespace srvf
 
-#endif // SRVF_ROTATE_H
+#endif // PMATCH_UTIL_H

@@ -16,22 +16,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#ifndef SRVF_ROTATE_H
-#define SRVF_ROTATE_H 1
-
-#include "srvf.h"
-#include "matrix.h"
+#include "pmatch_util.h"
 
 
 namespace srvf
 {
+namespace pmatch
+{
 
-Matrix optimal_rotation (const Srvf &Q1, const Srvf &Q2);
 
-Matrix optimal_rotation(const Srvf &Q1, const Srvf &Q2, 
-  double a, double b, double c, double d, 
-  size_t Q1_start_idx=(size_t)(-1), size_t Q2_start_idx=(size_t)(-1) );
+std::map<size_t,size_t> build_tv_idx_to_Q_idx_map (
+  const std::vector<double> &tv, const srvf::Srvf &Q )
+{
+  std::map<size_t,size_t> result;
 
+  for (size_t tvi=0, Qi=0; tvi+1<tv.size(); ++tvi)
+  {
+    result[tvi] = Qi;
+    while (Qi+2 < Q.ncp() && tv[tvi+1] > (Q.params()[Qi+1]-1e-5))
+      ++Qi;
+  }
+  result[tv.size()-1] = Q.ncp()-2;
+
+  return result;
+}
+
+} // namespace pmatch
 } // namespace srvf
-
-#endif // SRVF_ROTATE_H

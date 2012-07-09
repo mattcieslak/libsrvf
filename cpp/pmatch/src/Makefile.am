@@ -10,4 +10,4 @@ srvf_include_HEADERS=paretoset.h partialmatch.h
 
 LIBS+=-lsrvf -lgomp
 
-libsrvf_pmatch_la_SOURCES=partialmatch.cc
+libsrvf_pmatch_la_SOURCES=partialmatch.cc pmatch_util.cc rotselect.cc

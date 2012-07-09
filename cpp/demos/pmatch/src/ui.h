@@ -4,8 +4,11 @@
 #define ui_h
 #include <FL/Fl.H>
 #include "matchview.h"
+#include <sstream>
 #include <FL/Fl_Pack.H>
+#include <FL/Fl_Group.H>
 #include <FL/Fl_Slider.H>
+#include <FL/Fl_Output.H>
 
 class UserInterface {
 public:
@@ -15,5 +18,15 @@ public:
 private:
   void cb_slider_match_length_i(Fl_Slider*, void*);
   static void cb_slider_match_length(Fl_Slider*, void*);
+public:
+  Fl_Slider *slider_match_idx;
+private:
+  void cb_slider_match_idx_i(Fl_Slider*, void*);
+  static void cb_slider_match_idx(Fl_Slider*, void*);
+public:
+  Fl_Output *text_match_length;
+  Fl_Output *text_shape_distance;
+  void set_bucket();
+  void set_match();
 };
 #endif

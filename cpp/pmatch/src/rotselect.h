@@ -16,22 +16,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#ifndef SRVF_ROTATE_H
-#define SRVF_ROTATE_H 1
+#ifndef ROTSELECT_H
+#define ROTSELECT_H 1
 
-#include "srvf.h"
+#include "paretoset.h"
 #include "matrix.h"
+#include "srvf.h"
+
+#include <vector>
 
 
 namespace srvf
 {
+namespace pmatch
+{
 
-Matrix optimal_rotation (const Srvf &Q1, const Srvf &Q2);
 
-Matrix optimal_rotation(const Srvf &Q1, const Srvf &Q2, 
-  double a, double b, double c, double d, 
-  size_t Q1_start_idx=(size_t)(-1), size_t Q2_start_idx=(size_t)(-1) );
+/**
+ * Computes optimal rotations for all partial matches in the given grid.
+ *
+ * The rotations are computed relative to the given parametrizations 
+ * of \a Q1 and \a Q2.  If the curves were parametrized differently, then 
+ * this function would generally yield different results.
+ */
+std::vector<Matrix> select_rotations (
+  const Srvf &Q1, const Srvf &Q2, 
+  const std::vector<double> &tv1, const std::vector<double> &tv2 );
 
+
+} // namespace pmatch
 } // namespace srvf
 
-#endif // SRVF_ROTATE_H
+#endif // ROTSELECT_H

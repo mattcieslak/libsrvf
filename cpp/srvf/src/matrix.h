@@ -114,6 +114,22 @@ public:
    * Row-major ordering is used.  For example, in a \c 2x3 \c Matrix, 
    * calling this method with \c n=3 references the entry in row 1, column 0. 
    */ 
+  double& operator[] (size_t n)
+  { return data_[n]; }
+
+  /** 
+   * Returns the \f$ n^{th} \f$ entry in the matrix.
+   * Row-major ordering is used.  For example, in a \c 2x3 \c Matrix, 
+   * calling this method with \c n=3 references the entry in row 1, column 0. 
+   */ 
+  const double& operator[] (size_t n) const
+  { return data_[n]; };
+
+  /** 
+   * Returns the \f$ n^{th} \f$ entry in the matrix.
+   * Row-major ordering is used.  For example, in a \c 2x3 \c Matrix, 
+   * calling this method with \c n=3 references the entry in row 1, column 0. 
+   */ 
   double& operator() (size_t n)
   { return data_[n]; }
 
@@ -140,6 +156,33 @@ public:
   /** Returns a \c const pointer to the raw data for this \c Matrix. */
   const std::vector<double> &data() const 
   { return data_; }
+
+  /** Returns the norm of the matrix. */
+  double norm() const
+  {
+    double result = 0.0;
+
+    for (size_t i=0; i<size(); ++i)
+    {
+      double xi = (*this)[i];
+      result += xi*xi;
+    }
+
+    return sqrt(result);
+  }
+
+  /** Returns the Euclidean distance from this \c Matrix to \a A. */
+  double distance_to(const Matrix &A) const
+  {
+    double result = 0.0;
+
+    for (size_t i=0; i<size(); ++i){
+      double dxi = (*this)[i] - A[i];
+      result += dxi*dxi;
+    }
+
+    return sqrt(result);
+  }
 
   // In-place elementwise operations
   Matrix& operator+= (const Matrix &A);

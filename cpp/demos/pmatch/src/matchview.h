@@ -24,7 +24,11 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
+#include <plf.h>
+#include <srvf.h>
+#include <qmap.h>
 #include <plot.h>
+#include <rotate.h>
 #include <paretoset.h>
 
 
@@ -73,9 +77,26 @@ public:
 
       plot_.set_plf_interval (0, std::pair<double,double>(a,b));
       plot_.set_plf_interval (1, std::pair<double,double>(c,d));
+
+      srvf::Srvf Q1 = srvf::plf_to_srvf(plot_.get_plf(0));
+      srvf::Srvf Q2 = srvf::plf_to_srvf(plot_.get_plf(1));
+      srvf::Matrix R = srvf::optimal_rotation(Q1, Q2, a, b, c, d);
+      plot_.get_plf(1).rotate(R);
       redraw();
     }
   }
+
+  size_t nbuckets()
+  { return matches_.nbuckets(); }
+
+  size_t bucket_size(size_t bucket_idx)
+  { return matches_[bucket_idx].size(); }
+
+  double match_dist(size_t bucket_idx, size_t match_idx)
+  { return matches_[bucket_idx][match_idx].dist; }
+
+  double match_length(size_t bucket_idx, size_t match_idx)
+  { return matches_[bucket_idx][match_idx].length(); }
 
   virtual void draw()
   {
@@ -132,14 +153,7 @@ public:
       case FL_UNFOCUS :
         return 1;  // we want keyboard events
       case FL_KEYDOWN:
-        switch(Fl::event_key())
-        {
-          case FL_Escape:
-          case 'q':
-            this->hide();
-            break;
-        }
-        return 1;
+        return 0;
       case FL_SHORTCUT:
         return 0;
       default:

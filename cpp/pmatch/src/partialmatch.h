@@ -70,9 +70,8 @@ public:
    : grid_width_(grid_width), grid_height_(grid_height)
   { 
     nvertices_ = grid_width * grid_height;
-    //weights_ = std::vector<double> (
-    // nvertices_*nvertices_, std::numeric_limits<double>::max() );
-    weights_ = std::vector<double> (nvertices_*nvertices_, 1e6);
+    weights_ = std::vector<double> (
+      nvertices_*nvertices_, std::numeric_limits<double>::max() );
   }
 
   inline double&
@@ -116,6 +115,8 @@ MatchingGraph calculate_edge_weights (
   const std::vector<double> &tv1, const std::vector<double> &tv2 );
 
 void calculate_match_scores (MatchingGraph &G);
+
+
 
 } // namespace pmatch
 } // namespace srvf
