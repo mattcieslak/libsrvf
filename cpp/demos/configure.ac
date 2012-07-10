@@ -27,13 +27,20 @@ AC_ARG_ENABLE(pmatch,
 
 # Conditionally enable each program if its dependencies are satisfied
 demo_pmatch_enabled="no"
-if test "$libsrvf_plot_enabled" = yes && 
-   test "$libsrvf_pmatch_enabled" = yes; then :
+if test "$libsrvf_pmatch_enabled" = yes; then :
   demo_pmatch_enabled="yes"
   AC_CONFIG_SUBDIRS([pmatch]) 
 fi
 
+demo_pmatch_gui_enabled="no"
+if test "$libsrvf_plot_enabled" = yes && 
+   test "$libsrvf_pmatch_enabled" = yes; then :
+  demo_pmatch_gui_enabled="yes"
+  AC_CONFIG_SUBDIRS([pmatch-gui]) 
+fi
+
 AM_CONDITIONAL([COND_DEMO_PMATCH],[test "$demo_pmatch_enabled" = "yes"])
+AM_CONDITIONAL([COND_DEMO_PMATCH_GUI],[test "$demo_pmatch_gui_enabled" = "yes"])
 
 
 AC_CONFIG_FILES([Makefile])

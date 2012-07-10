@@ -25,6 +25,7 @@
 
 #include <cmath>
 #include <vector>
+#include <limits>
 #include <stdexcept>
 
 
@@ -169,6 +170,48 @@ public:
       throw std::out_of_range("Index i is out of range.");
 
     return buckets_[i].data();
+  }
+
+  /**
+   * Returns the total number of matches in the Pareto set.
+   *
+   * This is usually strictly larger than the number of buckets.
+   */
+  size_t total_size() const
+  {
+    size_t res=0;
+    for (size_t i=0; i<buckets_.size(); ++i)
+    {
+      res += buckets_[i].size();
+    }
+    return res;
+  }
+
+  /**
+   * Returns the weighted-norm Salukwadze distance of the Pareto set.
+   *
+   * The Salukwadze distance is defined as follows:
+   *
+   * \f[ d_s = \inf w_1\lambda + w_2\epsilon \f]
+   *
+   * where the \f$ \inf \f$ runs over all possible values of the partiality 
+   * measure \f$ \lambda \f$ and the shape distance \f$ \epsilon \f$.  
+   * The partiality is defined as the maximum possible match length minus 
+   * the length of the match.
+   */
+  double salukwadze_dist(double w1=1.0, double w2=1.0) const
+  {
+    double res = std::numeric_limits<double>::max();
+    for (size_t i=0; i<buckets_.size(); ++i)
+    {
+      if (buckets_[i].empty()) continue;
+
+      double cur_lambda = 2.0 - buckets_[i][0].length();
+      double cur_eps = buckets_[i].min().dist;
+      double cur_nrm = w1*cur_lambda + w2*cur_eps;
+      res = std::min(res, cur_nrm);
+    }
+    return res;
   }
 
   /**

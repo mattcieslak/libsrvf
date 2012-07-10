@@ -1,0 +1,8 @@
+bin_PROGRAMS=srvf_pmatch
+
+AM_CPPFLAGS=$(SRVF_CPPFLAGS)
+AM_LDFLAGS=$(SRVF_LDFLAGS)
+
+LIBS+=$(SRVF_LIBS)
+
+srvf_pmatch_SOURCES=main.cc

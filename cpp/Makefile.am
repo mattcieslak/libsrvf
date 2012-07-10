@@ -11,3 +11,5 @@ MAYBE_DEMOS=demos
 endif
 
 SUBDIRS=srvf $(MAYBE_PLOT) $(MAYBE_PMATCH) $(MAYBE_DEMOS)
+
+EXTRA_DIST=testdata
