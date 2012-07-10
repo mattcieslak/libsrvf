@@ -23,20 +23,5 @@ AC_TYPE_SIZE_T
 AC_CHECK_FUNCS([sqrt])
 
 
-AM_CONDITIONAL([COND_UNIT_TESTS],
-  [test "$enable_unit_tests" = "yes"])
-
-if test "$enable_pmatch_tests" = "yes"; then
-  AC_LANG(C++)
-  saved_LDFLAGS="$LDFLAGS"
-  LDFLAGS="$LDFLAGS -lboost_unit_test_framework"
-  AC_LINK_IFELSE(
-    [AC_LANG_PROGRAM([#include <boost/test/unit_test.hpp>],[])],dnl
-    [LIBS="-lboost_unit_test_framework $LIBS"]dnl
-    AC_DEFINE([HAVE_LIBBOOST_UNIT_TEST_FRAMEWORK],[],[Boost unit test]),dnl
-    [AC_MSG_WARN([Boost unit testing libraries not found])])dnl
-  LDFLAGS="$saved_LDFLAGS"
-fi
-
 AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile])
 AC_OUTPUT

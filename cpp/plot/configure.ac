@@ -15,17 +15,7 @@ LT_INIT
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
 
-# Check for FLTK
-#AC_LANG(C++)
-#saved_LDFLAGS="$LDFLAGS"
-#LDFLAGS="$LDFLAGS -lfltk2"
-#AC_LINK_IFELSE(
-#  [AC_LANG_PROGRAM([#include <fltk/Widget.h>],[fltk::Widget w(0,0,0,0,"")])],dnl
-#  [LIBS="-lfltk2 -lfltk2_gl $LIBS"]dnl
-#  AC_DEFINE([HAVE_FLTK],[],[FLTK]),dnl
-#  [AC_MSG_WARN([FLTK not found])])dnl
-#LDFLAGS="$saved_LDFLAGS"
-
+# Path to fltk-config
 fltk_config_prog=fltk-config
 AC_ARG_WITH([fltk-config],
   [AS_HELP_STRING([--with-fltk-config=PATH],
@@ -33,6 +23,7 @@ AC_ARG_WITH([fltk-config],
   [fltk_config_prog="$withval"],
   [])
 
+# FLTK config
 plot_enabled="no"
 AC_ARG_ENABLE([plot],
   [AS_HELP_STRING([--enable-plot],

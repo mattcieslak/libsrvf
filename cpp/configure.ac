@@ -34,5 +34,17 @@ AC_ARG_ENABLE(pmatch,
 AM_CONDITIONAL([COND_PMATCH],[test "$pmatch_enabled" = "yes"])
 
 
+# Build the demo programs?
+demos_enabled="no"
+AC_ARG_ENABLE(demos,
+  [AS_HELP_STRING([--enable-demos],
+    [Build the demo programs])],
+  [if test "$enableval" = yes; then 
+    AC_CONFIG_SUBDIRS([demos]) 
+    demos_enabled="yes"
+  fi],
+  [])
+AM_CONDITIONAL([COND_DEMOS],[test "$demos_enabled" = "yes"])
+
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

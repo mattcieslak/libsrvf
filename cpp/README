@@ -1,6 +1,40 @@
 libsrvf 
 
-I. Project layout and organization
+0. Required third-party libraries
+------------------------------------------------------------------------------
+First, in order to build or use any part of libsrvf, you need to have the 
+GNU Scientific Library installed.  See www.gnu.org/software/gsl/ for 
+instructions.
+
+FLTK 1.1 and OpenGL 1.1 (or newer) are required for the plotting features.  
+See www.fltk.org for instructions on installing FLTK.
+
+If you want to run the unit tests, then you will need the Boost libraries.  
+See www.boost.org for instructions on installing these.
+
+Last but not least, you need a working C++ compiler and linker,  and a 
+compatible 'make' program.  The configure script should check all of this 
+for you.
+
+
+I. Quick start guides
+------------------------------------------------------------------------------
+Here are a few quick recipes.
+
+a) To build the partial matching demo program, the following steps should work:
+
+> ./configure --enable-plot --enable-pmatch
+> make
+> cd demos/pmatch
+> ./configure
+> make
+> src/pmdemo -h
+
+The last command will output a help message explaining the options for the 
+demo program.  Requires GSL, FLTK, and OpenGL.
+
+
+II. Project layout and organization
 ------------------------------------------------------------------------------
 
 The libsrvf package is made up of a main package providing core functionality, 
@@ -15,56 +49,88 @@ namespace.
 
 Here are brief descriptions of the packages.
 
-0. The main package
-Directory: ./
-Library:   libsrvf
+1. The main package
+Directory: srvf
+Library:   libsrvf.a
 Namespace: srvf
 The main package provides the core classes and algorithms for the library.  
 
-1. Partial matching
-Directory: pmatch/
-Library:   libsrvf-pmatch
-Namespace: srvf::pmatch
-Implementation of partial matching in the SRVF framework.
-
-2. Functional analysis
-Directory: fa/
-Library:   libsrvf-fa
-Namespace: srvf::fa
-Specialized algorithms for 1-D functions.  Includes pairwise matching as well 
-as groupwise matching and Karcher mean.
-
-3. Plotting
+2. Plotting
 Directory: plot/
-Library:   libsrvf-plot
+Library:   libsrvf-plot.a
 Namespace: srvf::plot
 Very basic plotting support.  Requires FLTK and OpenGL.
 
-4. File I/O
-Directory: fileio/
-Library:   libsrvf-io
-Namespace: srvf::io
-Basic support for loading and saving srvf::Matrix objects to and from 
-.csv files.
-
-
-II. Required third-party libraries
-------------------------------------------------------------------------------
-You need to have GSL (the GNU scientific library) installed in order for 
-anything to work.
-
-If you want the optional plotting features enabled, then you also need 
-FLTK and OpenGL.
-
-If you want to run the unit tests, then you need the Boost libraries.
+3. Partial matching
+Directory: pmatch/
+Library:   libsrvf-pmatch.a
+Namespace: srvf::pmatch
+Implementation of partial matching in the SRVF framework.
 
 
 III. Building the library
 ------------------------------------------------------------------------------
-Building the library should be straightforward:
+libsrvf uses the GNU autotools build system, so the usual steps should work:
 
-shell_prompt$  ./configure [your configure options here]
-shell_prompt$  make
-shell_prompt$  make install
+>  ./configure [your configure options here]
+>  make
+>  make install
+
+If you have FLTK and OpenGL installed, then you can enable plotting 
+support by passing --enable-plot to ./configure.  This will build 
+the library libsrvf-plot.a
+
+If you want the partial matching library (libsrvf-pmatch.a) to be built, pass 
+--enable-pmatch to ./configure.
+
+To change the installation directory, use the --prefix option.  For example, 
+
+>  ./configure --prefix=/home/username
+
+will cause the libraries to be installed in /home/username/lib and the 
+headers to be installed in /home/username/include.  To see all of the 
+available configuration options, do
+
+>  ./configure --help
+
+
+IV. Building the demo programs
+------------------------------------------------------------------------------
+Once the libraries have been built, the demo programs in the demos/ directory 
+can be built.  Each demo program depends on one or more of the srvf 
+libraries.
+
+Here is the list of demo programs, along with the dependencies for each one.
+
+1. pmdemo
+-----------
+Directory:    demos/pmatch
+Description:  a simple GUI application that displays the Pareto-optimal partial 
+              partial matches between two curves
+Dependencies: libsrvf, libsrvf-plot, libsrvf-pmatch
+
+
+2. pmdemo-no-gui
+-----------------
+Directory     demos/pmatch-no-gui
+Description:  finds the Pareto-optimal partial matches between two curves 
+              and saves them to a file.  Does not require plotting.
+Dependencies: libsrvf, libsrvf-pmatch
+
+
+V. Unit tests
+------------------------------------------------------------------------------
+To build the unit tests for the library, run the following command from this 
+directory:
+
+>  make check
+
+The test programs are in the tests/ subdirectory for each package.  For 
+example, the test program for the main package is in srvf/tests/.
+
+You can also build the unit tests for a single package only.  For example, 
+
+>  cd pmatch
+>  make check
 
 
