@@ -5,12 +5,17 @@ AC_CONFIG_HEADERS([config.h])
 
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
 
-# Check for GSL
-AC_CHECK_LIB([gsl],[gsl_matrix_alloc],[],[AC_MSG_ERROR([gsl not found])])
+
+# Check for OpenMP
+AC_LANG(C++)
+AC_OPENMP
+CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+
 
 # Checks for header files.
 AC_CHECK_HEADERS([unistd.h])
@@ -19,7 +24,12 @@ AC_CHECK_HEADERS([unistd.h])
 AC_HEADER_STDBOOL
 AC_TYPE_SIZE_T
 
-# Checks for library functions.
+
+# Check for GSL
+AC_CHECK_LIB([gsl],[gsl_matrix_alloc],[],[AC_MSG_ERROR([gsl not found])],[-lgslcblas])
+
+
+# Check for FLTK
 fltk_config_prog=fltk-config
 AC_ARG_WITH([fltk-config],
   [AS_HELP_STRING([--with-fltk-config=PATH],
@@ -36,6 +46,7 @@ else
   AC_MSG_ERROR([cannot find $fltk_config_prog])
 fi
 
+
 # The SRVF sources and libraries in this directory tree
 SRVF_CPPFLAGS="-I../../../srvf/src"
 SRVF_CPPFLAGS+=" -I../../../plot/src"
@@ -47,6 +58,7 @@ SRVF_LIBS=" -lsrvf-pmatch -lsrvf-plot -lsrvf"
 AC_SUBST(SRVF_CPPFLAGS)
 AC_SUBST(SRVF_LDFLAGS)
 AC_SUBST(SRVF_LIBS)
+
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT

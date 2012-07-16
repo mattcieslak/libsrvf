@@ -445,7 +445,6 @@ groupwise_build_gammas(const Srvf &Mu, const std::vector<Srvf> &Qs,
     // Find the parameter of Mu corresponding to the next peak or valley
     std::vector<double> cands(nfuncs);
     double next_param = Mu.params()[alpha_mu+1];
-    size_t next_param_idx = nfuncs;  // next peak / valley is on Mu
     for (size_t i=0; i<nfuncs; ++i)
     {
       if (beta[i]+1 < paths[i].size()){
@@ -460,7 +459,6 @@ groupwise_build_gammas(const Srvf &Mu, const std::vector<Srvf> &Qs,
       if (cands[i] < next_param)
       {
         next_param = cands[i];
-        next_param_idx = i;
       }
     }
 

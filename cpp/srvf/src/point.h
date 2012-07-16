@@ -325,9 +325,24 @@ public:
     return (d < tol);
   }
 
+  friend inline Point linear_combination(const Point &A, const Point &B, 
+    double w1, double w2);
+
 private:
   std::vector<double> data_;
 };
+
+
+inline Point linear_combination(const Point &A, const Point &B, 
+  double w1, double w2)
+{
+  Point res(A.dim());
+  for (size_t i=0; i<A.dim(); ++i)
+  {
+    res[i] = w1*A[i] + w2*B[i];
+  }
+  return res;
+}
 
 } // namespace srvf
 

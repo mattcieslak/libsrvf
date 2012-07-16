@@ -76,9 +76,6 @@ libsrvf_pmatch_la_LIBADD =
 am_libsrvf_pmatch_la_OBJECTS = partialmatch.lo pmatch_util.lo \
 	rotselect.lo
 libsrvf_pmatch_la_OBJECTS = $(am_libsrvf_pmatch_la_OBJECTS)
-libsrvf_pmatch_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(libsrvf_pmatch_la_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I. -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -113,7 +110,7 @@ CPPFLAGS =
 CXX = g++
 CXXCPP = g++ -E
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -g -O2 -Wall -Werror
+CXXFLAGS = -g -O2 -Wall -Werror -fopenmp
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -135,7 +132,7 @@ INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LD = /usr/i686-pc-linux-gnu/bin/ld
 LDFLAGS =  -L/home/yevgeni/lib -L/usr/lib -L/usr/local/lib
 LIBOBJS = 
-LIBS =  -lsrvf
+LIBS =  $(SRVF_LIBS)
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = 
 LN_S = ln -s
@@ -147,6 +144,7 @@ NM = /usr/bin/nm -B
 NMEDIT = 
 OBJDUMP = objdump
 OBJEXT = o
+OPENMP_CXXFLAGS = -fopenmp
 OTOOL = 
 OTOOL64 = 
 PACKAGE = libsrvf-pmatch
@@ -216,12 +214,18 @@ target_alias =
 top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
-AM_CPPFLAGS = -I$(top_srcdir)/../srvf/src $(OPENMP_CXXFLAGS)
-AM_LDFLAGS = -L$(top_srcdir)/../srvf/src/.libs
+
+# Paths for SRVF libs and headers in the build tree
+SRVF_CPPFLAGS = "-I$(top_srcdir)/../srvf/src"
+SRVF_LDFLAGS = "-L$(top_srcdir)/../srvf/src/.libs"
+SRVF_LIBS = " -lsrvf"
+AM_CPPFLAGS = $(SRVF_CPPFLAGS) $(OPENMP_CXXFLAGS)
+AM_LDFLAGS = $(SRVF_LDFLAGS)
 lib_LTLIBRARIES = libsrvf-pmatch.la
-libsrvf_pmatch_la_LDFLAGS = -static
+
+#libsrvf_pmatch_la_LDFLAGS= -static
 srvf_includedir = $(includedir)/srvf
-srvf_include_HEADERS = paretoset.h partialmatch.h
+srvf_include_HEADERS = paretoset.h partialmatch.h pmatch_util.h rotselect.h
 libsrvf_pmatch_la_SOURCES = partialmatch.cc pmatch_util.cc rotselect.cc
 all: all-am
 
@@ -289,7 +293,7 @@ clean-libLTLIBRARIES:
 	  rm -f "$${dir}/so_locations"; \
 	done
 libsrvf-pmatch.la: $(libsrvf_pmatch_la_OBJECTS) $(libsrvf_pmatch_la_DEPENDENCIES) 
-	$(libsrvf_pmatch_la_LINK) -rpath $(libdir) $(libsrvf_pmatch_la_OBJECTS) $(libsrvf_pmatch_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libsrvf_pmatch_la_OBJECTS) $(libsrvf_pmatch_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

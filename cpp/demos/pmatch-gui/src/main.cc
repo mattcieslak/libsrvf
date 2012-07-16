@@ -40,7 +40,7 @@
 
 static void do_usage(const char *progname)
 {
-  std::cout << "USAGE: " << progname << " [OPTIONS] file1 file2";
+  std::cout << "USAGE: " << progname << " [OPTIONS] file1 file2" << std::endl;
   std::cout << "where" << std::endl;
   std::cout << "  file1 contains samples for the first curve" << std::endl;
   std::cout << "  file2 contains samples for the second curve" << std::endl;
@@ -48,7 +48,9 @@ static void do_usage(const char *progname)
   std::cout << "  -W n\t\tuse grid width n" << std::endl;
   std::cout << "  -H n\t\tuse grid height n" << std::endl;
   std::cout << "  -r\t\toptimize over rotations" << std::endl;
-  std::cout << "  -o outfile\t\twrite matches to outfile" << std::endl;
+  std::cout << "  -p\t\tsample point matrices in file1 and file2 " 
+               "are in point-per-column ordering" << std::endl;
+  std::cout << "  -o outfile\twrite matches to outfile" << std::endl;
   std::cout << "  -h\t\tshow this message" << std::endl;
 }
 
@@ -57,25 +59,29 @@ int main( int argc, char **argv ){
   size_t grid_height = DEFAULT_GRID_HEIGHT;
   bool do_rotations = false;
   const char *output_filename = "matches.mat";
+  srvf::Pointset::PackingMethod packing = srvf::Pointset::POINT_PER_ROW;
   int opt;
 
-  while( (opt=getopt(argc, argv, "hH:o:rW:")) != -1 ){
+  while( (opt=getopt(argc, argv, "W:H:rpo:h")) != -1 ){
     switch( opt ){
-      case 'h':
-        do_usage(argv[0]);
-        return 0;
+      case 'W':
+        grid_width = atoi(optarg);
+        break;
       case 'H':
         grid_height = atoi(optarg);
-        break;
-      case 'o':
-        output_filename = optarg;
         break;
       case 'r':
         do_rotations = true;
         break;
-      case 'W':
-        grid_width = atoi(optarg);
+      case 'p':  // sample point matrix = point per column
+        packing = srvf::Pointset::POINT_PER_COLUMN;
         break;
+      case 'o':
+        output_filename = optarg;
+        break;
+      case 'h':
+        do_usage(argv[0]);
+        return 0;
       case '?':
         do_usage(argv[0]);
         return -1;
@@ -108,8 +114,8 @@ int main( int argc, char **argv ){
     return -1;
   }
 
-  srvf::Pointset F1samps(F1data[0], srvf::Pointset::POINT_PER_COLUMN);
-  srvf::Pointset F2samps(F2data[0], srvf::Pointset::POINT_PER_COLUMN);
+  srvf::Pointset F1samps(F1data[0], packing);
+  srvf::Pointset F2samps(F2data[0], packing);
 
   srvf::Plf F1(F1samps);
   srvf::Plf F2(F2samps);

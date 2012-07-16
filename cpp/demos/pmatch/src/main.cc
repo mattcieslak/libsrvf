@@ -50,6 +50,8 @@ static void do_usage(const char *progname)
                "Salukwadze distance (default is 1.0)" << std::endl;
   std::cout << "  -y w\t\tuse w as shape distance weight for "
                "Salukwadze distance (default is 1.0)" << std::endl;
+  std::cout << "  -p sample point matrices in file1 and file2 " 
+               "are in point-per-column ordering" << std::endl;
   std::cout << "  -o file\twrite matches to file" << std::endl;
   std::cout << "  -h\t\tshow this message" << std::endl;
 }
@@ -78,10 +80,11 @@ int main( int argc, char **argv ){
   double salukwadze_w1 = 1.0;
   double salukwadze_w2 = 1.0;
   const char *output_filename = "matches.csv";
+  srvf::Pointset::PackingMethod packing = srvf::Pointset::POINT_PER_ROW;
   int opt;
 
   // Get the command line arguments
-  while( (opt=getopt(argc, argv, "W:H:rx:y:o:h")) != -1 ){
+  while( (opt=getopt(argc, argv, "W:H:rx:y:po:h")) != -1 ){
     switch( opt ){
       case 'W':  // set matching grid width
         grid_width = atoi(optarg);
@@ -97,6 +100,9 @@ int main( int argc, char **argv ){
         break;
       case 'y':  // shape distance weight for Salukwadze distance
         salukwadze_w2 = atof(optarg);
+        break;
+      case 'p':  // sample point matrix = point per column
+        packing = srvf::Pointset::POINT_PER_COLUMN;
         break;
       case 'o':  // set output filename
         output_filename = optarg;
@@ -141,8 +147,8 @@ int main( int argc, char **argv ){
 
   
   // Create Pointset's from the Matrix instances
-  srvf::Pointset F1samps(F1data[0], srvf::Pointset::POINT_PER_COLUMN);
-  srvf::Pointset F2samps(F2data[0], srvf::Pointset::POINT_PER_COLUMN);
+  srvf::Pointset F1samps(F1data[0], packing);
+  srvf::Pointset F2samps(F2data[0], packing);
 
   // Create the curves F1 and F2
   srvf::Plf F1(F1samps);
@@ -178,7 +184,10 @@ int main( int argc, char **argv ){
 
   ofs << "# srvf_pmatch output" << std::endl;
   ofs << "# File 1: " << argv[optind] << std::endl;
-  ofs << "# File 2: " << argv[optind+1] << std::endl << std::endl;
+  ofs << "# File 2: " << argv[optind+1] << std::endl;
+  ofs << "# Salukwadze dist: " 
+      << S.salukwadze_dist(salukwadze_w1, salukwadze_w2) 
+      << std::endl << std::endl;
 
   ofs << "# name: salukwadze_dist" << std::endl;
   ofs << "# type: matrix" << std::endl;

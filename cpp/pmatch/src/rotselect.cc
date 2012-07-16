@@ -61,7 +61,7 @@ std::vector<Matrix> select_rotations (
             Q1, Q2, tv1[cs], tv1[ct], 
             tv2[rs], tv2[rt], 
             tv1_idx_to_Q1_idx[cs], tv2_idx_to_Q2_idx[rs] ),
-          0.2 );
+          0.5 );
       }
     }
   

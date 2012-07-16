@@ -98,9 +98,9 @@ void SuperimposedPlot::render(Renderer &r)
   double dev_height = (double)r.device_height();
   double asp_rat = dev_height / dev_width;
   r.viewport(2, 2, dev_width-2, dev_height-2);
-  r.ortho(-bball_rad_, bball_rad_, 
-          -bball_rad_*asp_rat, bball_rad_*asp_rat, 
-          -bball_rad_, bball_rad_);
+  r.ortho(-bball_rad_*1.2, bball_rad_*1.2, 
+          -bball_rad_*asp_rat*1.2, bball_rad_*asp_rat*1.2, 
+          -bball_rad_*1.2, bball_rad_*1.2);
 
   for (size_t i=0; i<plfs_.size(); ++i)
   {

@@ -19,17 +19,19 @@
 #ifndef MATCHVIEW_H
 #define MATCHVIEW_H 1
 
-#include <FL/Fl.H>
-#include <FL/Fl_Gl_Window.H>
-#include <GL/gl.h>
-#include <GL/glu.h>
-
 #include <plf.h>
 #include <srvf.h>
 #include <qmap.h>
 #include <plot.h>
 #include <rotate.h>
 #include <paretoset.h>
+
+#include <FL/Fl.H>
+#include <FL/Fl_Gl_Window.H>
+#include <GL/gl.h>
+#include <GL/glu.h>
+
+#include <limits>
 
 
 class MatchView : public Fl_Gl_Window
@@ -62,6 +64,23 @@ public:
   void set_interval(size_t idx, double a, double b)
   {
     plot_.set_plf_interval(idx, std::pair<double,double>(a,b));
+
+    // Changing the domain also changes the bounding box and centroid, 
+    // so the curve needs to be re-centered
+    srvf::Plf &F = plot_.get_plf(idx);
+    srvf::Point lb(F.dim(),1e9), ub(F.dim(),-1e9);
+    for (size_t i=0; i<F.ncp(); ++i)
+    {
+      if (F.params()[i] >= a && F.params()[i] <= b)
+      {
+        for (size_t j=0; j<F.dim(); ++j)
+        {
+          lb[j] = std::min(lb[j], F.samps()[i][j]);
+          ub[j] = std::max(ub[j], F.samps()[i][j]);
+        }
+      }
+    }
+    F.translate(linear_combination(lb, ub, -0.5, -0.5));
     redraw();
   }
 
@@ -93,10 +112,22 @@ public:
   { return matches_[bucket_idx].size(); }
 
   double match_dist(size_t bucket_idx, size_t match_idx)
-  { return matches_[bucket_idx][match_idx].dist; }
+  { 
+    if (bucket_idx < matches_.nbuckets() && 
+        match_idx < matches_[bucket_idx].size())
+      return matches_[bucket_idx][match_idx].dist; 
+    else
+      return std::numeric_limits<double>::infinity();
+  }
 
   double match_length(size_t bucket_idx, size_t match_idx)
-  { return matches_[bucket_idx][match_idx].length(); }
+  { 
+    if (bucket_idx < matches_.nbuckets() && 
+        match_idx < matches_[bucket_idx].size())
+      return matches_[bucket_idx][match_idx].length(); 
+    else
+      return -std::numeric_limits<double>::infinity();
+  }
 
   virtual void draw()
   {

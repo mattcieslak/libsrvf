@@ -9,11 +9,26 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 # Checks for programs.
 AC_PROG_CXX
-AC_PROG_LIBTOOL
+AC_PROG_AWK
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+AC_PROG_RANLIB
 LT_INIT
 
+
 # Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDBOOL
+AC_C_INLINE
 AC_TYPE_SIZE_T
+AC_CHECK_TYPES([ptrdiff_t])
+
+
+# Checks for library functions.
+AC_CHECK_FUNCS([sqrt])
+
 
 # Path to fltk-config
 fltk_config_prog=fltk-config
@@ -45,9 +60,11 @@ else
   AC_MSG_ERROR([pass --enable-plot to configure to enable plotting])
 fi
 
+
 # Check for OpenGL
 AC_CHECK_LIB([GL],[glBegin])
 AC_CHECK_LIB([GLU],[gluLookAt])
+
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
