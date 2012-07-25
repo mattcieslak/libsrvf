@@ -16,6 +16,20 @@ void UserInterface::cb_slider_match_idx(Fl_Slider* o, void* v) {
   ((UserInterface*)(o->parent()->parent()->parent()->user_data()))->cb_slider_match_idx_i(o,v);
 }
 
+void UserInterface::cb_check_show_f1_i(Fl_Check_Button* o, void*) {
+  show_f1(o->value());
+}
+void UserInterface::cb_check_show_f1(Fl_Check_Button* o, void* v) {
+  ((UserInterface*)(o->parent()->parent()->parent()->user_data()))->cb_check_show_f1_i(o,v);
+}
+
+void UserInterface::cb_check_show_f2_i(Fl_Check_Button* o, void*) {
+  show_f2(o->value());
+}
+void UserInterface::cb_check_show_f2(Fl_Check_Button* o, void* v) {
+  ((UserInterface*)(o->parent()->parent()->parent()->user_data()))->cb_check_show_f2_i(o,v);
+}
+
 Fl_Window* UserInterface::make_window() {
   Fl_Window* w;
   { Fl_Window* o = new Fl_Window(835, 555, "Partial Match");
@@ -31,7 +45,7 @@ Fl_Window* UserInterface::make_window() {
     o->align(Fl_Align(FL_ALIGN_TOP));
     o->when(FL_WHEN_RELEASE);
     { Fl_Pack* o = new Fl_Pack(0, 0, 835, 555);
-      { match_view = new MatchView(5, 1, 825, 453);
+      { match_view = new MatchView(5, 1, 825, 426);
         match_view->box(FL_NO_BOX);
         match_view->color(FL_BACKGROUND_COLOR);
         match_view->selection_color(FL_BACKGROUND_COLOR);
@@ -43,7 +57,7 @@ Fl_Window* UserInterface::make_window() {
         match_view->when(FL_WHEN_RELEASE);
         Fl_Group::current()->resizable(match_view);
       } // MatchView* match_view
-      { Fl_Group* o = new Fl_Group(0, 455, 835, 100);
+      { Fl_Group* o = new Fl_Group(0, 425, 835, 130);
         { slider_match_length = new Fl_Slider(0, 460, 650, 30, "Length Range");
           slider_match_length->type(3);
           slider_match_length->box(FL_FLAT_BOX);
@@ -64,6 +78,14 @@ Fl_Window* UserInterface::make_window() {
         } // Fl_Output* text_match_length
         { text_shape_distance = new Fl_Output(710, 506, 115, 28, "distance");
         } // Fl_Output* text_shape_distance
+        { check_show_f1 = new Fl_Check_Button(5, 435, 125, 20, "Show F1");
+          check_show_f1->down_box(FL_DOWN_BOX);
+          check_show_f1->callback((Fl_Callback*)cb_check_show_f1);
+        } // Fl_Check_Button* check_show_f1
+        { check_show_f2 = new Fl_Check_Button(90, 435, 85, 15, "Show F2");
+          check_show_f2->down_box(FL_DOWN_BOX);
+          check_show_f2->callback((Fl_Callback*)cb_check_show_f2);
+        } // Fl_Check_Button* check_show_f2
         o->end();
       } // Fl_Group* o
       o->end();
@@ -95,4 +117,12 @@ void UserInterface::set_match() {
   
   oss << match_view->match_length(bucket_idx, match_idx);
   text_match_length->value(oss.str().c_str());
+}
+
+void UserInterface::show_f1(bool v) {
+  match_view->show_f1(v);
+}
+
+void UserInterface::show_f2(bool v) {
+  match_view->show_f2(v);
 }

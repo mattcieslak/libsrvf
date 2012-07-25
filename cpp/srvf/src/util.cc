@@ -1,7 +1,7 @@
 /*
  * LibSRVF - a shape analysis library using the square root velocity framework.
  *
- * Copyright (C) 2012  Daniel Robinson
+ * Copyright (C) 2012   FSU Statistical Shape Analysis and Modeling Group
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -151,6 +151,34 @@ Pointset diff(const Pointset &X, const std::vector<double> &tv)
     res.scale(i,1.0/dt);
   }
   return res;
+}
+
+
+/**
+ * Builds a map for looking up the elements of \a tv1 in \a tv2.
+ *
+ * \a tv1 and \tv2 must be sorted in increasing order, and all elements of 
+ * \a tv1 must lie between the first and last elements of \a tv2.
+ * If these conditions are not met, behavior is undefined.
+ *
+ * Given an index \c i, returns the index \c j such that 
+ * \c tv2[j]<=tv1[i]<tv2[j+1] (the last inequality will be non-strict 
+ * if \c tv1[i] is equal to the last element of \c tv2).
+ */
+std::map<size_t,size_t> build_lookup_map (
+  const std::vector<double> &tv1, const std::vector<double> &tv2 )
+{
+  std::map<size_t,size_t> result;
+
+  for (size_t tv1i=0, tv2i=0; tv1i+1<tv1.size(); ++tv1i)
+  {
+    result[tv1i] = tv2i;
+    while (tv2i+2 < tv2.size() && tv1[tv1i+1] > (tv2[tv2i+1]-1e-5))
+      ++tv2i;
+  }
+  result[tv1.size()-1] = tv2.size()-2;
+
+  return result;
 }
 
 } // namespace srvf::util

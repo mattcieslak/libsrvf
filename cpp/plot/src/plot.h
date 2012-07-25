@@ -1,7 +1,7 @@
 /*
  * LibSRVF - a shape analysis library using the square root velocity framework.
  *
- * Copyright (C) 2012  Daniel Robinson
+ * Copyright (C) 2012 FSU Statistical Shape Analysis and Modeling Group
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,9 @@
 #ifndef SRVF_PLOT_H
 #define SRVF_PLOT_H 1
 
-#include "plf.h"
-#include "srvf.h"
+#include <srvf/plf.h>
+#include <srvf/srvf.h>
+#include <srvf/matrix.h>
 #include "render.h"
 
 namespace srvf
@@ -37,18 +38,37 @@ class Plot
 { 
 public:
   
+  Plot()
+   : plot_radius_(1.0)
+  { }
+  
   virtual void 
   render(Renderer &r) = 0;
+
+  virtual void 
+  pan_view(double dx, double dy) { }
+
+  virtual void 
+  scale_view(double dx, double dy) { }
+
+  virtual void
+  rotate_view(double dx, double dy) { }
 
   virtual void 
   insert(const Plf &F, Color c, double thickness=1.0, DrawingMode mode=LINES)
   {
     plfs_.push_back(F);
+    plf_visibilities_.push_back(true);
     plf_colors_.push_back(c);
     plf_thicknesses_.push_back(thickness);
     plf_modes_.push_back(mode);
     plf_intervals_.push_back (
       std::pair<double,double>(F.domain_lb(), F.domain_ub()) );
+    bounding_boxes_.push_back(F.bounding_box());
+    for (size_t i=0; i<F.samps().npts(); ++i)
+    {
+      plot_radius_ = std::max(plot_radius_, F.samps()[i].norm());
+    }
   }
 
   virtual void 
@@ -62,6 +82,11 @@ public:
 
   Plf &get_plf(size_t idx)
   { return plfs_[idx]; }
+
+  virtual void set_plf_visibility(size_t idx, bool v)
+  { plf_visibilities_[idx] = v; }
+  virtual bool get_plf_visibility(size_t idx)
+  { return plf_visibilities_[idx]; }
 
   virtual void set_plf_color(size_t idx, Color c)
   { plf_colors_[idx] = c; }
@@ -87,6 +112,7 @@ protected:
   
   std::vector<Plf> plfs_;
   std::vector<Srvf> srvfs_;
+  std::vector<bool> plf_visibilities_;
   std::vector<Color> plf_colors_;
   std::vector<Color> srvf_colors_;
   std::vector<double> plf_thicknesses_;
@@ -94,64 +120,60 @@ protected:
   std::vector<DrawingMode> plf_modes_;
   std::vector<DrawingMode> srvf_modes_;
   std::vector<std::pair<double,double> > plf_intervals_;
+  std::vector<std::vector<Point> > bounding_boxes_;
+  double plot_radius_;
 };
 
 
-class MontagePlot : public Plot
+class Plot2D : public Plot
 { 
 public:
 
-  MontagePlot() 
-   : nrows_(1), next_x_(0.0), next_y_(0.0)
+  Plot2D() 
+   : trans_x_(0.0), trans_y_(0.0), rot_theta_(0.0), scale_(1.0)
   { }
 
-  MontagePlot(int nrows) 
-   : nrows_(nrows), next_x_(0.0), next_y_(0.0)
-  { }
-
-  virtual void 
-  insert(const Plf &F, Color c, double thickness=1.0, DrawingMode mode=LINES);
-
-  virtual void 
-  insert(const Srvf &Q, Color c, double thickness=1.0, DrawingMode mode=LINES);
-  
   virtual void render(Renderer &r);
+
+  virtual void 
+  pan_view(double dx, double dy);
+
+  virtual void 
+  scale_view(double dx, double dy);
+
+  virtual void
+  rotate_view(double dx, double dy);
 
 private:
   
-  int nrows_;
-  double next_x_;
-  double next_y_;
+  double trans_x_;
+  double trans_y_;
+  double rot_theta_;
+  double scale_;
 };
 
 
-class SuperimposedPlot : public Plot
+class Plot3D : public Plot
 { 
 public:
 
-  SuperimposedPlot()
-   : bball_rad_(1.0)
+  Plot3D() 
+   : hrot_(0.0), vrot_(0.0), scale_(1.0)
   { }
-  
-  virtual void 
-  insert(const Plf &F, Color c, double thickness=1.0, DrawingMode mode=LINES);
-
-  virtual void 
-  insert(const Srvf &Q, Color c, double thickness=1.0, DrawingMode mode=LINES);
 
   virtual void render(Renderer &r);
+
+  virtual void 
+  scale_view(double dx, double dy);
+
+  virtual void
+  rotate_view(double dx, double dy);
 
 private:
-
-  double bball_rad_;
-};
-
-
-class GeodesicPlot : public Plot
-{ 
-public:
-
-  virtual void render(Renderer &r);
+  
+  double hrot_;
+  double vrot_;
+  double scale_;
 };
 
 
@@ -162,36 +184,7 @@ class FunctionPlot : public Plot
 { 
 public:
 
-  virtual void 
-  insert(const Plf &F, Color c, double thickness=1.0, DrawingMode mode=LINES)
-  {
-    plfs_.push_back(F);
-    plf_colors_.push_back(c);
-    plf_thicknesses_.push_back(thickness);
-    plf_modes_.push_back(mode);
-
-    std::vector<Point> bbox = F.bounding_box();
-    x_min = std::min(x_min, F.params().front());
-    x_max = std::max(x_max, F.params().back());
-    y_min = std::min(y_min, bbox[0][0]);
-    y_max = std::max(y_max, bbox[1][0]);
-  }
-
-  virtual void 
-  insert(const Srvf &Q, Color c, double thickness=1.0, DrawingMode mode=LINES)
-  {
-    srvfs_.push_back(Q);
-    srvf_colors_.push_back(c);
-    srvf_thicknesses_.push_back(thickness);
-    srvf_modes_.push_back(mode);
-  }
-
   virtual void render(Renderer &r);
-
-private:
-  
-  double x_min, x_max;
-  double y_min, y_max;
 };
 
 

@@ -1,7 +1,7 @@
 /*
  * LibSRVF - a shape analysis library using the square root velocity framework.
  *
- * Copyright (C) 2012  Daniel Robinson
+ * Copyright (C) 2012  FSU Statistical Shape Analysis and Modeling Group
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #ifndef SRVF_RENDER_H
 #define SRVF_RENDER_H 1
 
+#include <srvf/matrix.h>
 #include <cstdlib>
 
 namespace srvf
@@ -66,6 +67,8 @@ public:
                        double bottom, double top, 
                        double near, double far) = 0;
 
+  virtual void clear_color(Color c) = 0;
+  virtual void clear() = 0;
   virtual void begin(DrawingMode mode) = 0;
   virtual void vertex(double x, double y) = 0;
   virtual void vertex(double x, double y, double z) = 0;
@@ -79,7 +82,7 @@ public:
   virtual void scale(double sfx, double sfy) = 0;
   virtual void scale(double sfx, double sfy, double sfz) = 0;
   virtual void rotate(double angle) = 0;
-  virtual void rotate(double ax, double ay, double az, double angle) = 0;
+  virtual void rotate(double angle, double ax, double ay, double az) = 0;
 
 protected:
   
@@ -109,6 +112,8 @@ public:
                        double bottom, double top, 
                        double near, double far);
 
+  virtual void clear_color(Color c);
+  virtual void clear();
   virtual void begin(DrawingMode mode);
   virtual void vertex(double x, double y);
   virtual void vertex(double x, double y, double z);
@@ -122,7 +127,7 @@ public:
   virtual void scale(double sfx, double sfy);
   virtual void scale(double sfx, double sfy, double sfz);
   virtual void rotate(double angle);
-  virtual void rotate(double ax, double ay, double az, double angle);
+  virtual void rotate(double angle, double ax, double ay, double az);
 
 private:
   DrawingMode mode_;

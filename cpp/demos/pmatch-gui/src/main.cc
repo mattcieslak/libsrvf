@@ -1,7 +1,7 @@
 /*
  * LibSRVF - a shape analysis library using the square root velocity framework.
  *
- * Copyright (C) 2012  Daniel Robinson
+ * Copyright (C) 2012  FSU Statistical Shape Analysis and Modeling Group
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,8 +34,8 @@
 #include <cstdlib>
 #include <unistd.h>
 
-#define DEFAULT_GRID_WIDTH 31
-#define DEFAULT_GRID_HEIGHT 31
+#define DEFAULT_GRID_WIDTH 0
+#define DEFAULT_GRID_HEIGHT 0
 
 
 static void do_usage(const char *progname)
@@ -58,11 +58,12 @@ int main( int argc, char **argv ){
   size_t grid_width = DEFAULT_GRID_WIDTH;
   size_t grid_height = DEFAULT_GRID_HEIGHT;
   bool do_rotations = false;
+  double salukwadze_weight = 1.0;
   const char *output_filename = "matches.mat";
   srvf::Pointset::PackingMethod packing = srvf::Pointset::POINT_PER_ROW;
   int opt;
 
-  while( (opt=getopt(argc, argv, "W:H:rpo:h")) != -1 ){
+  while( (opt=getopt(argc, argv, "W:H:rw:po:h")) != -1 ){
     switch( opt ){
       case 'W':
         grid_width = atoi(optarg);
@@ -72,6 +73,9 @@ int main( int argc, char **argv ){
         break;
       case 'r':
         do_rotations = true;
+        break;
+      case 'w':  // shape distance weight for Salukwadze distance
+        salukwadze_weight = atof(optarg);
         break;
       case 'p':  // sample point matrix = point per column
         packing = srvf::Pointset::POINT_PER_COLUMN;
@@ -120,6 +124,21 @@ int main( int argc, char **argv ){
   srvf::Plf F1(F1samps);
   srvf::Plf F2(F2samps);
 
+  std::cout << "F1 has " << F1.ncp() << " changepoints" << std::endl;
+  std::cout << "F2 has " << F2.ncp() << " changepoints" << std::endl;
+
+  if (F1.dim() != 2 && F1.dim() != 3)
+  {
+    std::cerr << "Invalid dimension: curves must have dimension 2 or 3." 
+              << std::endl;
+    return -1;
+  }
+  if (F1.dim() != F2.dim())
+  {
+    std::cerr << "F1 and F2 have different dimensions." << std::endl;
+    return -1;
+  }
+
   double L1 = F1.arc_length();
   double L2 = F2.arc_length();
   double L = std::min(L1, L2);
@@ -132,17 +151,58 @@ int main( int argc, char **argv ){
   srvf::pmatch::ParetoSet S = srvf::pmatch::find_matches (
     Q1, Q2, do_rotations, grid_width, grid_height);
 
+  std::vector<double> reg_errs = S.regression_errors();
+  for (size_t i=0; i<reg_errs.size(); ++i)
+  {
+    if (S[i].empty()) continue;
+
+    std::cout << S[i][0].length() << " "
+              << reg_errs[i] << std::endl;
+  }
+
   std::ofstream ofs(output_filename);
-  S.save_csv(ofs);
+  ofs << "# srvf_pmatch output" << std::endl;
+  ofs << "# File 1: " << argv[optind] << std::endl;
+  ofs << "# File 2: " << argv[optind+1] << std::endl;
+  ofs << "# Salukwadze dist: " 
+      << S.salukwadze_dist(salukwadze_weight) 
+      << std::endl << std::endl;
+
+  ofs << "# name: salukwadze_dist" << std::endl;
+  ofs << "# type: matrix" << std::endl;
+  ofs << "# rows: 1" << std::endl;
+  ofs << "# columns: 1" << std::endl;
+  ofs << S.salukwadze_dist(salukwadze_weight) 
+      << std::endl << std::endl;
+
+  ofs << "# name: pareto_set" << std::endl;
+  ofs << "# type: matrix" << std::endl;
+  ofs << "# rows: " << S.total_size() << std::endl;
+  ofs << "# columns: 5" << std::endl;
+  for (size_t i=0; i<S.nbuckets(); ++i)
+  {
+    for (size_t j=0; j<S[i].size(); ++j)
+    {
+      ofs << S[i][j].a << " " << S[i][j].b << " " 
+          << S[i][j].c << " " << S[i][j].d << " "
+          << S[i][j].dist << std::endl;
+    }
+  }
   ofs.close();
 
-  srvf::SuperimposedPlot plot;
-  plot.insert(F1, srvf::Color(0.0, 0.0, 1.0));
-  plot.insert(F2, srvf::Color(1.0, 0.0, 0.0));
+  srvf::Plot *plot = NULL;
+  if (F1.dim() == 2)
+    plot = new srvf::Plot2D();
+  else // dim = 3
+    plot = new srvf::Plot3D();
+
+  plot->insert(F1, srvf::Color(0.0, 0.0, 1.0), 25.0);
+  plot->insert(F2, srvf::Color(1.0, 0.0, 0.0), 25.0);
 
   UserInterface ui;
 
   Fl_Window *win = ui.make_window();
+  ui.match_view->do_rotations(do_rotations);
   ui.match_view->set_plot(plot);
   ui.match_view->set_matches(S);
   ui.slider_match_length->range(0.0, (double)(S.nbuckets()-1));
@@ -153,6 +213,7 @@ int main( int argc, char **argv ){
   win->show();
   Fl::run();
 
+  delete plot;
   return 0;
 }
 

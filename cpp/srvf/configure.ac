@@ -32,7 +32,7 @@ AC_CHECK_FUNCS([sqrt])
 
 
 # Check for GSL
-AC_CHECK_LIB([gsl],[gsl_matrix_alloc],[],
+AC_CHECK_LIB([gsl],[gsl_matrix_alloc],[LIBS="-lgsl -lgslcblas $LIBS"],
   [AC_MSG_ERROR([gsl not found])],[-lgslcblas])
 
 

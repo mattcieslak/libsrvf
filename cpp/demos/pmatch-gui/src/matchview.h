@@ -1,7 +1,7 @@
 /*
  * LibSRVF - a shape analysis library using the square root velocity framework.
  *
- * Copyright (C) 2012  Daniel Robinson
+ * Copyright (C) 2012  FSU Statistical Shape Analysis and Modeling Group
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,17 +40,17 @@ public:
 
   MatchView(int x, int y, int w, int h)
    : Fl_Gl_Window(x, y, w, h),
-     prev_x_(0), prev_y_(0), button_state_(0), 
-     camera_x_(0.0), camera_y_(0.0), camera_z_(1.0)
+     prev_x_(0), prev_y_(0), button_state_(0),
+     do_rotations_(false)
   { }
 
   MatchView(int x, int y, int w, int h, const char *l)
    : Fl_Gl_Window(x, y, w, h, l),
-     prev_x_(0), prev_y_(0), button_state_(0), 
-     camera_x_(0.0), camera_y_(0.0), camera_z_(1.0)
+     prev_x_(0), prev_y_(0), button_state_(0),
+     do_rotations_(false)
   { }
 
-  void set_plot(const srvf::SuperimposedPlot &p)
+  void set_plot(srvf::Plot *p)
   { 
     plot_ = p; 
     redraw();
@@ -63,24 +63,13 @@ public:
 
   void set_interval(size_t idx, double a, double b)
   {
-    plot_.set_plf_interval(idx, std::pair<double,double>(a,b));
+    plot_->set_plf_interval(idx, std::pair<double,double>(a,b));
 
     // Changing the domain also changes the bounding box and centroid, 
     // so the curve needs to be re-centered
-    srvf::Plf &F = plot_.get_plf(idx);
-    srvf::Point lb(F.dim(),1e9), ub(F.dim(),-1e9);
-    for (size_t i=0; i<F.ncp(); ++i)
-    {
-      if (F.params()[i] >= a && F.params()[i] <= b)
-      {
-        for (size_t j=0; j<F.dim(); ++j)
-        {
-          lb[j] = std::min(lb[j], F.samps()[i][j]);
-          ub[j] = std::max(ub[j], F.samps()[i][j]);
-        }
-      }
-    }
-    F.translate(linear_combination(lb, ub, -0.5, -0.5));
+    srvf::Plf &F = plot_->get_plf(idx);
+    srvf::Point X = F.evaluate(a);
+    F.translate( X*(-1) );
     redraw();
   }
 
@@ -94,16 +83,28 @@ public:
       double c = matches_[bucket_idx][match_idx].c;
       double d = matches_[bucket_idx][match_idx].d;
 
-      plot_.set_plf_interval (0, std::pair<double,double>(a,b));
-      plot_.set_plf_interval (1, std::pair<double,double>(c,d));
+      set_interval (0, a, b);
+      set_interval (1, c, d);
 
-      srvf::Srvf Q1 = srvf::plf_to_srvf(plot_.get_plf(0));
-      srvf::Srvf Q2 = srvf::plf_to_srvf(plot_.get_plf(1));
-      srvf::Matrix R = srvf::optimal_rotation(Q1, Q2, a, b, c, d);
-      plot_.get_plf(1).rotate(R);
+      if (do_rotations_)
+      {
+        srvf::Srvf Q1 = srvf::plf_to_srvf(plot_->get_plf(0));
+        srvf::Srvf Q2 = srvf::plf_to_srvf(plot_->get_plf(1));
+        srvf::Matrix R = srvf::optimal_rotation(Q1, Q2, a, b, c, d);
+        plot_->get_plf(1).rotate(R);
+      }
       redraw();
     }
   }
+
+  void show_f1(bool v)
+  { plot_->set_plf_visibility(0,v); redraw(); }
+
+  void show_f2(bool v)
+  { plot_->set_plf_visibility(1,v); redraw(); }
+
+  void do_rotations(bool v)
+  { do_rotations_ = v; }
 
   size_t nbuckets()
   { return matches_.nbuckets(); }
@@ -133,52 +134,55 @@ public:
   {
     renderer_.device_width(w());
     renderer_.device_height(h());
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    double sf = 1.0 / camera_z_;
-    glTranslatef(camera_x_, -camera_y_, -1.0);
-    glScalef(sf, sf, sf);
+    renderer_.viewport(0, 0, w(), h());
+    
+    renderer_.clear_color(srvf::Color(1.0,1.0,1.0));
+    renderer_.clear();
 
     glPushMatrix();
-    plot_.render(renderer_);
+    plot_->render(renderer_);
     glPopMatrix();
   }
 
-#define DX  0.02f
-#define DY  0.02f
-#define DZ  0.02f
+
   int handle(int event)
   {
+    double dx, dy;
+
     switch(event) {
       case FL_PUSH:
         prev_x_ = Fl::event_x();
         prev_y_ = Fl::event_y();
-        if      ( Fl::event_button() == 1 ) button_state_ |= 1;
-        else if ( Fl::event_button() == 2 ) button_state_ |= 2;
-        else if ( Fl::event_button() == 3 ) button_state_ |= 4;
+        if      ( Fl::event_button() == 1 ) button_state_ |= 1; // left down
+        else if ( Fl::event_button() == 2 ) button_state_ |= 2; // middle down
+        else if ( Fl::event_button() == 3 ) button_state_ |= 4; // right down
         return 1;
       case FL_DRAG:
-        if ( button_state_ == 1 ){
-          camera_x_ += DX * (float)(Fl::event_x() - prev_x_);
-          camera_y_ += DY * (float)(Fl::event_y() - prev_y_);
-          prev_x_ = Fl::event_x();
-          prev_y_ = Fl::event_y();
-          redraw();
-        } else if ( button_state_ == 2 ){
-          camera_z_ += DZ * (float)(Fl::event_y() - prev_y_);
-          camera_z_ = std::max(camera_z_, 0.05f);
-          prev_x_ = Fl::event_x();
-          prev_y_ = Fl::event_y();
-          redraw();
+        dx = (double)(Fl::event_x() - prev_x_) / (double)w();
+        dy = (double)(Fl::event_y() - prev_y_) / (double)h();
+        prev_x_ = Fl::event_x();
+        prev_y_ = Fl::event_y();
+
+        switch(button_state_)
+        {
+          case 1: // left button down only
+            plot_->pan_view(dx, dy);
+            break;
+          case 2: // middle button down only
+            break;
+          case 4: // right button down only
+            plot_->rotate_view(dx, dy);
+            break;
+          case 5: // left and right buttons down
+            plot_->scale_view(dx, dy);
+            break;
         }
+        redraw();
         return 1;
       case FL_RELEASE:   
-        if      ( Fl::event_button() == 1 ) button_state_ &= 6;
-        else if ( Fl::event_button() == 2 ) button_state_ &= 5;
-        else if ( Fl::event_button() == 3 ) button_state_ &= 3;
+        if      ( Fl::event_button() == 1 ) button_state_ &= 6; // left up
+        else if ( Fl::event_button() == 2 ) button_state_ &= 5; // middle up
+        else if ( Fl::event_button() == 3 ) button_state_ &= 3; // right up
         return 1;
       case FL_FOCUS :
       case FL_UNFOCUS :
@@ -193,7 +197,7 @@ public:
   }
 
 private:  
-  srvf::SuperimposedPlot plot_;
+  srvf::Plot *plot_;
   srvf::OpenGlRenderer renderer_;
   srvf::pmatch::ParetoSet matches_;
 
@@ -202,10 +206,7 @@ private:
   int prev_y_;
   int button_state_;
 
-  // Camera position
-  float camera_x_;
-  float camera_y_;
-  float camera_z_;
+  bool do_rotations_;
 };
 
 #endif // MATCHVIEW_H

@@ -1,7 +1,7 @@
 /*
  * LibSRVF - a shape analysis library using the square root velocity framework.
  *
- * Copyright (C) 2012  Daniel Robinson
+ * Copyright (C) 2012  FSU Statistical Shape Analysis and Modeling Group
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,116 +19,51 @@
 #include "render.h"
 #include "plot.h"
 
+#include <iostream>
+
 namespace srvf
 {
 
 
-////////////////////////////////////////////////////////////////////////////
-// MontagePlot
-////////////////////////////////////////////////////////////////////////////
-
-void MontagePlot::insert(
-  const Plf &F, 
-  Color c, 
-  double thickness, 
-  DrawingMode mode)
+static void render_plfs_ (
+  const std::vector<Plf> &plfs, 
+  const std::vector<bool> &visibilities,
+  const std::vector<std::pair<double,double> > &intervals,
+  const std::vector<DrawingMode> &modes,
+  const std::vector<Color> &colors,
+  const std::vector<double> &thicknesses,
+  Renderer &r)
 {
-  plfs_.push_back(F);
-  plf_colors_.push_back(c);
-  plf_thicknesses_.push_back(thickness);
-  plf_modes_.push_back(mode);
-}
-
-void MontagePlot::insert(
-  const Srvf &Q, 
-  Color c, 
-  double thickness, 
-  DrawingMode mode)
-{
-  srvfs_.push_back(Q);
-  srvf_colors_.push_back(c);
-  srvf_thicknesses_.push_back(thickness);
-  srvf_modes_.push_back(mode);
-}
-
-void MontagePlot::render(Renderer &r)
-{
-  
-}
-
-////////////////////////////////////////////////////////////////////////////
-// SuperimposedPlot
-////////////////////////////////////////////////////////////////////////////
-void SuperimposedPlot::insert(
-  const Plf &F, 
-  Color c, 
-  double thickness, 
-  DrawingMode mode)
-{
-  plfs_.push_back(F);
-  plf_colors_.push_back(c);
-  plf_thicknesses_.push_back(thickness);
-  plf_modes_.push_back(mode);
-  plf_intervals_.push_back(std::pair<double,double>( 
-    F.domain_lb(), F.domain_ub()) );
-
-  std::vector<Point> bbox = F.bounding_box();
-  for (size_t i=0; i<F.dim(); ++i)
+  for (size_t i=0; i<plfs.size(); ++i)
   {
-    bball_rad_ = std::max(bball_rad_, fabs(bbox[0][i]));
-    bball_rad_ = std::max(bball_rad_, fabs(bbox[1][i]));
-  }
-}
+    if (!visibilities[i]) continue;
 
-void SuperimposedPlot::insert(
-  const Srvf &Q, 
-  Color c, 
-  double thickness, 
-  DrawingMode mode)
-{
-  srvfs_.push_back(Q);
-  srvf_colors_.push_back(c);
-  srvf_thicknesses_.push_back(thickness);
-  srvf_modes_.push_back(mode);
-}
+    r.begin(modes[i]);
+    r.set_color(colors[i]);
+    r.set_thickness(thicknesses[i]);
 
-void SuperimposedPlot::render(Renderer &r)
-{
-  double dev_width = (double)r.device_width();
-  double dev_height = (double)r.device_height();
-  double asp_rat = dev_height / dev_width;
-  r.viewport(2, 2, dev_width-2, dev_height-2);
-  r.ortho(-bball_rad_*1.2, bball_rad_*1.2, 
-          -bball_rad_*asp_rat*1.2, bball_rad_*asp_rat*1.2, 
-          -bball_rad_*1.2, bball_rad_*1.2);
+    double dom_lb = intervals[i].first;
+    double dom_ub = intervals[i].second;
 
-  for (size_t i=0; i<plfs_.size(); ++i)
-  {
-    r.begin(plf_modes_[i]);
-    r.set_color(plf_colors_[i]);
-
-    double dom_lb = plf_intervals_[i].first;
-    double dom_ub = plf_intervals_[i].second;
-
-    for (size_t j=0; j<plfs_[i].ncp(); ++j)
+    for (size_t j=0; j<plfs[i].ncp(); ++j)
     {
-      double t1 = plfs_[i].params()[j];
+      double t1 = plfs[i].params()[j];
 
-      if (j+1 == plfs_[i].ncp())
+      if (j+1 == plfs[i].ncp())
       {
         // Last point.  Output it if it lies in the restricted domain.
         if (t1 < dom_ub + 1e-5)
         {
-          double x = (plfs_[i].dim() > 0 ? plfs_[i].samps()[j][0] : 0.0);
-          double y = (plfs_[i].dim() > 1 ? plfs_[i].samps()[j][1] : 0.0);
-          double z = (plfs_[i].dim() > 2 ? plfs_[i].samps()[j][2] : 0.0);
+          double x = (plfs[i].dim() > 0 ? plfs[i].samps()[j][0] : 0.0);
+          double y = (plfs[i].dim() > 1 ? plfs[i].samps()[j][1] : 0.0);
+          double z = (plfs[i].dim() > 2 ? plfs[i].samps()[j][2] : 0.0);
           r.vertex(x, y, z);
         }
       }
       else
       {
         // Not the last point.  Several cases to handle here.
-        double t2 = plfs_[i].params()[j+1];
+        double t2 = plfs[i].params()[j+1];
 
         if (t1 < dom_lb && t2 > dom_lb + 1e-5)
         {
@@ -139,7 +74,7 @@ void SuperimposedPlot::render(Renderer &r)
           double w1 = (t2 - dom_lb) / dt;
           double w2 = (dom_lb - t1) / dt;
 
-          Point p = (plfs_[i].samps()[j] * w1) + (plfs_[i].samps()[j+1] * w2);
+          Point p = (plfs[i].samps()[j] * w1) + (plfs[i].samps()[j+1] * w2);
           double x = (p.dim() > 0 ? p[0] : 0.0);
           double y = (p.dim() > 1 ? p[1] : 0.0);
           double z = (p.dim() > 2 ? p[2] : 0.0);
@@ -148,9 +83,9 @@ void SuperimposedPlot::render(Renderer &r)
         else if (t1 > dom_lb - 1e-5 && t1 < dom_ub + 1e-5)
         {
           // ith point is in the restricted domain, so output it.
-          double x = (plfs_[i].dim() > 0 ? plfs_[i].samps()[j][0] : 0.0);
-          double y = (plfs_[i].dim() > 1 ? plfs_[i].samps()[j][1] : 0.0);
-          double z = (plfs_[i].dim() > 2 ? plfs_[i].samps()[j][2] : 0.0);
+          double x = (plfs[i].dim() > 0 ? plfs[i].samps()[j][0] : 0.0);
+          double y = (plfs[i].dim() > 1 ? plfs[i].samps()[j][1] : 0.0);
+          double z = (plfs[i].dim() > 2 ? plfs[i].samps()[j][2] : 0.0);
           r.vertex(x, y, z);
 
           if (t2 > dom_ub)
@@ -161,7 +96,7 @@ void SuperimposedPlot::render(Renderer &r)
             double w1 = (t2 - dom_ub) / dt;
             double w2 = (dom_ub - t1) / dt;
 
-            Point p = (plfs_[i].samps()[j] * w1) + (plfs_[i].samps()[j+1] * w2);
+            Point p = (plfs[i].samps()[j] * w1) + (plfs[i].samps()[j+1] * w2);
             x = (p.dim() > 0 ? p[0] : 0.0);
             y = (p.dim() > 1 ? p[1] : 0.0);
             z = (p.dim() > 2 ? p[2] : 0.0);
@@ -177,14 +112,69 @@ void SuperimposedPlot::render(Renderer &r)
 
 
 ////////////////////////////////////////////////////////////////////////////
-// GeodesicPlot
+// Plot2D
 ////////////////////////////////////////////////////////////////////////////
 
-void GeodesicPlot::render(Renderer &r)
+void Plot2D::render(Renderer &r)
 {
-  
+  double asp_rat = ((double)r.device_height()) / ((double)r.device_width());
+  r.ortho(-plot_radius_*1.5, plot_radius_*1.5, 
+          -plot_radius_*asp_rat*1.5, plot_radius_*asp_rat*1.5, 
+          0.01, 1.5);
+
+  r.translate(trans_x_, trans_y_, -0.1);
+  r.rotate(rot_theta_);
+  r.scale(scale_, scale_);
+  render_plfs_(plfs_, plf_visibilities_, 
+    plf_intervals_, plf_modes_, plf_colors_, 
+    plf_thicknesses_, r);
 }
 
+void Plot2D::pan_view(double dx, double dy)
+{
+  trans_x_ += 3.0*dx;
+  trans_y_ -= 3.0*dy;  // invert the mouse!
+}
+
+void Plot2D::scale_view(double dx, double dy)
+{
+  scale_ = std::max(scale_-3*dy, 0.01);
+}
+
+void Plot2D::rotate_view(double dx, double dy)
+{
+  rot_theta_ -= dx * 360.0;
+}
+
+////////////////////////////////////////////////////////////////////////////
+// Plot3D
+////////////////////////////////////////////////////////////////////////////
+
+void Plot3D::render(Renderer &r)
+{
+  double asp_rat = ((double)r.device_height()) / ((double)r.device_width());
+  r.ortho(-plot_radius_*1.5, plot_radius_*1.5, 
+          -plot_radius_*asp_rat*1.5, plot_radius_*asp_rat*1.5, 
+          -plot_radius_*1.5, plot_radius_*1.5);
+
+  r.rotate(hrot_, 0.0, 1.0, 0.0);
+  r.rotate(vrot_, 1.0, 0.0, 0.0);
+  r.scale(scale_, scale_, scale_);
+  render_plfs_(plfs_, plf_visibilities_,
+    plf_intervals_, plf_modes_, plf_colors_, 
+    plf_thicknesses_, r);
+}
+
+void Plot3D::scale_view(double dx, double dy)
+{
+  scale_ = std::max(scale_ - 3.0*dy, 0.05);
+}
+
+void Plot3D::rotate_view(double dx, double dy)
+{
+  hrot_ += dx * 360.0;
+  vrot_ -= dy * 360.0;
+}
 
 ////////////////////////////////////////////////////////////////////////////
 // FunctionPlot
@@ -192,6 +182,18 @@ void GeodesicPlot::render(Renderer &r)
 
 void FunctionPlot::render(Renderer &r)
 {
+  double x_min=1e9, x_max=-1e9;
+  double y_min=1e9, y_max=-1e9;
+
+  for (size_t i=0; i<plfs_.size(); ++i)
+  {
+    x_min = std::min(x_min, plfs_[i].domain_lb());
+    x_max = std::max(x_max, plfs_[i].domain_ub());
+
+    y_min = std::min(y_min, bounding_boxes_[i][0][0]);
+    y_max = std::max(y_max, bounding_boxes_[i][1][0]);
+  }
+
   // Set up the rendering context
   double dev_width = (double)r.device_width();
   double dev_height = (double)r.device_height();

@@ -13,7 +13,7 @@
 
 BOOST_AUTO_TEST_SUITE(plotwin_tests)
 
-BOOST_AUTO_TEST_CASE(superimposed_test1)
+BOOST_AUTO_TEST_CASE(plot2d_test1)
 {
   std::ifstream is1("data/horse-1.csv");
   std::ifstream is2("data/horse-2.csv");
@@ -43,11 +43,11 @@ BOOST_AUTO_TEST_CASE(superimposed_test1)
   srvf::Plf F2r=composition(F2, G);
   srvf::Srvf Q2r=gamma_action(Q2, G);
 
-  srvf::SuperimposedPlot plot1;
+  srvf::Plot2D plot1;
   plot1.insert(F1, srvf::Color(0.0f,0.0f,1.0f));
   plot1.insert(F2r, srvf::Color(1.0f,0.0f,0.0f));
 
-  srvf::FltkGlPlotWindow win(400, 400, "SuperimposedPlot Test 1");
+  srvf::FltkGlPlotWindow win(400, 400, "plot2d_test1");
   win.add_plot(&plot1);
   win.show();
   Fl::run();

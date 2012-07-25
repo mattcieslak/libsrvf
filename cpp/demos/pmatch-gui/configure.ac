@@ -26,7 +26,7 @@ AC_TYPE_SIZE_T
 
 
 # Check for GSL
-AC_CHECK_LIB([gsl],[gsl_matrix_alloc],[],[AC_MSG_ERROR([gsl not found])],[-lgslcblas])
+AC_CHECK_LIB([gsl],[gsl_matrix_alloc],[LIBS="-lgsl -lgslcblas $LIBS"],[AC_MSG_ERROR([gsl not found])],[-lgslcblas])
 
 
 # Check for FLTK

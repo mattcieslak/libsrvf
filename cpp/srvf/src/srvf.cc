@@ -1,7 +1,7 @@
 /*
  * LibSRVF - a shape analysis library using the square root velocity framework.
  *
- * Copyright (C) 2012  Daniel Robinson
+ * Copyright (C) 2012   FSU Statistical Shape Analysis and Modeling Group
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,9 +33,11 @@ namespace srvf
  * \param t the parameter value at which the function will be evaluated
  * \return a \c Pointset containing the function value at \a t
  */
-Pointset Srvf::evaluate(double t) const
+Point Srvf::evaluate(double t) const
 {
-  return srvf::interp::interp_const(samps(),params(),std::vector<double>(1,t));
+  Pointset res = 
+    srvf::interp::interp_const(samps(),params(),std::vector<double>(1,t));
+  return res[0];
 }
 
 /**

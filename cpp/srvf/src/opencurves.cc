@@ -1,7 +1,7 @@
 /*
  * LibSRVF - a shape analysis library using the square root velocity framework.
  *
- * Copyright (C) 2012  Daniel Robinson
+ * Copyright (C) 2012   FSU Statistical Shape Analysis and Modeling Group
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,87 @@ namespace srvf
 
 namespace opencurves
 {
+
+double shape_distance (const Srvf &Q1, const Srvf &Q2, 
+                       bool optimize_rots, 
+                       bool optimize_scale, 
+                       bool optimize_reparams, 
+                       size_t nrounds, 
+                       size_t dp_grid_width, 
+                       size_t dp_grid_height)
+{
+  Srvf Q1l(Q1), Q2l(Q2);
+
+  if (optimize_scale)
+  {
+    Q1l.scale_to_unit_norm();
+    Q2l.scale_to_unit_norm();
+  }
+
+  if (optimize_rots && optimize_reparams)
+  {
+    std::vector<double> tv1, tv2;
+    if (dp_grid_width > 0) 
+      tv1 = srvf::util::linspace(Q1.domain_lb(),Q1.domain_ub(),dp_grid_width);
+    if (dp_grid_height > 0) 
+      tv2=srvf::util::linspace(Q2.domain_lb(),Q2.domain_ub(),dp_grid_height);
+    
+    const std::vector<double> &tv1r = (dp_grid_width > 0 ? tv1 : Q1.params());
+    const std::vector<double> &tv2r = (dp_grid_height > 0 ? tv2 : Q2.params());
+
+    Matrix R = optimal_rotation(Q1l, Q2l);
+    Q2l.rotate(R);
+
+    for (size_t i=0; i<nrounds; ++i)
+    {
+      Plf G = optimal_reparam(Q1l, Q2l, tv1r, tv2r);
+      Q2l = gamma_action(Q2l, G);
+      R = optimal_rotation(Q1l, Q2l);
+      Q2l.rotate(R);
+    }
+
+    if (optimize_scale)
+      return sphere_distance(Q1l, Q2l);
+    else
+      return l2_distance(Q1l, Q2l);
+  }
+  else if (optimize_rots)
+  {
+    Matrix R = optimal_rotation(Q1l, Q2l);
+    Q2l.rotate(R);
+
+    if (optimize_scale)
+      return sphere_distance(Q1l, Q2l);
+    else
+      return l2_distance(Q1l, Q2l);
+  }
+  else if (optimize_reparams)
+  {
+    std::vector<double> tv1, tv2;
+    if (dp_grid_width > 0) 
+      tv1 = srvf::util::linspace(Q1.domain_lb(),Q1.domain_ub(),dp_grid_width);
+    if (dp_grid_height > 0) 
+      tv2=srvf::util::linspace(Q2.domain_lb(),Q2.domain_ub(),dp_grid_height);
+    
+    const std::vector<double> &tv1r = (dp_grid_width > 0 ? tv1 : Q1.params());
+    const std::vector<double> &tv2r = (dp_grid_height > 0 ? tv2 : Q2.params());
+
+    Plf G = optimal_reparam(Q1l, Q2l, tv1r, tv2r);
+    Q2l = gamma_action(Q2l, G);
+
+    if (optimize_scale)
+      return sphere_distance(Q1l, Q2l);
+    else
+      return l2_distance(Q1l, Q2l);
+  }
+  else
+  {
+    if (optimize_scale)
+      return sphere_distance(Q1l, Q2l);
+    else
+      return l2_distance(Q1l, Q2l);
+  }
+}
 
 /**
  * Computes the Karcher mean of a collection of points on the unit 

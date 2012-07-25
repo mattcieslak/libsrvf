@@ -1,7 +1,7 @@
 /*
  * LibSRVF - a shape analysis library using the square root velocity framework.
  *
- * Copyright (C) 2012  Daniel Robinson
+ * Copyright (C) 2012  FSU Statistical Shape Analysis and Modeling Group
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,10 +46,11 @@ static void do_usage(const char *progname)
   std::cout << "  -W n\t\tuse grid width n" << std::endl;
   std::cout << "  -H n\t\tuse grid height n" << std::endl;
   std::cout << "  -r\t\toptimize over rotations" << std::endl;
-  std::cout << "  -x w\t\tuse w as partiality weight for "
-               "Salukwadze distance (default is 1.0)" << std::endl;
-  std::cout << "  -y w\t\tuse w as shape distance weight for "
-               "Salukwadze distance (default is 1.0)" << std::endl;
+  std::cout << "  -w w\t\tuse w as ratio of partiality weight "
+               "to shape distance weight in Salukwadze distance " 
+               "(default is 1.0)" << std::endl;
+  std::cout << "  -k t\t\tuse t as regression error threshold when finding "
+               "the knee of the Pareto curve" << std::endl;
   std::cout << "  -p sample point matrices in file1 and file2 " 
                "are in point-per-column ordering" << std::endl;
   std::cout << "  -o file\twrite matches to file" << std::endl;
@@ -77,14 +78,14 @@ int main( int argc, char **argv ){
   size_t grid_width = DEFAULT_GRID_WIDTH;
   size_t grid_height = DEFAULT_GRID_HEIGHT;
   bool do_rotations = false;
-  double salukwadze_w1 = 1.0;
-  double salukwadze_w2 = 1.0;
+  double salukwadze_ratio = 1.0;
+  double regression_thresh = 0.003;
   const char *output_filename = "matches.csv";
   srvf::Pointset::PackingMethod packing = srvf::Pointset::POINT_PER_ROW;
   int opt;
 
   // Get the command line arguments
-  while( (opt=getopt(argc, argv, "W:H:rx:y:po:h")) != -1 ){
+  while( (opt=getopt(argc, argv, "W:H:rw:k:po:h")) != -1 ){
     switch( opt ){
       case 'W':  // set matching grid width
         grid_width = atoi(optarg);
@@ -95,11 +96,11 @@ int main( int argc, char **argv ){
       case 'r':  // optimize over rotations
         do_rotations = true;
         break;
-      case 'x':  // partiality weight for Salukwadze distance
-        salukwadze_w1 = atof(optarg);
+      case 'w':  // partiality : distance weight ratio for Salukwadze distance
+        salukwadze_ratio = atof(optarg);
         break;
-      case 'y':  // shape distance weight for Salukwadze distance
-        salukwadze_w2 = atof(optarg);
+      case 'k':  // regression error threshold
+        regression_thresh = atof(optarg);
         break;
       case 'p':  // sample point matrix = point per column
         packing = srvf::Pointset::POINT_PER_COLUMN;
@@ -172,7 +173,6 @@ int main( int argc, char **argv ){
   srvf::pmatch::ParetoSet S = srvf::pmatch::find_matches (
     Q1, Q2, do_rotations, grid_width, grid_height);
 
-
   // Write the results to file
   std::ofstream ofs(output_filename);
   if (!ofs)
@@ -186,14 +186,18 @@ int main( int argc, char **argv ){
   ofs << "# File 1: " << argv[optind] << std::endl;
   ofs << "# File 2: " << argv[optind+1] << std::endl;
   ofs << "# Salukwadze dist: " 
-      << S.salukwadze_dist(salukwadze_w1, salukwadze_w2) 
+      << S.salukwadze_dist(salukwadze_ratio) 
       << std::endl << std::endl;
+
+  size_t knee_idx = S.find_knee(regression_thresh);
+  ofs << "# Partiality of knee: "
+      << (2.0 - S[knee_idx][0].length()) << std::endl << std::endl;
 
   ofs << "# name: salukwadze_dist" << std::endl;
   ofs << "# type: matrix" << std::endl;
   ofs << "# rows: 1" << std::endl;
   ofs << "# columns: 1" << std::endl;
-  ofs << S.salukwadze_dist(salukwadze_w1, salukwadze_w2) 
+  ofs << S.salukwadze_dist(salukwadze_ratio) 
       << std::endl << std::endl;
 
   ofs << "# name: pareto_set" << std::endl;

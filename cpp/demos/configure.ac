@@ -26,6 +26,8 @@ AC_ARG_ENABLE(pmatch,
 
 
 # Conditionally enable each program if its dependencies are satisfied
+AC_CONFIG_SUBDIRS([shapedist])  # always enabled
+
 demo_pmatch_enabled="no"
 if test "$libsrvf_pmatch_enabled" = yes; then :
   demo_pmatch_enabled="yes"

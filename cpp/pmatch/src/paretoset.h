@@ -1,7 +1,7 @@
 /*
  * LibSRVF - a shape analysis library using the square root velocity framework.
  *
- * Copyright (C) 2012  Daniel Robinson
+ * Copyright (C) 2012  FSU Statistical Shape Analysis and Modeling Group
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +19,9 @@
 #ifndef PARETOSET_H
 #define PARETOSET_H 1
 
-#include <fileio.h>
-#include <matrix.h>
-#include <minmaxheap.h>
+#include <srvf/fileio.h>
+#include <srvf/matrix.h>
+#include <srvf/minmaxheap.h>
 
 #include <cmath>
 #include <vector>
@@ -192,14 +192,14 @@ public:
    *
    * The Salukwadze distance is defined as follows:
    *
-   * \f[ d_s = \inf w_1\lambda + w_2\epsilon \f]
+   * \f[ d_s = \inf \lambda + w\epsilon \f]
    *
    * where the \f$ \inf \f$ runs over all possible values of the partiality 
    * measure \f$ \lambda \f$ and the shape distance \f$ \epsilon \f$.  
    * The partiality is defined as the maximum possible match length minus 
    * the length of the match.
    */
-  double salukwadze_dist(double w1=1.0, double w2=1.0) const
+  double salukwadze_dist(double w) const
   {
     double res = std::numeric_limits<double>::max();
     for (size_t i=0; i<buckets_.size(); ++i)
@@ -208,12 +208,93 @@ public:
 
       double cur_lambda = 2.0 - buckets_[i][0].length();
       double cur_eps = buckets_[i].min().dist;
-      double cur_nrm = w1*cur_lambda + w2*cur_eps;
+      double cur_nrm = cur_lambda + w*cur_eps;
       res = std::min(res, cur_nrm);
     }
     return res;
   }
 
+  /**
+   * Find the knee of the Pareto curve.
+   *
+   * \param thresh the maximum sum of squared residuals
+   * \return the index of the last bucket for which the sum of squared 
+   *   residuals was less than \a thresh
+   */
+  size_t find_knee(double thresh)
+  {
+    double nst = 0.0;
+    double tdy = 0.0;
+
+    for (size_t i=1; i<nbuckets(); ++i)
+    {
+      if (buckets_[i].empty()) continue;
+
+      // Update dot product and squared norm
+      double ti = buckets_[i][0].length();
+      double yi = buckets_[i][0].dist;
+      nst += ti*ti;
+      tdy += ti*yi;
+      if (nst < 1e-6) continue;
+
+      // Get regression error up to and including bucket i
+      double m = tdy / nst;
+      double err = 0.0;
+      for (size_t j=0; j<=i; ++j)
+      {
+        if (buckets_[j].empty()) continue;
+        double tj = buckets_[j][0].length();
+        double yj = buckets_[j][0].dist;
+        double dy = yj - m*tj;
+        err += dy*dy;
+      }
+      if (err > thresh)
+      {
+        return i-1;
+      }
+    }
+
+    // If still here, then the regression error never got above thresh, 
+    // so we return the index of the last bucket.
+    return nbuckets()-1;
+  }
+
+  /**
+   * Compute the linear regression errors for the Pareto curve.
+   */
+  std::vector<double> regression_errors()
+  {
+    std::vector<double> result(nbuckets(),0.0);
+    double nst = 0.0;
+    double tdy = 0.0;
+
+    for (size_t i=1; i<nbuckets(); ++i)
+    {
+      if (buckets_[i].empty()) continue;
+
+      // Update dot product and squared norm
+      double ti = buckets_[i][0].length();
+      double yi = buckets_[i][0].dist;
+      nst += ti*ti;
+      tdy += ti*yi;
+      if (nst < 1e-6) continue;
+
+      // Get regression error up to and including bucket i
+      double m = tdy / nst;
+      for (size_t j=0; j<=i; ++j)
+      {
+        if (buckets_[j].empty()) continue;
+        double tj = buckets_[j][0].length();
+        double yj = buckets_[j][0].dist;
+        double dy = yj - m*tj;
+        result[i] += dy*dy;
+      }
+    }
+    
+    return result;
+  }
+
+    
   /**
    * Save the matches to a .csv file.
    *

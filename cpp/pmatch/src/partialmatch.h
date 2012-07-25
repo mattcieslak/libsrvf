@@ -1,7 +1,7 @@
 /*
  * LibSRVF - a shape analysis library using the square root velocity framework.
  *
- * Copyright (C) 2012  Daniel Robinson
+ * Copyright (C) 2012  FSU Statistical Shape Analysis and Modeling Group
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 
 #include "paretoset.h"
 
-#include <srvf.h>
+#include <srvf/srvf.h>
 
 #include <vector>
 #include <limits>
@@ -102,13 +102,6 @@ private:
   size_t nvertices_;
   std::vector<double> weights_;
 };
-
-double edge_weight (
-  const srvf::Srvf &Q1, const srvf::Srvf &Q2, 
-  const std::vector<double> &tv1, const std::vector<double> &tv2, 
-  size_t tv1_i1, size_t tv1_i2, 
-  size_t tv2_i1, size_t tv2_i2, 
-  size_t Q1_idx_start, size_t Q2_idx_start );
 
 MatchingGraph calculate_edge_weights (
   const srvf::Srvf &Q1, const srvf::Srvf &Q2, 

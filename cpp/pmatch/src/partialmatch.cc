@@ -1,7 +1,7 @@
 /*
  * LibSRVF - a shape analysis library using the square root velocity framework.
  *
- * Copyright (C) 2012  Daniel Robinson
+ * Copyright (C) 2012  FSU Statistical Shape Analysis and Modeling Group
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +20,11 @@
 #include "partialmatch.h"
 #include "paretoset.h"
 #include "rotselect.h"
-#include "pmatch_util.h"
 
 #include <srvf.h>
+#include <reparam.h>
 #include <dpnbhd.h>
+#include <util.h>
 
 #include <cstdlib>
 #include <cmath>
@@ -38,71 +39,6 @@ namespace pmatch
 
 
 /**
- * Computes the weight of an edge in the matching graph.
- */
-double edge_weight (
-  const srvf::Srvf &Q1, const srvf::Srvf &Q2, 
-  const std::vector<double> &tv1, const std::vector<double> &tv2, 
-  size_t tv1_i1, size_t tv1_i2, 
-  size_t tv2_i1, size_t tv2_i2, 
-  size_t Q1_idx_start, size_t Q2_idx_start )
-{
-  double a = tv1[tv1_i1], b = tv1[tv1_i2];
-  double c = tv2[tv2_i1], d = tv2[tv2_i2];
-
-  double m = (d-c) / (b-a);
-  double rm = sqrt(m);
-  
-  size_t Q1_idx = Q1_idx_start;
-  size_t Q2_idx = Q2_idx_start;
-  double t1 = a;
-  double t2 = c;
-  double result = 0.0;
-
-
-  while (t1 < (b-1e-5) && t2 < (d-1e-5))
-  {
-    double dx1 = std::min(b, Q1.params()[Q1_idx+1]) - t1;
-    double dy1 = m * dx1;
-    double dy2 = std::min(d, Q2.params()[Q2_idx+1]) - t2;
-    double dx2 = dy2 / m;
-    
-    double dQi = 0.0;
-    for (size_t j=0; j<Q1.dim(); ++j)
-    {
-      double dQij = Q1.samps()[Q1_idx][j] - rm * Q2.samps()[Q2_idx][j];
-      dQi += dQij * dQij;
-    }
-
-    if ( fabs(dx1 - dx2) < 1e-5 )
-    {
-      result += dx1 * dQi;
-      t1 += dx1;
-      t2 += dy1;
-      ++Q1_idx;
-      ++Q2_idx;
-    }
-    else if (dx1 < dx2)
-    {
-      result += dx1 * dQi;
-      t1 += dx1;
-      t2 += dy1;
-      ++Q1_idx;
-    }
-    else
-    {
-      result += dx2 * dQi;
-      t1 += dx2;
-      t2 += dy2;
-      ++Q2_idx;
-    }
-  }
-
-  return result;
-}
-
-
-/**
  * Calculates the weights of all edges in the matching graph.
  */
 MatchingGraph calculate_edge_weights (
@@ -110,9 +46,9 @@ MatchingGraph calculate_edge_weights (
   const std::vector<double> &tv1, const std::vector<double> &tv2 )
 {
   std::map<size_t,size_t> tv1_idx_to_Q1_idx = 
-    build_tv_idx_to_Q_idx_map(tv1,Q1);
+    srvf::util::build_lookup_map(tv1,Q1.params());
   std::map<size_t,size_t> tv2_idx_to_Q2_idx = 
-    build_tv_idx_to_Q_idx_map(tv2,Q2);
+    srvf::util::build_lookup_map(tv2,Q2.params());
 
   MatchingGraph result(tv1.size(), tv2.size());
 
@@ -125,7 +61,7 @@ MatchingGraph calculate_edge_weights (
         size_t cs = ct - srvf::dp_nbhd[i][0];
         size_t rs = rt - srvf::dp_nbhd[i][1];
         if (cs < tv1.size() && rs < tv2.size()){
-          double w = edge_weight (
+          double w = srvf::opencurves::edge_weight (
             Q1, Q2, tv1, tv2, 
             cs, ct, rs, rt, 
             tv1_idx_to_Q1_idx[cs], 

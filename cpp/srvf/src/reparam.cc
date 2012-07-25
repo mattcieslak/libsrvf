@@ -1,7 +1,7 @@
 /*
  * LibSRVF - a shape analysis library using the square root velocity framework.
  *
- * Copyright (C) 2012  Daniel Robinson
+ * Copyright (C) 2012   FSU Statistical Shape Analysis and Modeling Group
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,8 +38,24 @@ namespace opencurves
  */
 Plf optimal_reparam (const Srvf &Q1, const Srvf &Q2)
 {
-  size_t npts1 = Q1.ncp();
-  size_t npts2 = Q2.ncp();
+  return optimal_reparam(Q1, Q2, Q1.params(), Q2.params());
+}
+
+
+/**
+ * Computes an optimal reparametrization of \a Q2 relative to \a Q1.
+ */
+Plf optimal_reparam (const Srvf &Q1, const Srvf &Q2, 
+  const std::vector<double> &tv1, const std::vector<double> &tv2)
+{
+  size_t npts1 = tv1.size();
+  size_t npts2 = tv2.size();
+
+  std::map<size_t,size_t> tv1_idx_to_Q1_idx =
+    srvf::util::build_lookup_map(tv1, Q1.params());
+  std::map<size_t,size_t> tv2_idx_to_Q2_idx =
+    srvf::util::build_lookup_map(tv2, Q2.params());
+
 
   // DP grid.  Columns correspond to parameters of Q1, and 
   // rows correspond to parameters of Q2.
@@ -65,7 +81,10 @@ Plf optimal_reparam (const Srvf &Q1, const Srvf &Q2)
         // Check for underflow
         if (r1>r2 || c1>c2) continue;
         
-        double w = match_cost(Q1, c1, c2, Q2, r1, r2);
+        double w = edge_weight (
+          Q1, Q2, tv1, tv2, c1, c2, r1, r2, 
+          tv1_idx_to_Q1_idx[c1], tv2_idx_to_Q2_idx[r1] );
+
         double cand_cost = grid(r1,c1) + w;
         if (cand_cost < grid(r2,c2))
         {
@@ -93,8 +112,8 @@ Plf optimal_reparam (const Srvf &Q1, const Srvf &Q2)
     size_t i1 = path.top() % npts1;
     size_t i2 = path.top() / npts1;
     path.pop();
-    params[i] = Q1.params()[i1];
-    samps[i][0] = Q2.params()[i2];
+    params[i] = tv1[i1];
+    samps[i][0] = tv2[i2];
   }
 
   return Plf(samps, params);

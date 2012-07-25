@@ -9,6 +9,7 @@
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Slider.H>
 #include <FL/Fl_Output.H>
+#include <FL/Fl_Check_Button.H>
 
 class UserInterface {
 public:
@@ -26,7 +27,19 @@ private:
 public:
   Fl_Output *text_match_length;
   Fl_Output *text_shape_distance;
+  Fl_Check_Button *check_show_f1;
+private:
+  void cb_check_show_f1_i(Fl_Check_Button*, void*);
+  static void cb_check_show_f1(Fl_Check_Button*, void*);
+public:
+  Fl_Check_Button *check_show_f2;
+private:
+  void cb_check_show_f2_i(Fl_Check_Button*, void*);
+  static void cb_check_show_f2(Fl_Check_Button*, void*);
+public:
   void set_bucket();
   void set_match();
+  void show_f1(bool v);
+  void show_f2(bool v);
 };
 #endif

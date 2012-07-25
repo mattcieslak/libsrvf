@@ -17,11 +17,11 @@ class UserInterface {open
         xywh {0 0 835 555} resizable
       } {
         Fl_Box match_view {
-          xywh {5 1 825 453} resizable
+          xywh {5 1 825 426} resizable
           class MatchView
         }
         Fl_Group {} {open
-          xywh {0 455 835 100}
+          xywh {0 425 835 130}
         } {
           Fl_Slider slider_match_length {
             label {Length Range}
@@ -38,8 +38,18 @@ class UserInterface {open
             xywh {705 461 120 28}
           }
           Fl_Output text_shape_distance {
-            label distance selected
+            label distance
             xywh {710 506 115 28}
+          }
+          Fl_Check_Button check_show_f1 {
+            label {Show F1}
+            callback {show_f1(o->value());}
+            xywh {5 435 125 20} down_box DOWN_BOX
+          }
+          Fl_Check_Button check_show_f2 {
+            label {Show F2}
+            callback {show_f2(o->value());}
+            xywh {90 435 85 15} down_box DOWN_BOX
           }
         }
       }
@@ -67,5 +77,14 @@ oss.str("");
 
 oss << match_view->match_length(bucket_idx, match_idx);
 text_match_length->value(oss.str().c_str());} {}
+  }
+  Function {show_f1(bool v)} {open return_type void
+  } {
+    code {match_view->show_f1(v);} {}
+  }
+  Function {show_f2(bool v)} {open return_type void
+  } {
+    code {match_view->show_f2(v);} {selected
+    }
   }
 } 

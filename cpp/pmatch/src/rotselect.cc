@@ -1,7 +1,7 @@
 /*
  * LibSRVF - a shape analysis library using the square root velocity framework.
  *
- * Copyright (C) 2012  Daniel Robinson
+ * Copyright (C) 2012  FSU Statistical Shape Analysis and Modeling Group
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,10 +17,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 #include "rotselect.h"
-#include "pmatch_util.h"
-#include "kdtree.h"
-#include "rotate.h"
-#include "dpnbhd.h"
+
+#include <kdtree.h>
+#include <rotate.h>
+#include <dpnbhd.h>
+#include <util.h>
 
 #include <vector>
 #include <map>
@@ -36,9 +37,9 @@ std::vector<Matrix> select_rotations (
   const std::vector<double> &tv1, const std::vector<double> &tv2 )
 {
   std::map<size_t,size_t> tv1_idx_to_Q1_idx = 
-    build_tv_idx_to_Q_idx_map(tv1,Q1);
+    srvf::util::build_lookup_map(tv1,Q1.params());
   std::map<size_t,size_t> tv2_idx_to_Q2_idx = 
-    build_tv_idx_to_Q_idx_map(tv2,Q2);
+    srvf::util::build_lookup_map(tv2,Q2.params());
 
   size_t grid_width = tv1.size();
   size_t grid_height = tv2.size();
@@ -61,7 +62,7 @@ std::vector<Matrix> select_rotations (
             Q1, Q2, tv1[cs], tv1[ct], 
             tv2[rs], tv2[rt], 
             tv1_idx_to_Q1_idx[cs], tv2_idx_to_Q2_idx[rs] ),
-          0.5 );
+          0.75 );
       }
     }
   

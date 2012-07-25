@@ -1,7 +1,7 @@
 /*
  * LibSRVF - a shape analysis library using the square root velocity framework.
  *
- * Copyright (C) 2012  Daniel Robinson
+ * Copyright (C) 2012  FSU Statistical Shape Analysis and Modeling Group
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #ifndef PMATCH_UTIL_H
 #define PMATCH_UTIL_H 1
 
-#include <srvf.h>
+#include <srvf/srvf.h>
 
 #include <vector>
 #include <map>
@@ -32,15 +32,6 @@ namespace pmatch
 {
 
 
-/**
- * Build a map that sends each index \c i of \a tv to the index of the 
- * parameter subinterval of \a Q which contains \c tv[i].
- *
- * These maps are used in \c calculate_edge_weights().
- */
-std::map<size_t,size_t> build_tv_idx_to_Q_idx_map (
-  const std::vector<double> &tv, const srvf::Srvf &Q );
-  
 
 } // namespace pmatch
 } // namespace srvf

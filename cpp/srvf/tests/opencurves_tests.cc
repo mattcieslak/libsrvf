@@ -60,9 +60,9 @@ BOOST_AUTO_TEST_CASE(karcher_mean_test1)
     Qs.push_back(srvf::plf_to_srvf(Fs[i]));
   }
 
-  srvf::Srvf Mu = srvf::opencurves::karcher_mean(Qs, 5e-3, 20);
+  srvf::Srvf Mu = srvf::opencurves::karcher_mean(Qs, 5e-3, 5);
 
-  srvf::SuperimposedPlot plot;
+  srvf::Plot3D plot;
   plot.insert(srvf::srvf_to_plf(Mu), srvf::Color(1.0,0.0,0.0));
   for (size_t i=0; i<Qs.size(); ++i)
   {
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(karcher_mean_test1)
     Fs[i].rotate(Ri);
     plot.insert(Fs[i], srvf::Color(0.0,0.0,1.0));
   }
-  srvf::FltkGlPlotWindow win(200, 200, 
+  srvf::FltkGlPlotWindow win(400, 400, 
       "Karcher Mean of Serveral RNA Molecules");
   win.add_plot(&plot);
   win.show();

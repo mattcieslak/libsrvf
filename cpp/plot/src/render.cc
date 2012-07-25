@@ -1,7 +1,7 @@
 /*
  * LibSRVF - a shape analysis library using the square root velocity framework.
  *
- * Copyright (C) 2012  Daniel Robinson
+ * Copyright (C) 2012  FSU Statistical Shape Analysis and Modeling Group
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,10 @@ OpenGlRenderer::OpenGlRenderer()
 
 void OpenGlRenderer::viewport(double x, double y, double w, double h)
 {
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
   glViewport(x, y, w, h);
+  glMatrixMode(GL_MODELVIEW);
 }
 
 void OpenGlRenderer::ortho(double left, double right, 
@@ -63,6 +66,18 @@ void OpenGlRenderer::frustum(double left, double right,
   glLoadIdentity();
   glFrustum(left, right, bottom, top, near, far);
   glMatrixMode(GL_MODELVIEW);
+}
+
+void 
+OpenGlRenderer::clear_color(Color c)
+{
+  glClearColor(c.red, c.green, c.blue, 1.0);
+}
+
+void 
+OpenGlRenderer::clear()
+{
+  glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void 
@@ -149,15 +164,14 @@ OpenGlRenderer::scale(double sfx, double sfy, double sfz)
 void 
 OpenGlRenderer::rotate(double angle)
 {
-  glRotated(0.0, 0.0, 1.0, (GLfloat)angle);
+  glRotated(angle, 0.0, 0.0, 1.0);
 }
 
 void 
-OpenGlRenderer::rotate(double ax, double ay, double az, double angle)
+OpenGlRenderer::rotate(double angle, double ax, double ay, double az)
 {
-  glRotated((GLfloat)ax, (GLfloat)ay, (GLfloat)az, (GLfloat)angle);
+  glRotated(angle, ax, ay, az);
 }
-
 
 
 } // namespace srvf
