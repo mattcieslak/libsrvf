@@ -68,8 +68,18 @@ public:
     // Changing the domain also changes the bounding box and centroid, 
     // so the curve needs to be re-centered
     srvf::Plf &F = plot_->get_plf(idx);
-    srvf::Point X = F.evaluate(a);
-    F.translate( X*(-1) );
+    srvf::Point X(F.dim(), 0.0);
+    double npts=0.0;
+    for (size_t i=0; i<F.ncp(); ++i)
+    {
+      if (F.params()[i] >= a && F.params()[i] <= b)
+      {
+        X += F.samps()[i];
+        ++npts;
+      }
+    }
+    if (npts > 0.0) X *= (-1.0 / npts);
+    F.translate( X );
     redraw();
   }
 

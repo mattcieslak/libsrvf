@@ -291,12 +291,12 @@ Matrix optimal_rotation(const Srvf &Q1, const Srvf &Q2,
   if (Q1_start_idx >= Q1.ncp()){
     int i = srvf::interp::lookup(Q1.params(), a);
     Q1_start_idx = 
-      (i>=0 ? ((size_t)i<Q1.ncp() ? (size_t)i : Q1.ncp()-1) : 0);
+      (i>=0 ? ((size_t)i<Q1.ncp()-1 ? (size_t)i : Q1.ncp()-2) : 0);
   }
   if (Q2_start_idx >= Q2.ncp()){
     int i = srvf::interp::lookup(Q2.params(), c);
     Q2_start_idx = 
-      (i>=0 ? ((size_t)i<Q2.ncp() ? (size_t)i : Q2.ncp()-1) : 0);
+      (i>=0 ? ((size_t)i<Q2.ncp()-1 ? (size_t)i : Q2.ncp()-2) : 0);
   }
 
   // Copied and pasted from above (gulp)

@@ -196,8 +196,8 @@ int main( int argc, char **argv ){
   else // dim = 3
     plot = new srvf::Plot3D();
 
-  plot->insert(F1, srvf::Color(0.0, 0.0, 1.0), 25.0);
-  plot->insert(F2, srvf::Color(1.0, 0.0, 0.0), 25.0);
+  plot->insert(F1, srvf::Color(0.0, 0.0, 1.0), 2.0);
+  plot->insert(F2, srvf::Color(1.0, 0.0, 0.0), 2.0);
 
   UserInterface ui;
 

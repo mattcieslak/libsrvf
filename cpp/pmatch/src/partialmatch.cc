@@ -91,19 +91,21 @@ void calculate_match_scores (MatchingGraph &G)
   for (size_t rm=1; rm+1<G.height(); ++rm)
   {
 
-    for (size_t ct=cm+1; ct<G.width(); ++ct)
+    for (size_t cs=0; cs<cm; ++cs)
     {
-    for (size_t rt=rm+1; rt<G.height(); ++rt)
+    for (size_t rs=0; rs<rm; ++rs)
     {
 
-      for (size_t cs=0; cs<cm; ++cs)
+      for (size_t i=0; i<DP_NBHD_SIZE; ++i)
       {
-      for (size_t rs=0; rs<rm; ++rs)
-      {
+        size_t ct = cm + srvf::dp_nbhd[i][0];
+        size_t rt = rm + srvf::dp_nbhd[i][1];
+
+        if (ct >= G.width() || rt >= G.height()) continue;
+
         double cand_w = G(cs, rs, cm, rm) + G(cm, rm, ct, rt);
         if (cand_w < G(cs, rs, ct, rt))
           G(cs, rs, ct, rt) = cand_w;
-      }
       }
     
     }

@@ -27,13 +27,11 @@ if COND_PLOT
 endif
 if COND_DEMOS
 if COND_PMATCH
-	cp demos/pmatch/src/srvf_pmatch.bin $(bindistdir)
-	cp aux/run_with_ldpath.sh $(bindistdir)/srvf_pmatch
+	cp demos/pmatch/src/srvf_pmatch $(bindistdir)
 if COND_PLOT
-	cp demos/pmatch-gui/src/srvf_pmatch_gui.bin $(bindistdir)
-	cp aux/run_with_ldpath.sh $(bindistdir)/srvf_pmatch_gui
-endif
-endif
-endif
+	cp demos/pmatch-gui/src/srvf_pmatch_gui $(bindistdir)
+endif	 # COND_PLOT
+endif	 # COND_PMATCH
+endif  # COND_DEMOS
 	tar -cvzf $(bindistdir).tar.gz $(bindistdir)
 	rm -rf $(bindistdir)

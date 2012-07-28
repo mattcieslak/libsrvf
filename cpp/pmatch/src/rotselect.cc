@@ -45,25 +45,24 @@ std::vector<Matrix> select_rotations (
   size_t grid_height = tv2.size();
 
   KdTree<Matrix> rot_tree;
-  for (size_t ct=1; ct<grid_width; ++ct)
+  for (size_t ct=2; ct<grid_width; ct+=3)
   {
-  for (size_t rt=1; rt<grid_height; ++rt)
+  for (size_t rt=2; rt<grid_height; rt+=3)
   {
 
-    for (size_t i=0; i<DP_NBHD_SIZE; ++i)
+    for (size_t cs=0; cs<ct; cs+=2)
     {
-      size_t cs = ct - dp_nbhd[i][0];
-      size_t rs = rt - dp_nbhd[i][1];
+    for (size_t rs=0; rs<rt; rs+=2)
+    {
 
-      if (cs < ct && rs < rt)
-      {
-        rot_tree.insert_cond (
-          srvf::optimal_rotation (
-            Q1, Q2, tv1[cs], tv1[ct], 
-            tv2[rs], tv2[rt], 
-            tv1_idx_to_Q1_idx[cs], tv2_idx_to_Q2_idx[rs] ),
-          0.75 );
-      }
+      rot_tree.insert_cond (
+        srvf::optimal_rotation (
+          Q1, Q2, tv1[cs], tv1[ct], 
+          tv2[rs], tv2[rt], 
+          tv1_idx_to_Q1_idx[cs], tv2_idx_to_Q2_idx[rs] ),
+        0.5 );
+
+    }
     }
   
   }

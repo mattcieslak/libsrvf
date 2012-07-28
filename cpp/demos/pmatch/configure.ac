@@ -35,7 +35,7 @@ SRVF_CPPFLAGS="-I../../../srvf/src"
 SRVF_CPPFLAGS+=" -I../../../pmatch/src"
 SRVF_LDFLAGS="-L../../../srvf/src/.libs"
 SRVF_LDFLAGS+=" -L../../../pmatch/src/.libs"
-SRVF_LIBS=" -lsrvf-pmatch -lsrvf"
+SRVF_LIBS=" -Wl,-Bstatic -lsrvf-pmatch -lsrvf -Wl,-Bdynamic"
 AC_SUBST(SRVF_CPPFLAGS)
 AC_SUBST(SRVF_LDFLAGS)
 AC_SUBST(SRVF_LIBS)

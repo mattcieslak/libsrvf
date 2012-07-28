@@ -104,13 +104,13 @@ AUTOMAKE = ${SHELL} /home/yevgeni/dev/shapes/srvf/trunk/cpp/pmatch/missing --run
 AWK = gawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2 -Wall -Werror
+CFLAGS = -g -pg -O2 -Wall -Werror
 CPP = gcc -E
 CPPFLAGS = 
 CXX = g++
 CXXCPP = g++ -E
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -g -O2 -Wall -Werror -fopenmp
+CXXFLAGS = -g -pg -O3 -Wall -Werror -fopenmp
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps

@@ -38,9 +38,9 @@ static void render_plfs_ (
   {
     if (!visibilities[i]) continue;
 
+    r.set_thickness(thicknesses[i]);
     r.begin(modes[i]);
     r.set_color(colors[i]);
-    r.set_thickness(thicknesses[i]);
 
     double dom_lb = intervals[i].first;
     double dom_ub = intervals[i].second;

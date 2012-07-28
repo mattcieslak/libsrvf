@@ -32,6 +32,7 @@ namespace srvf
  * High-level convenience routine for plotting a vector of 1-D Plf's.
  */
 void plot_1d_plfs(const std::vector<Plf> &v, 
+  const std::vector<Color> &colors,
   size_t x=0, size_t y=0, size_t w=800, size_t h=400, 
   const char *title="-");
 
@@ -39,6 +40,7 @@ void plot_1d_plfs(const std::vector<Plf> &v,
  * High-level convenience routine for plotting a vector of 1-D Srvf's.
  */
 void plot_1d_srvfs(const std::vector<Srvf> &v, 
+  const std::vector<Color> &colors,
   size_t x=0, size_t y=0, size_t w=800, size_t h=400, 
   const char *title="-");
 

@@ -50,7 +50,7 @@ FltkGlPlotWindow::draw()
   renderer_.device_height(h());
   renderer_.viewport(2, 2, w()-2, h()-2);
   
-  renderer_.clear_color(Color(0.0,0.0,0.0));
+  renderer_.clear_color(Color(1.0,1.0,1.0));
   renderer_.clear();
 
   for (size_t i=0; i<plots_.size(); ++i)

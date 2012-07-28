@@ -43,6 +43,9 @@ static void do_usage(const char *progname)
   std::cout << "  file1 contains samples for the first curve" << std::endl;
   std::cout << "  file2 contains samples for the second curve" << std::endl;
   std::cout << "Recognized options are:" << std::endl;
+  std::cout << "  -A r\t\tautomatically calculate grid size so that " 
+               "there is a breakpoint for every rth sample point"
+            << std::endl;
   std::cout << "  -W n\t\tuse grid width n" << std::endl;
   std::cout << "  -H n\t\tuse grid height n" << std::endl;
   std::cout << "  -r\t\toptimize over rotations" << std::endl;
@@ -78,6 +81,7 @@ int main( int argc, char **argv ){
   size_t grid_width = DEFAULT_GRID_WIDTH;
   size_t grid_height = DEFAULT_GRID_HEIGHT;
   bool do_rotations = false;
+  double sample_to_grid_ratio = -1.0;
   double salukwadze_ratio = 1.0;
   double regression_thresh = 0.003;
   const char *output_filename = "matches.csv";
@@ -85,8 +89,11 @@ int main( int argc, char **argv ){
   int opt;
 
   // Get the command line arguments
-  while( (opt=getopt(argc, argv, "W:H:rw:k:po:h")) != -1 ){
+  while( (opt=getopt(argc, argv, "A:W:H:rw:k:po:h")) != -1 ){
     switch( opt ){
+      case 'A':  // set sample to grid ratio
+        sample_to_grid_ratio = atof(optarg);
+        break;
       case 'W':  // set matching grid width
         grid_width = atoi(optarg);
         break;
@@ -120,7 +127,6 @@ int main( int argc, char **argv ){
     do_usage(argv[0]);
     return -1;
   }
-
 
   // Load sample points from file into Matrix instances
   std::ifstream ifs1(argv[optind]);
@@ -168,6 +174,14 @@ int main( int argc, char **argv ){
   srvf::Srvf Q1 = srvf::plf_to_srvf(F1);
   srvf::Srvf Q2 = srvf::plf_to_srvf(F2);
 
+  // Calculate matching grid dimensions
+  if (sample_to_grid_ratio > 0.0)
+  {
+    grid_width = F1.ncp() / sample_to_grid_ratio;
+    grid_height = F2.ncp() / sample_to_grid_ratio;
+  }
+  std::cout << "Using grid dimensions " << grid_width << " x " 
+            << grid_height << std::endl;
 
   // Find the Pareto-optimal partial matches
   srvf::pmatch::ParetoSet S = srvf::pmatch::find_matches (
@@ -185,11 +199,19 @@ int main( int argc, char **argv ){
   ofs << "# srvf_pmatch output" << std::endl;
   ofs << "# File 1: " << argv[optind] << std::endl;
   ofs << "# File 2: " << argv[optind+1] << std::endl;
+  ofs << "# Grid dimensions: " << grid_width << " x " 
+      << grid_height << std::endl;
   ofs << "# Salukwadze dist: " 
       << S.salukwadze_dist(salukwadze_ratio) 
       << std::endl << std::endl;
 
   size_t knee_idx = S.find_knee(regression_thresh);
+  ofs << "# Best match at knee: "
+      << find_nearest_(S[knee_idx][0].a, F1.params()) << " "
+      << find_nearest_(S[knee_idx][0].b, F1.params()) << " "
+      << find_nearest_(S[knee_idx][0].c, F1.params()) << " "
+      << find_nearest_(S[knee_idx][0].d, F1.params()) << " "
+      << S[knee_idx][0].dist << std::endl;
   ofs << "# Partiality of knee: "
       << (2.0 - S[knee_idx][0].length()) << std::endl << std::endl;
 

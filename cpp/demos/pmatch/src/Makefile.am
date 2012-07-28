@@ -1,8 +1,8 @@
-bin_PROGRAMS=srvf_pmatch.bin
+bin_PROGRAMS=srvf_pmatch
 
 AM_CPPFLAGS=$(SRVF_CPPFLAGS) $(OPENMP_CXXFLAGS)
 AM_LDFLAGS=$(SRVF_LDFLAGS) $(OPENMP_CXXFLAGS)
 
 LIBS+=$(SRVF_LIBS)
 
-srvf_pmatch_bin_SOURCES=main.cc
+srvf_pmatch_SOURCES=main.cc
