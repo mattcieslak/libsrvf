@@ -1,7 +1,7 @@
 #include <cmath>
 #include <boost/test/unit_test.hpp>
 
-#include "matrix.h"
+#include <srvf/matrix.h>
 
 BOOST_AUTO_TEST_SUITE(matrix_tests)
 

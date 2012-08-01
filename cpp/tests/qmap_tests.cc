@@ -1,11 +1,11 @@
 #include <boost/test/unit_test.hpp>
 
-#include "matrix.h"
-#include "pointset.h"
-#include "plf.h"
-#include "srvf.h"
-#include "qmap.h"
-#include "util.h"
+#include <srvf/matrix.h>
+#include <srvf/pointset.h>
+#include <srvf/plf.h>
+#include <srvf/srvf.h>
+#include <srvf/qmap.h>
+#include <srvf/util.h>
 
 BOOST_AUTO_TEST_SUITE(qmap_tests)
 

@@ -21,10 +21,10 @@
 #include <srvf/paretoset.h>
 #include <srvf/rotselect.h>
 
-#include <srvf.h>
-#include <reparam.h>
-#include <dpnbhd.h>
-#include <util.h>
+#include <srvf/srvf.h>
+#include <srvf/reparam.h>
+#include <srvf/dpnbhd.h>
+#include <srvf/util.h>
 
 #include <cstdlib>
 #include <cmath>

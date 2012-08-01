@@ -1,12 +1,13 @@
 #include <boost/test/unit_test.hpp>
 
+#include <srvf/plot.h>
+#include <srvf/plotwin.h>
+#include <srvf/plf.h>
+#include <srvf/srvf.h>
+
 #include <FL/Fl.H>
 #include <vector>
 
-#include "plot.h"
-#include "plotwin.h"
-#include "plf.h"
-#include "srvf.h"
 
 BOOST_AUTO_TEST_SUITE(plot_tests)
 

@@ -18,10 +18,10 @@
  */
 #include <srvf/rotselect.h>
 
-#include <kdtree.h>
-#include <rotate.h>
-#include <dpnbhd.h>
-#include <util.h>
+#include <srvf/kdtree.h>
+#include <srvf/rotate.h>
+#include <srvf/dpnbhd.h>
+#include <srvf/util.h>
 
 #include <vector>
 #include <map>

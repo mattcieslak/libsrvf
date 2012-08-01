@@ -16,12 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#include <matrix.h>
-#include <plf.h>
-#include <srvf.h>
-#include <qmap.h>
-#include <opencurves.h>
-#include <fileio.h>
+#include <srvf/matrix.h>
+#include <srvf/plf.h>
+#include <srvf/srvf.h>
+#include <srvf/qmap.h>
+#include <srvf/opencurves.h>
+#include <srvf/fileio.h>
 
 #include <cstdlib>
 #include <vector>

@@ -1,8 +1,8 @@
 #include <boost/test/unit_test.hpp>
 
-#include "matrix.h"
-#include "kdtree.h"
-#include "numeric.h"
+#include <srvf/matrix.h>
+#include <srvf/kdtree.h>
+#include <srvf/numeric.h>
 
 #include <cstdlib>
 #include <vector>

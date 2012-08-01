@@ -1,15 +1,17 @@
 #include <boost/test/unit_test.hpp>
+
+#include <srvf/plotwin.h>
+#include <srvf/plf.h>
+#include <srvf/srvf.h>
+#include <srvf/qmap.h>
+#include <srvf/rotate.h>
+#include <srvf/reparam.h>
+#include <srvf/fileio.h>
+
 #include <vector>
 #include <fstream>
 
 #include <FL/Fl.h>
-#include "plotwin.h"
-#include "plf.h"
-#include "srvf.h"
-#include "qmap.h"
-#include "rotate.h"
-#include "reparam.h"
-#include "fileio.h"
 
 BOOST_AUTO_TEST_SUITE(plotwin_tests)
 

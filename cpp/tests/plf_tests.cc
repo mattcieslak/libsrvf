@@ -2,13 +2,13 @@
 
 #include <FL/Fl.H>
 
-#include "plf.h"
-#include "pointset.h"
-#include "plot.h"
-#include "plotwin.h"
-#include "render.h"
-#include "matrix.h"
-#include "util.h"
+#include <srvf/plf.h>
+#include <srvf/pointset.h>
+#include <srvf/plot.h>
+#include <srvf/plotwin.h>
+#include <srvf/render.h>
+#include <srvf/matrix.h>
+#include <srvf/util.h>
 
 BOOST_AUTO_TEST_SUITE(plf_tests)
 

@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
-#include "numeric.h"
-#include "point.h"
+#include <srvf/numeric.h>
+#include <srvf/point.h>
 
 
 #define MY_CHECK_CLOSE(a,b) \

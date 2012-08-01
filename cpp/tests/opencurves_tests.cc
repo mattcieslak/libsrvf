@@ -2,15 +2,15 @@
 #include <cmath>
 #include <boost/test/unit_test.hpp>
 
-#include "matrix.h"
-#include "pointset.h"
-#include "srvf.h"
-#include "qmap.h"
-#include "opencurves.h"
-#include "rotate.h"
-#include "fileio.h"
-#include "render.h"
-#include "plotwin.h"
+#include <srvf/matrix.h>
+#include <srvf/pointset.h>
+#include <srvf/srvf.h>
+#include <srvf/qmap.h>
+#include <srvf/opencurves.h>
+#include <srvf/rotate.h>
+#include <srvf/fileio.h>
+#include <srvf/render.h>
+#include <srvf/plotwin.h>
 
 #include <FL/Fl.h>
 

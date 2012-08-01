@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
-#include "point.h"
-#include "pointset.h"
+#include <srvf/point.h>
+#include <srvf/pointset.h>
 
 #include <algorithm>
 #include <iterator>

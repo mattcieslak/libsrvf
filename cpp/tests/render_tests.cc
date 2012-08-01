@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
-#include "render.h"
+#include <srvf/render.h>
 
 BOOST_AUTO_TEST_SUITE(render_tests)
 

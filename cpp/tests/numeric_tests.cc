@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
-#include "numeric.h"
+#include <srvf/numeric.h>
 
 
 BOOST_AUTO_TEST_SUITE(numeric_tests)

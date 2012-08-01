@@ -1,9 +1,10 @@
 #include <boost/test/unit_test.hpp>
 
+#include <srvf/fileio.h>
+#include <srvf/matrix.h>
+
 #include <vector>
 #include <fstream>
-#include "fileio.h"
-#include "matrix.h"
 
 BOOST_AUTO_TEST_SUITE(fileio_tests)
 

@@ -16,16 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#include "partialmatch.h"
-#include "paretoset.h"
 #include "matchview.h"
 #include "ui.h"
 
-#include <matrix.h>
-#include <plf.h>
-#include <srvf.h>
-#include <qmap.h>
-#include <fileio.h>
+#include <srvf/partialmatch.h>
+#include <srvf/paretoset.h>
+
+#include <srvf/matrix.h>
+#include <srvf/plf.h>
+#include <srvf/srvf.h>
+#include <srvf/qmap.h>
+#include <srvf/fileio.h>
 
 #include <FL/Fl.H>
 

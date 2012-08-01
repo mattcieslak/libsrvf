@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
-#include "util.h"
-#include "matrix.h"
+#include <srvf/util.h>
+#include <srvf/matrix.h>
 
 BOOST_AUTO_TEST_SUITE(util_tests)
 

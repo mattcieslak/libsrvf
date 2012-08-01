@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
-#include "interp.h"
-#include "util.h"
+#include <srvf/interp.h>
+#include <srvf/util.h>
 
 BOOST_AUTO_TEST_SUITE(interp_tests)
 

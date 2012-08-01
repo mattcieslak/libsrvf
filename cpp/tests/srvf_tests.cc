@@ -1,9 +1,9 @@
 #include <boost/test/unit_test.hpp>
 
-#include "srvf.h"
-#include "plf.h"
-#include "matrix.h"
-#include "util.h"
+#include <srvf/srvf.h>
+#include <srvf/plf.h>
+#include <srvf/matrix.h>
+#include <srvf/util.h>
 
 BOOST_AUTO_TEST_SUITE(srvf_tests)
 

@@ -1,6 +1,6 @@
 AC_INIT([libsrvf], [0.1], [drobinso@math.fsu.edu])
 AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_SRCDIR([srvf/src/matrix.h])
+AC_CONFIG_SRCDIR([srvf/matrix.h])
 AC_CONFIG_AUX_DIR([.])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
@@ -68,10 +68,9 @@ fi
 
 AC_CONFIG_FILES([Makefile
                  srvf/Makefile
-                 srvf/src/Makefile
-                 srvf/tests/Makefile
+                 src/Makefile
+                 tests/Makefile
                  plot/Makefile
-                 plot/src/Makefile
                  demos/Makefile
                  demos/pmatch/Makefile
                  demos/pmatch/src/Makefile

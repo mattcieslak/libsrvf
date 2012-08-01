@@ -1,10 +1,10 @@
 #include <boost/test/unit_test.hpp>
 
-#include <plf.h>
-#include <srvf.h>
-#include <qmap.h>
-#include <numeric.h>
-#include <partialmatch.h>
+#include <srvf/plf.h>
+#include <srvf/srvf.h>
+#include <srvf/qmap.h>
+#include <srvf/numeric.h>
+#include <srvf/partialmatch.h>
 
 #define MY_CHECK_CLOSE(a,b) \
  BOOST_CHECK_EQUAL(srvf::numeric::almost_equal((a),(b)), true)

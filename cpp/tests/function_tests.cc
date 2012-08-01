@@ -1,17 +1,17 @@
 #include <cmath>
 #include <boost/test/unit_test.hpp>
 
-#include "matrix.h"
-#include "pointset.h"
-#include "plf.h"
-#include "srvf.h"
-#include "qmap.h"
-#include "functions.h"
+#include <srvf/matrix.h>
+#include <srvf/pointset.h>
+#include <srvf/plf.h>
+#include <srvf/srvf.h>
+#include <srvf/qmap.h>
+#include <srvf/functions.h>
 using srvf::functions::match_vertex_t;
 
-#include "util.h"
-#include "render.h"
-#include "plotwin.h"
+#include <srvf/util.h>
+#include <srvf/render.h>
+#include <srvf/plotwin.h>
 #include <FL/Fl.H>
 
 #include <vector>
