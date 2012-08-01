@@ -28,6 +28,8 @@
 
 namespace srvf
 {
+namespace plot
+{
 
 /**
  * A basic plotting window based on FLTK GlWindow.
@@ -61,6 +63,7 @@ private:
   float camera_z_;
 };
 
+} // namespace plot
 } // namespace srvf
 
 #endif // SRVF_PLOTWIN_H

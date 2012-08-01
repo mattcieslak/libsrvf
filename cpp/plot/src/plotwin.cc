@@ -31,6 +31,8 @@
 
 namespace srvf
 {
+namespace plot
+{
 
 
 FltkGlPlotWindow::FltkGlPlotWindow(int w, int h, const char *l)
@@ -131,4 +133,5 @@ FltkGlPlotWindow::handle(int event)
   }
 }
 
+} //namespace plot
 } // namespace srvf

@@ -28,6 +28,9 @@
 namespace srvf
 {
 
+namespace plot
+{
+
 /**
  * High-level convenience routine for plotting a vector of 1-D Plf's.
  */
@@ -35,7 +38,7 @@ void plot_1d_plfs(const std::vector<Plf> &v,
   const std::vector<Color> &colors,
   size_t x, size_t y, size_t w, size_t h, const char *title)
 {
-  srvf::FunctionPlot plot;
+  FunctionPlot plot;
   for (size_t i=0; i<v.size(); ++i){
     if (!colors.empty())
       plot.insert( v[i], colors[(i % colors.size())] );
@@ -43,7 +46,7 @@ void plot_1d_plfs(const std::vector<Plf> &v,
       plot.insert( v[i], Color(0.0, 0.0, 1.0) );
   }
 
-  srvf::FltkGlPlotWindow plotwin(x, y, w, h, title);
+  FltkGlPlotWindow plotwin(x, y, w, h, title);
   plotwin.add_plot(&plot);
   plotwin.show();
   Fl::run();
@@ -56,7 +59,7 @@ void plot_1d_srvfs(const std::vector<Srvf> &v,
   const std::vector<Color> &colors,
   size_t x, size_t y, size_t w, size_t h, const char *title)
 {
-  srvf::FunctionPlot plot;
+  FunctionPlot plot;
   for (size_t i=0; i<v.size(); ++i){
     if (!colors.empty())
       plot.insert( v[i], colors[(i % colors.size())] );
@@ -64,10 +67,11 @@ void plot_1d_srvfs(const std::vector<Srvf> &v,
       plot.insert( v[i], Color(0.0, 0.0, 1.0) );
   }
 
-  srvf::FltkGlPlotWindow plotwin(x, y, w, h, title);
+  FltkGlPlotWindow plotwin(x, y, w, h, title);
   plotwin.add_plot(&plot);
   plotwin.show();
   Fl::run();
 }
 
+} // namespace plot
 } // namespace srvf

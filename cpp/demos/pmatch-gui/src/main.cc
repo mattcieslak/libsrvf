@@ -190,14 +190,14 @@ int main( int argc, char **argv ){
   }
   ofs.close();
 
-  srvf::Plot *plot = NULL;
+  srvf::plot::Plot *plot = NULL;
   if (F1.dim() == 2)
-    plot = new srvf::Plot2D();
+    plot = new srvf::plot::Plot2D();
   else // dim = 3
-    plot = new srvf::Plot3D();
+    plot = new srvf::plot::Plot3D();
 
-  plot->insert(F1, srvf::Color(0.0, 0.0, 1.0), 2.0);
-  plot->insert(F2, srvf::Color(1.0, 0.0, 0.0), 2.0);
+  plot->insert(F1, srvf::plot::Color(0.0, 0.0, 1.0), 2.0);
+  plot->insert(F2, srvf::plot::Color(1.0, 0.0, 0.0), 2.0);
 
   UserInterface ui;
 

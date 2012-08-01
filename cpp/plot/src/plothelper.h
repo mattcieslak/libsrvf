@@ -27,6 +27,8 @@
 
 namespace srvf
 {
+namespace plot
+{
 
 /**
  * High-level convenience routine for plotting a vector of 1-D Plf's.
@@ -45,6 +47,7 @@ void plot_1d_srvfs(const std::vector<Srvf> &v,
   const char *title="-");
 
 
+} // namespace plot
 } // namespace srvf
 
 #endif // PLOTHELPER_H

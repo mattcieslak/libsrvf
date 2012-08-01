@@ -18,10 +18,10 @@ BOOST_AUTO_TEST_CASE(function_plot_test1)
   std::vector<double> params = srvf::util::linspace(0.0, 1.0, npts);
   srvf::Plf F(samps, params);
 
-  srvf::FunctionPlot plot;
-  plot.insert(F, srvf::Color(0.0, 0.0, 1.0));
-  srvf::FltkGlPlotWindow plotwin(800, 400, "plot_tests/function_plot_test1");
-  plotwin.add_plot(static_cast<srvf::Plot*>(&plot));
+  srvf::plot::FunctionPlot plot;
+  plot.insert(F, srvf::plot::Color(0.0, 0.0, 1.0));
+  srvf::plot::FltkGlPlotWindow plotwin(800, 400, "plot_tests/function_plot_test1");
+  plotwin.add_plot(static_cast<srvf::plot::Plot*>(&plot));
   plotwin.show();
   Fl::run();
 }

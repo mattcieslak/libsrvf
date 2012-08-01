@@ -19,12 +19,12 @@
 #ifndef MATCHVIEW_H
 #define MATCHVIEW_H 1
 
-#include <plf.h>
-#include <srvf.h>
-#include <qmap.h>
-#include <plot.h>
-#include <rotate.h>
-#include <paretoset.h>
+#include <srvf/plf.h>
+#include <srvf/srvf.h>
+#include <srvf/qmap.h>
+#include <srvf/plot.h>
+#include <srvf/rotate.h>
+#include <srvf/paretoset.h>
 
 #include <FL/Fl.H>
 #include <FL/Fl_Gl_Window.H>
@@ -50,7 +50,7 @@ public:
      do_rotations_(false)
   { }
 
-  void set_plot(srvf::Plot *p)
+  void set_plot(srvf::plot::Plot *p)
   { 
     plot_ = p; 
     redraw();
@@ -146,7 +146,7 @@ public:
     renderer_.device_height(h());
     renderer_.viewport(0, 0, w(), h());
     
-    renderer_.clear_color(srvf::Color(1.0,1.0,1.0));
+    renderer_.clear_color(srvf::plot::Color(1.0,1.0,1.0));
     renderer_.clear();
 
     glPushMatrix();
@@ -207,8 +207,8 @@ public:
   }
 
 private:  
-  srvf::Plot *plot_;
-  srvf::OpenGlRenderer renderer_;
+  srvf::plot::Plot *plot_;
+  srvf::plot::OpenGlRenderer renderer_;
   srvf::pmatch::ParetoSet matches_;
 
   // Mouse state

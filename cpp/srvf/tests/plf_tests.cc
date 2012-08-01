@@ -6,6 +6,7 @@
 #include "pointset.h"
 #include "plot.h"
 #include "plotwin.h"
+#include "render.h"
 #include "matrix.h"
 #include "util.h"
 
@@ -23,11 +24,10 @@ BOOST_AUTO_TEST_CASE(evaluate_test1)
   BOOST_REQUIRE_EQUAL(Ftv1.npts(), tv.size());
   for (size_t i=0; i<5; ++i)
   {
-    srvf::Pointset Ftv2 = F.evaluate(tv[i]);
+    srvf::Point Ftv2 = F.evaluate(tv[i]);
     BOOST_REQUIRE_EQUAL(Ftv2.dim(), F.dim());
-    BOOST_REQUIRE_EQUAL(Ftv2.npts(), 1);
     BOOST_CHECK_EQUAL(Ftv1[i][0],expdata[i]);
-    BOOST_CHECK_EQUAL(Ftv2[0][0],expdata[i]);
+    BOOST_CHECK_EQUAL(Ftv2[0],expdata[i]);
   }
 }
 
@@ -227,13 +227,13 @@ BOOST_AUTO_TEST_CASE(constant_speed_reparam_test1)
   srvf::Plf G = constant_speed_reparam(F, 0.0, 1.0);
   srvf::Plf Fn = composition(F, G);
 
-  srvf::FunctionPlot plot;
-  plot.insert(F, srvf::Color(0.0,0.0,1.0));
-  plot.insert(Fn, srvf::Color(0.0,1.0,0.0));
-  plot.insert(G, srvf::Color(1.0,0.0,0.0));
-  srvf::FltkGlPlotWindow plotwin(800,400,
+  srvf::plot::FunctionPlot plot;
+  plot.insert(F, srvf::plot::Color(0.0,0.0,1.0));
+  plot.insert(Fn, srvf::plot::Color(0.0,1.0,0.0));
+  plot.insert(G, srvf::plot::Color(1.0,0.0,0.0));
+  srvf::plot::FltkGlPlotWindow plotwin(800,400,
     "constant_speed_reparam_test1: F(blue), Fn(green), and G(red)");
-  plotwin.add_plot(static_cast<srvf::Plot*>(&plot));
+  plotwin.add_plot(static_cast<srvf::plot::Plot*>(&plot));
   plotwin.show();
   Fl::run();
 }

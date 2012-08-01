@@ -177,11 +177,11 @@ BOOST_AUTO_TEST_CASE(match_test1)
   F1.scale_to_unit_arc_length();
   F2.scale_to_unit_arc_length();
 
-  srvf::FltkGlPlotWindow plotwin_orig(600, 300, 
+  srvf::plot::FltkGlPlotWindow plotwin_orig(600, 300, 
     "match_test1: original functions");
-  srvf::FunctionPlot plot_orig;
-  plot_orig.insert(F1,srvf::Color(0.0,0.0,1.0));
-  plot_orig.insert(F2,srvf::Color(1.0,0.0,0.0));
+  srvf::plot::FunctionPlot plot_orig;
+  plot_orig.insert(F1,srvf::plot::Color(0.0,0.0,1.0));
+  plot_orig.insert(F2,srvf::plot::Color(1.0,0.0,0.0));
   plotwin_orig.add_plot(&plot_orig);
   plotwin_orig.show();
 
@@ -222,11 +222,11 @@ BOOST_AUTO_TEST_CASE(match_test1)
   //for (size_t i=0; i<Gv[1].params().size(); std::cout << Gv[1].params()[i++] << " ");
   //std::cout << std::endl;
 
-  srvf::FltkGlPlotWindow plotwin(600, 300, 
+  srvf::plot::FltkGlPlotWindow plotwin(600, 300, 
     "match_test1: aligned functions");
-  srvf::FunctionPlot plot;
-  plot.insert(F1r,srvf::Color(0.0,0.0,1.0));
-  plot.insert(F2r,srvf::Color(1.0,0.0,0.0));
+  srvf::plot::FunctionPlot plot;
+  plot.insert(F1r,srvf::plot::Color(0.0,0.0,1.0));
+  plot.insert(F2r,srvf::plot::Color(1.0,0.0,0.0));
   plotwin.add_plot(&plot);
   plotwin.show();
   Fl::run();
@@ -325,14 +325,14 @@ BOOST_AUTO_TEST_CASE(karcher_mean_test1)
     Qs[i] = gamma_action(Qs[i], GE[i]);
   }
 
-  srvf::FltkGlPlotWindow plotwin(600, 300, "karcher_mean_test1");
-  srvf::FunctionPlot plot;
+  srvf::plot::FltkGlPlotWindow plotwin(600, 300, "karcher_mean_test1");
+  srvf::plot::FunctionPlot plot;
 
   for (size_t i=0; i<Qs.size(); ++i)
   {
-    plot.insert(srvf::srvf_to_plf(Qs[i]),srvf::Color(0.0,0.0,1.0));
+    plot.insert(srvf::srvf_to_plf(Qs[i]),srvf::plot::Color(0.0,0.0,1.0),2.0);
   }
-  plot.insert(srvf::srvf_to_plf(Mu),srvf::Color(1.0,0.0,0.0));
+  plot.insert(srvf::srvf_to_plf(Mu),srvf::plot::Color(1.0,0.0,0.0),2.0);
 
   plotwin.add_plot(&plot);
   plotwin.show();

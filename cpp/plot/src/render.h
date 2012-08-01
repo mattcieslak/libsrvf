@@ -24,6 +24,8 @@
 
 namespace srvf
 {
+namespace plot
+{
 
 
 struct Color
@@ -137,6 +139,7 @@ private:
 };
 
 
+} // namespace plot
 } // namespace srvf
 
 #endif // SRVF_RENDER_H

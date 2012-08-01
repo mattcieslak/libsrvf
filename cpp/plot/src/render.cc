@@ -28,6 +28,8 @@
 
 namespace srvf
 {
+namespace plot
+{
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -85,11 +87,11 @@ OpenGlRenderer::begin(DrawingMode mode)
 {
   mode_ = mode;
 
-  if (mode == srvf::LINES)
+  if (mode == srvf::plot::LINES)
   {
     glBegin(GL_LINE_STRIP);
   }
-  else if (mode == srvf::POINTS)
+  else if (mode == srvf::plot::POINTS)
   {
     glBegin(GL_POINTS);
   }
@@ -98,7 +100,7 @@ OpenGlRenderer::begin(DrawingMode mode)
 void 
 OpenGlRenderer::vertex(double x, double y)
 {
-  if (mode_ == srvf::POINTS || mode_ == srvf::LINES)
+  if (mode_ == srvf::plot::POINTS || mode_ == srvf::plot::LINES)
   {
     glVertex2d(x, y);
   }
@@ -107,7 +109,7 @@ OpenGlRenderer::vertex(double x, double y)
 void 
 OpenGlRenderer::vertex(double x, double y, double z)
 {
-  if (mode_ == srvf::POINTS || mode_ == srvf::LINES)
+  if (mode_ == srvf::plot::POINTS || mode_ == srvf::plot::LINES)
   {
     glVertex3d(x, y, z);
   }
@@ -116,7 +118,7 @@ OpenGlRenderer::vertex(double x, double y, double z)
 void 
 OpenGlRenderer::end()
 {
-  if (mode_ == srvf::POINTS || mode_ == srvf::LINES)
+  if (mode_ == srvf::plot::POINTS || mode_ == srvf::plot::LINES)
   {
     glEnd();
   }
@@ -133,7 +135,7 @@ OpenGlRenderer::set_thickness(double t)
 {
   thickness_ = t;
 
-  if (mode_ == srvf::LINES)
+  if (mode_ == srvf::plot::LINES)
   {
     glLineWidth((GLfloat)t);
   }
@@ -174,4 +176,5 @@ OpenGlRenderer::rotate(double angle, double ax, double ay, double az)
 }
 
 
+} // namespace plot
 } // namespace srvf

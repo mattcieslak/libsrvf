@@ -62,15 +62,15 @@ BOOST_AUTO_TEST_CASE(karcher_mean_test1)
 
   srvf::Srvf Mu = srvf::opencurves::karcher_mean(Qs, 5e-3, 5);
 
-  srvf::Plot3D plot;
-  plot.insert(srvf::srvf_to_plf(Mu), srvf::Color(1.0,0.0,0.0));
+  srvf::plot::Plot3D plot;
+  plot.insert(srvf::srvf_to_plf(Mu), srvf::plot::Color(1.0,0.0,0.0));
   for (size_t i=0; i<Qs.size(); ++i)
   {
     srvf::Matrix Ri = srvf::optimal_rotation(Mu, Qs[i]);
     Fs[i].rotate(Ri);
-    plot.insert(Fs[i], srvf::Color(0.0,0.0,1.0));
+    plot.insert(Fs[i], srvf::plot::Color(0.0,0.0,1.0));
   }
-  srvf::FltkGlPlotWindow win(400, 400, 
+  srvf::plot::FltkGlPlotWindow win(400, 400, 
       "Karcher Mean of Serveral RNA Molecules");
   win.add_plot(&plot);
   win.show();

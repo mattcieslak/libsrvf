@@ -24,6 +24,9 @@
 namespace srvf
 {
 
+namespace plot
+{
+
 
 static void render_plfs_ (
   const std::vector<Plf> &plfs, 
@@ -237,5 +240,8 @@ void FunctionPlot::render(Renderer &r)
   r.vertex(0.0, y_max);
   r.end();
 }
+
+
+} //namespace plot
 
 } // namespace srvf

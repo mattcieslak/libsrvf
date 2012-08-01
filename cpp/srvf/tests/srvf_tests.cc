@@ -15,11 +15,10 @@ BOOST_AUTO_TEST_CASE(ctor_test1)
   BOOST_CHECK_EQUAL(z1.domain_lb(), 0.0);
   BOOST_CHECK_EQUAL(z1.domain_ub(), 1.0);
 
-  srvf::Pointset samps = z1.evaluate(0.5);
+  srvf::Point samps = z1.evaluate(0.5);
   BOOST_REQUIRE_EQUAL(samps.dim(), z1.dim());
-  BOOST_REQUIRE_EQUAL(samps.npts(), 1);
-  BOOST_CHECK_EQUAL(samps[0][0], 0.25);
-  BOOST_CHECK_EQUAL(samps[0][1], 0.25);
+  BOOST_CHECK_EQUAL(samps[0], 0.25);
+  BOOST_CHECK_EQUAL(samps[1], 0.25);
 }
 
 BOOST_AUTO_TEST_CASE(ctor_test2)

@@ -26,6 +26,8 @@
 
 namespace srvf
 {
+namespace plot
+{
 
 /**
  * Abstract base for plot classes.
@@ -188,6 +190,7 @@ public:
 };
 
 
+} // namespace plot
 } // namespace srvf
 
 #endif // SRVF_PLOT_H
