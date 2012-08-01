@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#include "srvf.h"
-#include "plf.h"
-#include "matrix.h"
-#include "interp.h"
+#include <srvf/srvf.h>
+#include <srvf/plf.h>
+#include <srvf/matrix.h>
+#include <srvf/interp.h>
 
 #include <cmath>
 

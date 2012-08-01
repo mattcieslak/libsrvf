@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#include "functions.h"
+#include <srvf/functions.h>
 
-#include "srvf.h"
-#include "plf.h"
+#include <srvf/srvf.h>
+#include <srvf/plf.h>
 
 #include <stack>
 #include <algorithm>

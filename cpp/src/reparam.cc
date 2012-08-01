@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#include "reparam.h"
-#include "dpnbhd.h"
-#include "pointset.h"
-#include "matrix.h"
+#include <srvf/reparam.h>
+#include <srvf/dpnbhd.h>
+#include <srvf/pointset.h>
+#include <srvf/matrix.h>
 
 #include <limits>
 #include <cmath>

@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#include "plot.h"
-#include "render.h"
+#include <srvf/plot.h>
+#include <srvf/render.h>
 
 #include <vector>
 

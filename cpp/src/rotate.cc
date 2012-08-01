@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#include "rotate.h"
-#include "interp.h"
-#include "util.h"
-#include "exceptions.h"
+#include <srvf/rotate.h>
+#include <srvf/interp.h>
+#include <srvf/util.h>
+#include <srvf/exceptions.h>
 
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_linalg.h>

@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#include "plf.h"
-#include "interp.h"
+#include <srvf/plf.h>
+#include <srvf/interp.h>
 
 #include <cmath>
 #include <algorithm>

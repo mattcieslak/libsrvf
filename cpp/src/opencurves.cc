@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#include "opencurves.h"
-#include "plf.h"
-#include "rotate.h"
-#include "reparam.h"
+#include <srvf/opencurves.h>
+#include <srvf/plf.h>
+#include <srvf/rotate.h>
+#include <srvf/reparam.h>
 
 #include <cmath>
 #include <iostream>

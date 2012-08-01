@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#include "plotwin.h"
-#include "render.h"
-#include "plot.h"
+#include <srvf/plotwin.h>
+#include <srvf/render.h>
+#include <srvf/plot.h>
 
 #include <vector>
 #include <iostream>

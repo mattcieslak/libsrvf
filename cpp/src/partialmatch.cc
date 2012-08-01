@@ -17,9 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-#include "partialmatch.h"
-#include "paretoset.h"
-#include "rotselect.h"
+#include <srvf/partialmatch.h>
+#include <srvf/paretoset.h>
+#include <srvf/rotselect.h>
 
 #include <srvf.h>
 #include <reparam.h>

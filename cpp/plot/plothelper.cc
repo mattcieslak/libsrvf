@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#include "plf.h"
-#include "srvf.h"
-#include "plot.h"
-#include "plotwin.h"
+#include <srvf/plf.h>
+#include <srvf/srvf.h>
+#include <srvf/plot.h>
+#include <srvf/plotwin.h>
+#include <srvf/plothelper.h>
 
 #include <FL/Fl.H>
 
-#include "plothelper.h"
 
 namespace srvf
 {

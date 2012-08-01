@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#include "fileio.h"
-#include "matrix.h"
-#include "exceptions.h"
+#include <srvf/fileio.h>
+#include <srvf/matrix.h>
+#include <srvf/exceptions.h>
 
 #include <cstddef>
 #include <cctype>
