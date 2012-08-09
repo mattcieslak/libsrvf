@@ -70,6 +70,7 @@ AC_CONFIG_FILES([Makefile
                  srvf/Makefile
                  src/Makefile
                  tests/Makefile
+                 tests/data/Makefile
                  plot/Makefile
                  demos/Makefile
                  demos/pmatch/Makefile

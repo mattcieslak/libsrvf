@@ -6,8 +6,6 @@ endif
 
 SUBDIRS=srvf src tests $(MAYBE_PLOT) demos
 
-EXTRA_DIST=testdata
-
 bindistdir=$(PACKAGE)-$(VERSION)-bin
 bindist: $(DISTFILES)
 	mkdir -p $(bindistdir)
