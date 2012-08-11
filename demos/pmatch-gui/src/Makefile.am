@@ -1,5 +1,7 @@
 bin_PROGRAMS=srvf_pmatch_gui
 
+noinst_HEADERS=matchview.h ui.h
+
 AM_CPPFLAGS=$(FLTK_CFLAGS) $(OPENMP_CXXFLAGS)
 AM_LDFLAGS=$(FLTK_LDFLAGS) $(OPENMP_CXXFLAGS)
 
