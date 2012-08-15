@@ -1,5 +1,28 @@
-% Computes the covariance of a collection of points on the unit sphere 
-% in L^2.
+% libsrvf
+% =======
+%
+% A shape analysis library using the square root velocity framework.
+% 
+% Copyright (C) 2012   FSU Statistical Shape Analysis and Modeling Group
+% 
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+% 
+% You should have received a copy of the GNU General Public License
+% along with this program.  If not, see <http://www.gnu.org/licenses/>
+% --------------------------------------------------------------------
+
+
+% Computes the covariance of a collection of points on the unit sphere in L^2.
+% We first lift the points into the tangent space at Qm, and then we compute 
+% the covariance of the resulting collection of points in L^2.
 %
 % Inputs:
 %  Qs : the collection of SRVFs.  Must all have the same domain, and 
@@ -9,7 +32,7 @@
 %       the SRVFs in Qs.
 %  Ts : the corresponding parameter values for Qm
 % --------------------------------------------------------------------------
-function [K, Mu] = sphere_covariance(Qs, Ts, Qm, Tm)
+function [K, Mu] = srvf_covariance(Qs, Ts, Qm, Tm)
   uv = linspace(Tm(1), Tm(end), length(Tm));
 
   % TODO: to get a bunch of vectors of the same length, we're evaluating 
@@ -29,11 +52,11 @@ end
 
 %!demo
 %! debug_on_error(1);
-%! load demos/rna1.mat
-%! load demos/rna2.mat
-%! load demos/rna3.mat
-%! load demos/rna4.mat
-%! load demos/rna5.mat
+%! load ../tests/data/rna1.mat
+%! load ../tests/data/rna2.mat
+%! load ../tests/data/rna3.mat
+%! load ../tests/data/rna4.mat
+%! load ../tests/data/rna5.mat
 %! nfuncs=5;
 %! colors = {'b', 'g', 'c', 'm', 'r'};
 %! 
@@ -47,12 +70,12 @@ end
 %! for i=1:nfuncs
 %!   Ts{i} = Ts{i} / Ts{i}(end);
 %!   Qs{i} = plf_to_srvf(Fs{i}, Ts{i});
-%!   nrm = srvf_squared_l2norm(Qs{i}, Ts{i});
-%!   Qs{i} = Qs{i} / sqrt(nrm);
-%!   Fs{i} = Fs{i} / nrm;
+%!   nrm = srvf_l2norm(Qs{i}, Ts{i});
+%!   Qs{i} = Qs{i} / nrm;
+%!   Fs{i} = Fs{i} / (nrm*nrm);
 %!   plot3(Fs{i}(1,:), Fs{i}(2,:), Fs{i}(3,:), colors{i});
 %! end
-%! [Qm, Tm] = sphere_karcher_mean(Qs, Ts, 1e-3, 30, 0.3);
+%! [Qm, Tm] = srvf_karcher_mean(Qs, Ts, 1e-3, 30, 0.3);
 %! Fm = srvf_to_plf(Qm, Tm);
 %! figure();
 %! hold on;
@@ -60,11 +83,11 @@ end
 %! for i=1:nfuncs
 %!   R = srvf_optimal_rotation(Qm, Tm, Qs{i}, Ts{i});
 %!   Qs{i} = R*Qs{i};
-%!   [G T] = srvf_optimal_matching(Qm, Tm, Qs{i}, Ts{i});
+%!   [G T] = srvf_optimal_reparam(Qm, Tm, Qs{i}, Ts{i});
 %!   [Qs{i}, Ts{i}] = srvf_gamma_action(Qs{i}, Ts{i}, G, T);
 %!   R = srvf_optimal_rotation(Qm, Tm, Qs{i}, Ts{i});
 %!   Qs{i} = R*Qs{i};
 %!   Fsr{i} = srvf_to_plf(Qs{i}, Ts{i});
 %!   plot3(Fsr{i}(1,:), Fsr{i}(2,:), Fsr{i}(3,:), colors{i});
 %! end
-%! [K, Mu] = sphere_covariance(Qs, Ts, Qm, Tm)
+%! [K, Mu] = srvf_covariance(Qs, Ts, Qm, Tm)

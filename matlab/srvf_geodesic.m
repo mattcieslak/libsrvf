@@ -1,6 +1,32 @@
+% libsrvf
+% =======
+%
+% A shape analysis library using the square root velocity framework.
+% 
+% Copyright (C) 2012   FSU Statistical Shape Analysis and Modeling Group
+% 
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+% 
+% You should have received a copy of the GNU General Public License
+% along with this program.  If not, see <http://www.gnu.org/licenses/>
+% --------------------------------------------------------------------
+
+
 % Computes several steps along the minimum-length great circle path between 
 % the given SRVFs Q1,T1 and Q2,T2.  The SRVFs must have the same dimension 
 % and the same L^2 norm, and must be defined on the same interval.
+%
+% If you want a geodesic in the shape space (i.e. between the orbits of 
+% Q1 and Q2), then you should first optimally rotate and reparametrize Q2 
+% using srvf_optimal_rotation() and srvf_optimal_reparam().
 %
 % Inputs:
 %  Q1,T1  : the SRVF at the beginning of the geodesic
@@ -13,6 +39,7 @@
 %      P(:,:,k) is an SRVF representing the kth point.  All of these 
 %      SRVFs will have the same change point parameters.
 %  T : a 1-row matrix containing the change point parameters for the SRVFs in P.
+% --------------------------------------------------------------------------
 function [P T] = srvf_geodesic( Q1, T1, Q2, T2, Nsteps )
   assert( size(Q1,1) == size(Q2,1) );
   assert( size(T1,1) == 1 && size(T1,2) == size(Q1,2)+1 );
@@ -40,8 +67,10 @@ end
 
 
 %!demo
-%! load demos/horse-1.mat
-%! load demos/horse-1a.mat
+%! load ../tests/data/horse-1.csv
+%! load ../tests/data/horse-2.csv
+%! X1 = horse_1;
+%! X2 = horse_2;
 %! [F1 T1]=poly_to_plf(X1);
 %! [F2 T2]=poly_to_plf(X2);
 %! Q1=plf_to_srvf(F1,T1);

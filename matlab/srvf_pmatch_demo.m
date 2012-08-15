@@ -1,3 +1,34 @@
+% libsrvf
+% =======
+%
+% A shape analysis library using the square root velocity framework.
+% 
+% Copyright (C) 2012   FSU Statistical Shape Analysis and Modeling Group
+% 
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+% 
+% You should have received a copy of the GNU General Public License
+% along with this program.  If not, see <http://www.gnu.org/licenses/>
+% --------------------------------------------------------------------
+
+
+% A simple demo of the libsrvf partial matching functions.
+%
+% Inputs:
+%  X1 - sample points for the first curve
+%  X2 - sample points for the second curve
+%  W - grid width: the number of break points for X1 (default = 30)
+%  H - grid height: the number of break points for X2 (default = 30)
+%  do_rots - nonzero to optimize over rotations
+% --------------------------------------------------------------------------
 function srvf_pmatch_demo(X1,X2,W,H,do_rots)
   if (nargin < 3) W=30; end
   if (nargin < 4) H=30; end

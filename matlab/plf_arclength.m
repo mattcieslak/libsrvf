@@ -1,5 +1,38 @@
+% libsrvf 
+% =======
+%
+% A shape analysis library using the square root velocity framework.
+% 
+% Copyright (C) 2012   FSU Statistical Shape Analysis and Modeling Group
+% 
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+% 
+% You should have received a copy of the GNU General Public License
+% along with this program.  If not, see <http://www.gnu.org/licenses/>
+% --------------------------------------------------------------------
+
+
+% Computes the arclength of the given curve.
+%
 % For closed curves, F(:,1)==F(:,end) (i.e. the seedpoint is duplicated), 
 % so computing the arclength is the same as for open curves.
+% 
+% Inputs:
+%  F,T - the sample points and parameter values of the curve
+% 
+% Outputs:
+%  l - the arclength of the curve
+%  S - the arclength function of the curve.  That is, for each i, 
+%      S(i) = the arc length of F(:,1) through F(:,i)
+% --------------------------------------------------------------------------
 function [l S] = plf_arclength( F, T )
   [dim npts] = size( F );
 
@@ -13,6 +46,7 @@ function [l S] = plf_arclength( F, T )
     l = S(end);
   end
 end
+
 
 %!test
 %! F=[0 1/4 0 1/4 0];

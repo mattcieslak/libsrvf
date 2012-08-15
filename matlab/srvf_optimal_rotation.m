@@ -1,4 +1,35 @@
+% libsrvf
+% =======
+%
+% A shape analysis library using the square root velocity framework.
+% 
+% Copyright (C) 2012   FSU Statistical Shape Analysis and Modeling Group
+% 
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+% 
+% You should have received a copy of the GNU General Public License
+% along with this program.  If not, see <http://www.gnu.org/licenses/>
+% --------------------------------------------------------------------
+
+
 % Given two SRVFs Q1 and Q2, returns the rotation R which best aligns Q2 to Q1.
+%
+% Inputs:
+%  Q1,T1 : the sample points and parameter values of the first SRVF
+%  Q2,T2 : the sample points and parameter values of the second SRVF
+%
+% Outputs:
+%  R : a D x D matrix (where D is the dimension of Q1 and Q2) representing 
+%      the rotation.
+% --------------------------------------------------------------------------
 function R = srvf_optimal_rotation( Q1, T1, Q2, T2 )
   dim = size(Q1,1);
 
@@ -29,8 +60,10 @@ end
 
 
 %!demo
-%! load demos/horse-1.mat
-%! load demos/horse-2.mat
+%! load ../tests/data/horse-1.csv
+%! load ../tests/data/horse-2.csv
+%! X1=horse_1;
+%! X2=horse_2;
 %! T1 = linspace(0,1,length(X1));
 %! T2 = linspace(0,1,length(X2));
 %! Q1=plf_to_srvf(X1,T1);

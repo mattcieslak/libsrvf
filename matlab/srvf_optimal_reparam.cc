@@ -1,5 +1,8 @@
 /*
- * LibSRVF - a shape analysis library using the square root velocity framework.
+ * libsrvf
+ * =======
+ *
+ * A shape analysis library using the square root velocity framework.
  *
  * Copyright (C) 2012   FSU Statistical Shape Analysis and Modeling Group
  * 
