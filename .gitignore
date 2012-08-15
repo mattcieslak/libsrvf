@@ -11,3 +11,13 @@ Makefile.in
 /depcomp
 /install-sh
 /missing
+
+
+# ignore build products
+*.o
+*.a
+*.la
+*.mex
+
+# ignore Vim swap files
+*.swp
