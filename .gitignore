@@ -17,6 +17,7 @@ Makefile.in
 *.o
 *.a
 *.la
+*.lo
 *.mex
 
 # ignore Vim swap files

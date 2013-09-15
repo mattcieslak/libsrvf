@@ -11,7 +11,7 @@ BOOST_AUTO_TEST_CASE(lookup_test1)
   double tv[]={ -5.0, -0.0001, 0.0, 0.00001, 0.49999, 0.5, 0.9999, 1.0, 23.0 };
   size_t expv[]={ 0, 0, 0, 1, 1, 2, 3, 4, 4 };
   size_t ntable=sizeof(table_data)/sizeof(double);
-  size_t ncases=sizeof(expv)/sizeof(int);
+  size_t ncases=sizeof(expv)/sizeof(size_t);
   std::vector<double> table(&table_data[0],&table_data[ntable]);
   for (size_t i=0; i<ncases; ++i)
   {
