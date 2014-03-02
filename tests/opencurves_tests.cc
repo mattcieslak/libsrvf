@@ -7,12 +7,6 @@
 #include <srvf/srvf.h>
 #include <srvf/qmap.h>
 #include <srvf/opencurves.h>
-#include <srvf/rotate.h>
-#include <srvf/fileio.h>
-#include <srvf/render.h>
-#include <srvf/plotwin.h>
-
-#include <FL/Fl.h>
 
 
 BOOST_AUTO_TEST_SUITE(opencurves_tests)
@@ -43,38 +37,5 @@ BOOST_AUTO_TEST_CASE(shooting_vector_test1)
   }
 }
 
-BOOST_AUTO_TEST_CASE(karcher_mean_test1)
-{
-  std::ifstream ifs("data/rna.csv");
-  BOOST_REQUIRE_EQUAL(ifs.good(), true);
-  std::vector<srvf::Matrix> samps_data = srvf::io::load_csv(ifs);
-  std::vector<srvf::Srvf> Qs;
-  std::vector<srvf::Plf> Fs;
-
-  for (size_t i=0; i<samps_data.size(); ++i)
-  {
-    srvf::Pointset samps(samps_data[i], srvf::Pointset::POINT_PER_COLUMN);
-    Fs.push_back(srvf::Plf(samps));
-    Fs[i].translate_to_origin();
-    Fs[i].scale_to_unit_arc_length();
-    Qs.push_back(srvf::plf_to_srvf(Fs[i]));
-  }
-
-  srvf::Srvf Mu = srvf::opencurves::karcher_mean(Qs, 5e-3, 5);
-
-  srvf::plot::Plot3D plot;
-  plot.insert(srvf::srvf_to_plf(Mu), srvf::plot::Color(1.0,0.0,0.0));
-  for (size_t i=0; i<Qs.size(); ++i)
-  {
-    srvf::Matrix Ri = srvf::optimal_rotation(Mu, Qs[i]);
-    Fs[i].rotate(Ri);
-    plot.insert(Fs[i], srvf::plot::Color(0.0,0.0,1.0));
-  }
-  srvf::plot::FltkGlPlotWindow win(400, 400, 
-      "Karcher Mean of Serveral RNA Molecules");
-  win.add_plot(&plot);
-  win.show();
-  Fl::run();
-}
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -1,12 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
-#include <FL/Fl.H>
-
 #include <srvf/plf.h>
 #include <srvf/pointset.h>
-#include <srvf/plot.h>
-#include <srvf/plotwin.h>
-#include <srvf/render.h>
 #include <srvf/matrix.h>
 #include <srvf/util.h>
 
@@ -214,28 +209,6 @@ BOOST_AUTO_TEST_CASE(inverse_test1)
     BOOST_CHECK_EQUAL(Fi.params()[i],samps_data[i]);
     BOOST_CHECK_EQUAL(Fi.samps()[i][0],params_data[i]);
   }
-}
-
-BOOST_AUTO_TEST_CASE(constant_speed_reparam_test1)
-{
-  double samps_data[] = { 0.0, 0.1, 1.0, 0.0, 0.1, 0.0 };
-  double params_data[] = { 0.0, 0.6, 0.7, 0.8, 1.0 };
-  size_t npts = sizeof(params_data) / sizeof(double);
-  srvf::Pointset samps(1, npts, samps_data);
-  std::vector<double> params(&(params_data[0]), &(params_data[npts]));
-  srvf::Plf F(samps, params);
-  srvf::Plf G = constant_speed_reparam(F, 0.0, 1.0);
-  srvf::Plf Fn = composition(F, G);
-
-  srvf::plot::FunctionPlot plot;
-  plot.insert(F, srvf::plot::Color(0.0,0.0,1.0));
-  plot.insert(Fn, srvf::plot::Color(0.0,1.0,0.0));
-  plot.insert(G, srvf::plot::Color(1.0,0.0,0.0));
-  srvf::plot::FltkGlPlotWindow plotwin(800,400,
-    "constant_speed_reparam_test1: F(blue), Fn(green), and G(red)");
-  plotwin.add_plot(static_cast<srvf::plot::Plot*>(&plot));
-  plotwin.show();
-  Fl::run();
 }
 
 BOOST_AUTO_TEST_SUITE_END()
