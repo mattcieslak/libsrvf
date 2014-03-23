@@ -5,4 +5,8 @@ add_executable(run_tests fileio_tests.cc function_tests.cc interp_tests.cc kdtre
 
 target_link_libraries(run_tests srvf boost_unit_test_framework boost_test_exec_monitor)
 
+if(GSL)
+  set_target_properties(run_tests PROPERTIES COMPILE_FLAGS "-DUSE_GSL")
+endif()
+
 file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

@@ -40,6 +40,14 @@ public:
   { }
 };
 
+class UnsupportedOperation : public std::runtime_error 
+{ 
+public:
+  explicit UnsupportedOperation(const std::string &msg)
+   : runtime_error(msg)
+  { }
+};
+
 }
 
 #endif // SRVF_EXCEPTIONS_H

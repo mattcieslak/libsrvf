@@ -1,5 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
+#ifdef USE_GSL
+
 #include <srvf/srvf.h>
 #include <srvf/rotate.h>
 #include <srvf/matrix.h>
@@ -42,3 +44,5 @@ BOOST_AUTO_TEST_CASE(optimal_rotation_test1)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+#endif // USE_GSL

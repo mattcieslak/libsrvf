@@ -25,6 +25,7 @@
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_blas.h>
 
+#include <algorithm>
 #include <cstddef>
 #include <cmath>
 #include <stdexcept>
@@ -33,6 +34,7 @@
 namespace srvf
 {
 
+#ifdef USE_GSL
 
 // Computes the sign of the determinant of A
 static int sgndet_(gsl_matrix *A)
@@ -382,5 +384,21 @@ cleanup:
 
   return R;
 }
+
+#else // USE_GSL
+
+Matrix optimal_rotation (const Srvf &Q1, const Srvf &Q2)
+{
+  throw UnsupportedOperation("optimal_rotation");
+}
+
+Matrix optimal_rotation(const Srvf &Q1, const Srvf &Q2, 
+  double a, double b, double c, double d, 
+  size_t Q1_start_idx, size_t Q2_start_idx )
+{
+  throw UnsupportedOperation("optimal_rotation");
+}
+
+#endif // USE_GSL
 
 } // namespace srvf

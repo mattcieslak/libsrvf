@@ -77,3 +77,10 @@ end
 %!       x  x -x];
 %! Q=plf_to_srvf(F,T);
 %! assert(Q,Qexp,1e-3);
+%!
+%!test
+%! F=[0 1 1 0];
+%! T=[0 1/3 2/3 1];
+%! Qexp=[sqrt(3) 0 -sqrt(3)];
+%! Q=plf_to_srvf(F,T);
+%! assert(Q,Qexp,1e-5);

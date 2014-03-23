@@ -1,5 +1,10 @@
 include_directories(${LIBSRVF_SOURCE_DIR}/include)
 
-add_library(srvf dpnbhd.cc fileio.cc functions.cc interp.cc matchselect.cc matrix.cc opencurves.cc partialmatch.cc plf.cc qmap.cc reparam.cc rotate.cc rotselect.cc srvf.cc util.cc)
+add_library(srvf SHARED dpnbhd.cc fileio.cc functions.cc interp.cc matchselect.cc matrix.cc opencurves.cc partialmatch.cc plf.cc qmap.cc reparam.cc rotate.cc rotselect.cc srvf.cc util.cc)
 
-target_link_libraries(srvf gsl gslcblas)
+if(GSL)
+  target_link_libraries(srvf gsl gslcblas)
+  set_target_properties(srvf PROPERTIES COMPILE_FLAGS "-DUSE_GSL")
+endif()
+
+install(TARGETS srvf LIBRARY DESTINATION lib)

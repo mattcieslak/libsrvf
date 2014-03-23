@@ -1,6 +1,6 @@
-SRVF_LIBDIR=..
+SRVF_LIBDIR=../build/src
 SRVF_LIBS=-lsrvf
-SRVF_INCDIR=../src/include
+SRVF_INCDIR=../include
 
 # Change this to the command for compiling MEX files on your system.
 MEXCMD=mkoctfile --mex
@@ -18,4 +18,4 @@ all: $(MEXFILES)
 
 clean:
 	rm -f $(MEXFILES)
-
+	rm -f *.o
