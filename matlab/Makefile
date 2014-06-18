@@ -5,7 +5,7 @@ SRVF_INCDIR=../include
 # Change this to the command for compiling MEX files on your system.
 MEXCMD=mkoctfile --mex
 
-MEXFILES=srvf_fa_optimal_reparam.mex
+MEXFILES=srvf_fa_optimal_reparam.mex srvf_fa_groupwise_reparam.mex
 
 # Rule for building a .mex file from a .cc file.
 # Links libsrvf.a in statically so that this will work even if the 

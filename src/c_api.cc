@@ -127,9 +127,35 @@ libsrvf_plf_t* libsrvf_fa_optimal_reparam(libsrvf_srvf_t q1, libsrvf_srvf_t q2)
   srvf::Srvf Q2 = convert_srvf_from_c_api_struct_(q2);
 
   std::vector<srvf::Plf> Gs = srvf::functions::optimal_reparam(Q1, Q2);
-  
+
   libsrvf_plf_t* result = new libsrvf_plf_t[2];
   for (size_t i=0; i<2; ++i)
+  {
+    result[i] = libsrvf_plf_alloc(Gs[i].dim(), Gs[i].ncp());
+    copy_plf_to_c_api_struct_(result[i], Gs[i]);
+  }
+
+  return result;
+}
+
+LIBSRVF_EXPORT
+libsrvf_plf_t *libsrvf_fa_groupwise_reparam(libsrvf_srvf_t qm, libsrvf_srvf_t *qs, size_t nfuncs)
+{
+  srvf::Srvf Qm = convert_srvf_from_c_api_struct_(qm);
+  std::vector<srvf::Srvf> Qs;
+  for (size_t i=0; i<nfuncs; ++i)
+  {
+    Qs.push_back(convert_srvf_from_c_api_struct_(qs[i]));
+  }
+
+  std::vector<srvf::Plf> Gs = srvf::functions::groupwise_optimal_reparam(Qm, Qs);
+
+  libsrvf_plf_t* result = new libsrvf_plf_t[nfuncs+1];
+
+  result[nfuncs] = libsrvf_plf_alloc(Gs[nfuncs].dim(), Gs[nfuncs].ncp());
+  copy_plf_to_c_api_struct_(result[nfuncs], Gs[nfuncs]);
+
+  for (size_t i=0; i<nfuncs; ++i)
   {
     result[i] = libsrvf_plf_alloc(Gs[i].dim(), Gs[i].ncp());
     copy_plf_to_c_api_struct_(result[i], Gs[i]);

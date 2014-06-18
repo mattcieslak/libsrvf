@@ -19,12 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#include <srvf/srvf.h>
-#include <srvf/functions.h>
+#include <srvf/c_api.h>
 
 #include <mex.h>
 #include <vector>
 
+#include "mex_helpers.h"
 
 void do_usage()
 {
@@ -40,25 +40,33 @@ void do_usage()
   );
 }
 
+static void teardown_matrix_(mxArray *matrix)
+{
+  if (matrix) mxDestroyArray(matrix);
+}
+
+static void teardown_cell_array_(mxArray *array)
+{
+  if (array)
+  {
+    size_t ncells = mxGetNumberOfElements(array);
+    for (size_t i=0; i<ncells; ++i)
+    {
+      teardown_matrix_(mxGetCell(array, i));
+    }
+    mxDestroyArray(array);
+  }
+}
 
 extern "C"
 {
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   size_t nfuncs;
-
-  std::vector<srvf::Srvf> Qs;
-  srvf::Srvf Qm;
-  mxArray *sampsi_data;
-  mxArray *paramsi_data;
-  srvf::Pointset sampsi;
-  std::vector<double> paramsi;
-
-  std::vector<srvf::Plf> Gs;
-  mxArray *Gi_matrix, *Ti_matrix;
-  double *Gi_data, *Ti_data;
   mwSize Gs_dim;
-
+  mxArray *Gi_matrix;
+  mxArray *Ti_matrix;
+  int success = 1;
 
   // Check arguments
   if (nrhs != 4 || nlhs != 4)
@@ -81,129 +89,89 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     return;
   }
 
-
-  // Create the SRVFs
+  // Check dimensions of all the sample point and parameter matrices
+  die_if_not_valid_srvf_(prhs[0], prhs[1]);
   for (size_t i=0; i<nfuncs; ++i)
   {
-    sampsi_data = mxGetCell(prhs[2],i);
-    paramsi_data = mxGetCell(prhs[3],i);
-
-    // More input checking
-    if (mxGetM(sampsi_data) != 1 || mxGetM(paramsi_data) != 1)
-    {
-      mexPrintf("error: elements of Qs and Ts must have 1 row.\n");
-      return;
-    }
-    if (mxGetN(paramsi_data) != mxGetN(sampsi_data)+1)
-    {
-      mexPrintf("error: Ts(%d) must have length size(Qs(%d),2)+1.\n", i, i);
-      return;
-    }
-
-    sampsi = srvf::Pointset(1, mxGetN(sampsi_data), mxGetPr(sampsi_data));
-    paramsi = std::vector<double>(mxGetPr(paramsi_data), 
-      mxGetPr(paramsi_data)+mxGetN(paramsi_data));
-
-    Qs.push_back(srvf::Srvf(sampsi, paramsi));
+    die_if_not_valid_srvf_(mxGetCell(prhs[2], i), mxGetCell(prhs[3], i));
   }
-  if (mxGetM(prhs[0]) != 1 || mxGetM(prhs[1]))
-  {
-    mexPrintf("error: Qm and Tm must have 1 row\n");
-    return;
-  }
-  if (mxGetN(prhs[0])+1 != mxGetN(prhs[1]))
-  {
-    mexPrintf("error: Tm must have length size(Qm,2)+1.\n");
-    return;
-  }
-  sampsi = srvf::Pointset(1,mxGetN(prhs[0]),mxGetPr(prhs[0]));
-  paramsi = std::vector<double> (mxGetPr(prhs[1]), 
-    mxGetPr(prhs[1])+mxGetN(prhs[1]));
-  Qm = srvf::Srvf(sampsi,paramsi);
 
+  libsrvf_srvf_t qm = mex_args_to_libsrvf_srvf_t_(prhs[0], prhs[1]);
 
-  // All SRVFs must be unit-norm, constant-speed SRVFs
+  libsrvf_srvf_t qs[nfuncs];
   for (size_t i=0; i<nfuncs; ++i)
   {
-    Qs[i].scale_to_unit_norm();
-    Qs[i] = srvf::constant_speed_param(Qs[i]);
+    qs[i] = mex_args_to_libsrvf_srvf_t_(mxGetCell(prhs[2], i), mxGetCell(prhs[3], i));
   }
-  Qm.scale_to_unit_norm();
-  Qm = srvf::constant_speed_param(Qm);
-
 
   // Compute the groupwise alignment using libsrvf
-  Gs = srvf::functions::groupwise_optimal_reparam(Qm,Qs);
-
+  libsrvf_plf_t *gs = libsrvf_fa_groupwise_reparam(qm, qs, nfuncs);
 
   // Allocate output variables
   Gs_dim = (mwSize)nfuncs;
-  plhs[2] = mxCreateCellArray(1,&Gs_dim);
-  plhs[3] = mxCreateCellArray(1,&Gs_dim);
+  plhs[2] = mxCreateCellArray(1, &Gs_dim);
+  plhs[3] = mxCreateCellArray(1, &Gs_dim);
   if (!plhs[2] || !plhs[3])
   {
     mexPrintf("error: mxCreateCellArray() failed.\n");
-    if (plhs[2]) mxDestroyArray(plhs[2]);
-    if (plhs[3]) mxDestroyArray(plhs[3]);
-    return;
+    success = 0;
+    goto cleanup;
   }
 
-  plhs[0] = mxCreateDoubleMatrix(1, Gs.back().ncp(), mxREAL);
-  plhs[1] = mxCreateDoubleMatrix(1, Gs.back().ncp(), mxREAL);
+  plhs[0] = mxCreateDoubleMatrix(1, LIBSRVF_PLF_T_NCP(gs[nfuncs]), mxREAL);
+  plhs[1] = mxCreateDoubleMatrix(1, LIBSRVF_PLF_T_NCP(gs[nfuncs]), mxREAL);
   if (!plhs[0] || !plhs[1])
   {
     mexPrintf("error: mxCreateDoubleMatrix() failed.\n");
-    mxDestroyArray(plhs[2]);
-    mxDestroyArray(plhs[3]);
-    if (plhs[0]) mxDestroyArray(plhs[0]);
-    if (plhs[1]) mxDestroyArray(plhs[1]);
-    return;
+    success = 0;
+    goto cleanup;
   }
+
   for (size_t i=0; i<nfuncs; ++i)
   {
-    Gi_matrix = mxCreateDoubleMatrix(1, Gs[i].ncp(), mxREAL);
-    Ti_matrix = mxCreateDoubleMatrix(1, Gs[i].ncp(), mxREAL);
+    Gi_matrix = mxCreateDoubleMatrix(1, LIBSRVF_PLF_T_NCP(gs[i]), mxREAL);
+    Ti_matrix = mxCreateDoubleMatrix(1, LIBSRVF_PLF_T_NCP(gs[i]), mxREAL);
     if (!Gi_matrix || !Ti_matrix)
     {
-      if (Gi_matrix) mxDestroyArray(Gi_matrix);
-      if (Ti_matrix) mxDestroyArray(Ti_matrix);
-      for (size_t j=0; j<i; ++j)
-      {
-        mxDestroyArray(mxGetCell(plhs[2],j));
-        mxDestroyArray(mxGetCell(plhs[3],j));
-      }
-      mxDestroyArray(plhs[0]);
-      mxDestroyArray(plhs[1]);
-      mxDestroyArray(plhs[2]);
-      mxDestroyArray(plhs[3]);
-
       mexPrintf("error: mxCreateDoubleMatrix() failed.\n");
-      return;
+      success = 0;
+      goto cleanup;
     }
     mxSetCell(plhs[2], i, Gi_matrix);
     mxSetCell(plhs[3], i, Ti_matrix);
   }
 
-  
   // Copy into plhs
-  Gi_data = mxGetPr(plhs[0]);
-  Ti_data = mxGetPr(plhs[1]);
-  for (size_t i=0; i<Gs.back().ncp(); ++i)
-  {
-    Gi_data[i] = Gs.back().samps()[i][0];
-    Ti_data[i] = Gs.back().params()[i];
-  }
+  libsrvf_array_copy(mxGetPr(plhs[0]), gs[nfuncs].samps.data, 1, LIBSRVF_PLF_T_NCP(gs[nfuncs]), 0);
+  libsrvf_array_copy(mxGetPr(plhs[1]), gs[nfuncs].params.data, 1, LIBSRVF_PLF_T_NCP(gs[nfuncs]), 0);
+
   for (size_t i=0; i<nfuncs; ++i)
   {
-    Gi_data = mxGetPr(mxGetCell(plhs[2],i));
-    Ti_data = mxGetPr(mxGetCell(plhs[3],i));
-
-    for (size_t j=0; j<Gs[i].ncp(); ++j)
-    {
-      Gi_data[j] = Gs[i].samps()[j][0];
-      Ti_data[j] = Gs[i].params()[j];
-    }
+    libsrvf_array_copy(mxGetPr(mxGetCell(plhs[2], i)), gs[i].samps.data, 1, LIBSRVF_PLF_T_NCP(gs[i]), 0);
+    libsrvf_array_copy(mxGetPr(mxGetCell(plhs[3], i)), gs[i].params.data, 1, LIBSRVF_PLF_T_NCP(gs[i]), 0);
   }
 
+cleanup:
+
+  if (!success)
+  {
+    teardown_matrix_(plhs[0]);
+    teardown_matrix_(plhs[1]);
+    teardown_cell_array_(plhs[2]);
+    teardown_cell_array_(plhs[3]);
+  }
+
+  libsrvf_srvf_free(qm);
+  for (size_t i=0; i<nfuncs; ++i)
+  {
+    libsrvf_srvf_free(qs[i]);
+  }
+
+  // We're responsible for freeing gs
+  for (size_t i=0; i<nfuncs + 1; ++i)
+  {
+    libsrvf_plf_free(gs[i]);
+  }
+  delete[] gs;
 }
 } // extern "C"

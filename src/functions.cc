@@ -377,8 +377,8 @@ std::vector<Plf> build_gammas(const Srvf&Q1, const Srvf &Q2,
     G2samps.push_back(Q2.params()[path[path_idx].second]);
   }
 
-  size_t sr = path[path_idx].first; 
-  size_t sc = path[path_idx].second;
+  size_t sc = path[path_idx].first; 
+  size_t sr = path[path_idx].second;
   ++path_idx;
 
   while (path_idx < path.size())

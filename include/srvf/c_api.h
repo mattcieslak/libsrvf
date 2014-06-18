@@ -88,15 +88,32 @@ void libsrvf_srvf_free(libsrvf_srvf_t q);
  * Given SRVFs q1 and q2, find reparametrizations g1 and g2 such that q1*g1 and q2*g2 are 
  * optimally aligned.
  *
- * This function makes two assumptions about the input:
- * 1. Q1 and Q2 have unit norm
+ * This function makes three assumptions about the input:
+ * 1. Q1 and Q2 have unit norm.
  * 2. Q1 and Q2 have constant-speed parametrizations (i.e. |Qi(t)| = 1 for all t)
+ * 3. The values of Q1 and Q2 alternate between 1 and -1 on adjacent intervals.
  *
  * inputs: two SRVFs with the same dimension
  * return: an array containing g1 and g2, in that order
  */
 LIBSRVF_EXPORT
 libsrvf_plf_t *libsrvf_fa_optimal_reparam(libsrvf_srvf_t q1, libsrvf_srvf_t q2);
+
+/**
+ * Finds reparametrizations that optimally align each SRVF in qs to qm.
+ *
+ * This function makes three assumptions about the input:
+ * 1. All SRVFs have unit norm.
+ * 2. All SRVFs have constant-speed parametrizations (i.e. |Qi(t)| = 1 for all t)
+ * 3. The values of all SRVFs alternate between 1 and -1 on adjacent intervals.
+ *
+ * inputs: qm = the SRVF to which all of the others will be aligned
+ *         qs = an array of SRVFs to be aligned to qm
+ * return: an array of (nfuncs + 1) PLFs.  The first nfuncs PLFs are to be applied to 
+ *         the SRVFs in qs, in order.  The last PLF is to be applied to qm.
+ */
+LIBSRVF_EXPORT
+libsrvf_plf_t *libsrvf_fa_groupwise_reparam(libsrvf_srvf_t qm, libsrvf_srvf_t *qs, size_t nfuncs);
 
 LIBSRVF_EXPORT libsrvf_srvf_t foo();
 LIBSRVF_EXPORT libsrvf_matrix_t bar();

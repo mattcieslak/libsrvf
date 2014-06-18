@@ -107,13 +107,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   plhs[3] = mxCreateDoubleMatrix(1, g2_ncp, mxREAL);
   if (!plhs[0] || !plhs[1] || !plhs[2] || !plhs[3])
   {
+    mexPrintf("error: mxCreateDoubleMatrix() failed.\n");
+
     if (plhs[0]) mxDestroyArray(plhs[0]);
     if (plhs[1]) mxDestroyArray(plhs[1]);
     if (plhs[2]) mxDestroyArray(plhs[2]);
     if (plhs[3]) mxDestroyArray(plhs[3]);
 
-    mexPrintf("error: mxCreateDoubleMatrix() failed.\n");
-    return;
+    goto cleanup;
   }
 
   libsrvf_array_copy(mxGetPr(plhs[0]), Gs[0].samps.data, 1, g1_ncp, 0);
@@ -121,6 +122,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
   libsrvf_array_copy(mxGetPr(plhs[2]), Gs[1].samps.data, 1, g2_ncp, 0);
   libsrvf_array_copy(mxGetPr(plhs[3]), Gs[1].params.data, 1, g2_ncp, 0);
+
+cleanup:
 
   libsrvf_srvf_free(q1);
   libsrvf_srvf_free(q2);

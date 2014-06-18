@@ -12,3 +12,6 @@ cmake_install.cmake
 
 # ignore Vim swap files
 *.swp
+
+# ignore the build directory
+build/
