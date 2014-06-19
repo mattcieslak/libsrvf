@@ -60,11 +60,11 @@ std::vector<double> random_vector(size_t len, double first, int dir)
   for (size_t i=1; i<len; ++i)
   {
     if (dir > 0)
-      res[i] = res[i-1] + ((double)random()) / (RAND_MAX);
+      res[i] = res[i-1] + ((double)rand()) / (RAND_MAX);
     else if (dir < 0)
-      res[i] = res[i-1] - ((double)random()) / (RAND_MAX);
+      res[i] = res[i-1] - ((double)rand()) / (RAND_MAX);
     else
-      res[i] = ((double)random()) / (RAND_MAX);
+      res[i] = ((double)rand()) / (RAND_MAX);
   }
   return res;
 }

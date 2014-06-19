@@ -19,11 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#include <srvf/c_api.h>
-
 #include <mex.h>
+#include "operatornew/newdelete.h"
+
 #include <vector>
 
+#include <srvf/c_api.h>
 #include "mex_helpers.h"
 
 void do_usage()

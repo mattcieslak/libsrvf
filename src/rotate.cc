@@ -21,9 +21,11 @@
 #include <srvf/util.h>
 #include <srvf/exceptions.h>
 
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_linalg.h>
-#include <gsl/gsl_blas.h>
+#ifdef USE_GSL
+  #include <gsl/gsl_matrix.h>
+  #include <gsl/gsl_linalg.h>
+  #include <gsl/gsl_blas.h>
+#endif
 
 #include <algorithm>
 #include <cstddef>
