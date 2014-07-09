@@ -23,6 +23,7 @@
 #include <srvf/matrix.h>
 #include <srvf/minmaxheap.h>
 
+#include <algorithm>
 #include <cmath>
 #include <vector>
 #include <limits>

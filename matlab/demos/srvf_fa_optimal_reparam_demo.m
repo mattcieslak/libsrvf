@@ -7,6 +7,8 @@ T2 = ages;
 F1 = boys_rates(1,:);
 F2 = boys_rates(2,:);
 
+% srvf_fa_optimal_reparam assumes that the functions are 
+% scaled to unit arclength, and have constant-speed parametrizations
 F1 = F1 ./ plf_arclength(F1, T1);
 F2 = F2 ./ plf_arclength(F2, T2);
 
@@ -19,6 +21,8 @@ F2 = F2 ./ plf_arclength(F2, T2);
 Q1 = plf_to_srvf(F1n, TF1n);
 Q2 = plf_to_srvf(F2n, TF2n);
 
+% srvf_fa_optimal_reparam also assumes that the SRVF values
+% alternate between 1 and -1 on adjacent intervals
 [Q1n, TQ1n] = srvf_make_alternating(Q1, TF1n);
 [Q2n, TQ2n] = srvf_make_alternating(Q2, TF2n);
 

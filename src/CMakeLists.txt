@@ -1,4 +1,4 @@
-include_directories(${LIBSRVF_SOURCE_DIR}/include)
+include_directories(${LIBSRVF_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(srvf SHARED c_api.cc dpnbhd.cc fileio.cc functions.cc interp.cc matchselect.cc matrix.cc opencurves.cc partialmatch.cc plf.cc qmap.cc reparam.cc rotate.cc rotselect.cc srvf.cc util.cc)
 
@@ -7,4 +7,16 @@ if(GSL)
   set_target_properties(srvf PROPERTIES COMPILE_FLAGS "-DUSE_GSL")
 endif()
 
-install(TARGETS srvf LIBRARY DESTINATION lib)
+include (GenerateExportHeader)
+GENERATE_EXPORT_HEADER( srvf
+  BASE_NAME srvf
+  EXPORT_MACRO_NAME SRVF_EXPORT
+  EXPORT_FILE_NAME srvf_export.h
+  STATIC_DEFINE SRVF_BUILT_AS_STATIC
+)
+
+install(TARGETS srvf 
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib/static
+  RUNTIME DESTINATION bin
+)

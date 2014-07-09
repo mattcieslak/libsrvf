@@ -22,6 +22,7 @@
 #include "plf.h"
 #include "srvf.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <vector>
 
