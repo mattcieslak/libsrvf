@@ -98,7 +98,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
   libsrvf_srvf_t qm = mex_args_to_libsrvf_srvf_t_(prhs[0], prhs[1]);
 
-  libsrvf_srvf_t qs[nfuncs];
+  libsrvf_srvf_t *qs = new libsrvf_srvf_t[nfuncs];
   for (size_t i=0; i<nfuncs; ++i)
   {
     qs[i] = mex_args_to_libsrvf_srvf_t_(mxGetCell(prhs[2], i), mxGetCell(prhs[3], i));
@@ -162,9 +162,13 @@ cleanup:
   }
 
   libsrvf_srvf_free(qm);
-  for (size_t i=0; i<nfuncs; ++i)
+  if (qs)
   {
-    libsrvf_srvf_free(qs[i]);
+    for (size_t i=0; i<nfuncs; ++i)
+    {
+      libsrvf_srvf_free(qs[i]);
+    }
+    delete[] qs;
   }
 
   // We're responsible for freeing gs
