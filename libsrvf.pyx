@@ -7,6 +7,8 @@ np.import_array()
 
 from cython.operator cimport dereference as deref
 from libcpp.vector cimport vector
+from libcpp.pair cimport pair
+from libcpp.deque cimport deque
 from libcpp cimport bool
 
 cdef extern from "include/srvf/matrix.h" namespace "srvf":
@@ -164,8 +166,11 @@ cdef extern from "include/srvf/srvf.h" namespace "srvf":
 
 
 cdef extern from "include/srvf/functions.h" namespace "srvf::functions":
+    ctypedef pair[size_t,size_t] match_vertex_t
     cdef Srvf karcher_mean(vector[Srvf] Qs, double tol, size_t max_iters)
-    #cdef vector[Plf] groupwise_build_gammas(Srvf, vector[Srvf])
+    cdef vector[Plf] groupwise_build_gammas(Srvf, vector[Srvf])
+    cdef vector[Plf] groupwise_optimal_reparam(Srvf, vector[Srvf])
+    cdef vector[Plf] build_gammas(Srvf, Srvf, deque[match_vertex_t])
 
 
     
@@ -250,7 +255,7 @@ cpdef np.ndarray[double, ndim=2] functions_to_srvfs(np.ndarray[double, ndim=2] o
 
 
 def calculate_karcher_mean(np.ndarray[double, ndim=2] orig_functions,
-                double tol=1e-3, size_t max_iters = 10, 
+                double tol=1e-3, size_t max_iters = 0, 
                 bool do_rots=True, bool do_reparams=True):
     """
     Calculates the Karcher Mean of a set of input functions.
